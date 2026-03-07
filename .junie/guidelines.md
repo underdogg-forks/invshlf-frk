@@ -103,7 +103,7 @@ if ($response->status() !== 200) {
 - Workflows are **temporarily restricted to manual triggering only** (`workflow_dispatch`)
 - `push` and `pull_request` triggers are commented out until stability is confirmed
 - The `check.yaml` workflow supports a `fix_pint_errors` boolean input:
-  - When `true`: runs `./vendor/bin/pint --fix` to auto-fix style issues
+  - When `true`: runs `./vendor/bin/pint` to auto-fix style issues
   - When `false` (default): runs `./vendor/bin/pint --test` to validate style
 
 ## AI Assistant CLI Restrictions

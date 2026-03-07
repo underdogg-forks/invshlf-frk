@@ -51,15 +51,19 @@ class CompanySettingTest extends TestCase
     public function it_sets_and_retrieves_multiple_settings(): void
     {
         /* Arrange */
-        $key = fake()->name();
-        $value = fake()->word();
+        $settings = [
+            'setting_one' => 'value_one',
+            'setting_two' => 'value_two',
+        ];
         $company = Company::factory()->create();
 
         /* Act */
-        CompanySetting::setSettings([$key => $value], $company->id);
-        $result = CompanySetting::getSettings([$key], $company->id);
+        CompanySetting::setSettings($settings, $company->id);
+        $result = CompanySetting::getSettings(array_keys($settings), $company->id);
 
         /* Assert */
-        $this->assertEquals([$key => $value], $result->toArray());
+        $this->assertEquals('value_one', $result['setting_one']);
+        $this->assertEquals('value_two', $result['setting_two']);
+    }
     }
 }

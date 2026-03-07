@@ -22,8 +22,8 @@ class EstimateTest extends TestCase
         Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
         Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-        $customer = Customer::factory()->create();
-        Sanctum::actingAs($customer, ['*'], 'customer');
+        $this->customer = Customer::factory()->create();
+        Sanctum::actingAs($this->customer, ['*'], 'customer');
     }
 
     #[Test]
@@ -69,7 +69,10 @@ class EstimateTest extends TestCase
         $response = $this->postJson(
             "api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status",
             $status
-        )->assertOk();
+        );
+
+        /* Assert */
+        $response->assertOk();
 
         /* Assert */
         $this->assertEquals(Estimate::STATUS_ACCEPTED, $response->json()['data']['status']);

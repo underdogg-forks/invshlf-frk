@@ -73,7 +73,6 @@ class CompanyTest extends TestCase
     public function it_transfers_ownership_to_another_user(): void
     {
         /* Arrange */
-        $company = Company::factory()->create();
         $user = User::factory()->create();
 
         /* Act & Assert */
