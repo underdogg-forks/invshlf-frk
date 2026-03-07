@@ -41,10 +41,18 @@ class GotenbergPDFDriver
             throw new \InvalidArgumentException('Invalid Gotenberg Papersize specified');
         }
 
+        $marginConfig = config('pdf.connections.gotenberg.margins');
+        $margins = is_string($marginConfig)
+            ? preg_split('/\s+/', trim($marginConfig))
+            : [];
+        if (count($margins) !== 4) {
+            throw new \InvalidArgumentException('Invalid Gotenberg margins specified');
+        }
+
         $host = config('pdf.connections.gotenberg.host');
         $request = Gotenberg::chromium($host)
             ->pdf()
-            ->margins(0, 0, 0, 0) // Margins can be set using CSS
+            ->margins($margins[0], $margins[1], $margins[2], $margins[3])
             ->paperSize($papersize[0], $papersize[1])
             ->html(
                 Stream::string(

@@ -57,7 +57,7 @@ class CloneInvoiceController extends Controller
         }
 
         $newInvoice = Invoice::create([
-            'invoice_date' => $date->format('Y-m-d'),
+            'invoice_date' => $date->format($dateFormat),
             'due_date' => $due_date,
             'invoice_number' => $serial->getNextNumber(),
             'sequence_number' => $serial->nextSequenceNumber,

@@ -17,7 +17,7 @@ class TimeFormatter
         ],
     ];
 
-    public static function get_list()
+    public static function getList()
     {
         $new = [];
 

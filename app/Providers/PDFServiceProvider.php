@@ -8,6 +8,6 @@ use Illuminate\Support\ServiceProvider;
 class PDFServiceProvider extends ServiceProvider
 {
     public $bindings = [
-        'pdf.driver' => PDFService::class,
+        'pdf' => PDFService::class,
     ];
 }
