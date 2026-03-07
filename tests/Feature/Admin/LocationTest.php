@@ -20,8 +20,9 @@ class LocationTest extends TestCase
         Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
         Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-        $user = User::find(1);
-        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        $user = User::findOrFail(1);
+        $company = $user->companies()->firstOrFail();
+        $this->withHeaders(['company' => $company->id]);
         Sanctum::actingAs($user, ['*']);
     }
 
