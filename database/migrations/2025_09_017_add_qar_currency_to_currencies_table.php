@@ -18,4 +18,9 @@ return new class extends Migration
                 'decimal_separator' => '.',
             ]);
     }
+
+    public function down(): void
+    {
+        Currency::where('code', 'QAR')->delete();
+    }
 };

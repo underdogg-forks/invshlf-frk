@@ -31,8 +31,8 @@ services:
         dockerfile: docker/production/Dockerfile
     environment:
       - APP_NAME=Laravel
-      - APP_ENV=local
-      - APP_DEBUG=true
+      - APP_ENV=production
+      - APP_DEBUG=false
       - APP_URL=http://localhost:8090
       - DB_CONNECTION=mariadb
       - DB_HOST=database
