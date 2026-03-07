@@ -23,10 +23,10 @@ class TaxTypeTest extends TestCase
     #[Test]
     public function it_has_many_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $taxtype = TaxType::factory()->hasTaxes(4)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(4, $taxtype->taxes);
         $this->assertTrue($taxtype->taxes()->exists());
     }

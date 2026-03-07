@@ -28,13 +28,13 @@ class DashboardTest extends TestCase
     #[Test]
     public function it_retrieves_the_customer_dashboard(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/dashboard");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

@@ -23,20 +23,20 @@ class UserTest extends TestCase
     #[Test]
     public function it_belongs_to_a_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $user = User::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($user->currency()->exists());
     }
 
     #[Test]
     public function it_belongs_to_many_companies(): void
     {
-        // Arrange
+        /* Arrange */
         $user = User::factory()->hasCompanies(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $user->companies);
     }
 }

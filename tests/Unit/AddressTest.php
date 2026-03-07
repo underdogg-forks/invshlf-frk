@@ -23,30 +23,30 @@ class AddressTest extends TestCase
     #[Test]
     public function it_belongs_to_a_user(): void
     {
-        // Arrange
+        /* Arrange */
         $address = Address::factory()->forUser()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($address->user->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_country(): void
     {
-        // Arrange
+        /* Arrange */
         $address = Address::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($address->country->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $address = Address::factory()->forCustomer()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($address->customer()->exists());
     }
 }

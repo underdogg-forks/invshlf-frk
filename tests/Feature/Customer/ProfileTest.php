@@ -30,9 +30,9 @@ class ProfileTest extends TestCase
     #[Test]
     public function it_validates_the_update_profile_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             ProfileController::class,
             'updateProfile',
@@ -43,17 +43,17 @@ class ProfileTest extends TestCase
     #[Test]
     public function it_updates_the_customer_profile(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
         $updatedCustomer = Customer::factory()->raw([
             'shipping' => ['name' => 'newName', 'address_street_1' => 'address'],
             'billing' => ['name' => 'newName', 'address_street_1' => 'address'],
         ]);
 
-        // Act
+        /* Act */
         $this->postJson("api/v1/{$customer->company->slug}/customer/profile", $updatedCustomer)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('customers', [
             'name' => $customer['name'],
             'email' => $customer['email'],
@@ -63,13 +63,13 @@ class ProfileTest extends TestCase
     #[Test]
     public function it_retrieves_the_authenticated_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/me");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

@@ -34,21 +34,21 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_retrieves_the_current_user_profile(): void
     {
-        // Arrange - user authenticated in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/me');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_validates_the_update_profile_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             CompanyController::class,
             'updateProfile',
@@ -59,17 +59,17 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_updates_the_user_profile(): void
     {
-        // Arrange
+        /* Arrange */
         $user = [
             'name' => 'John Doe',
             'password' => 'admin@123',
             'email' => 'admin@invoiceshelf.com',
         ];
 
-        // Act
+        /* Act */
         $response = $this->putJson('api/v1/me', $user);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('users', [
             'name' => $user['name'],
@@ -80,9 +80,9 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_validates_the_update_company_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             CompanyController::class,
             'updateCompany',
@@ -93,7 +93,7 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_updates_the_company_details(): void
     {
-        // Arrange
+        /* Arrange */
         $company = [
             'name' => 'XYZ',
             'country_id' => 2,
@@ -106,10 +106,10 @@ class CompanySettingTest extends TestCase
             'address' => ['country_id' => 2],
         ];
 
-        // Act
+        /* Act */
         $this->putJson('api/v1/company', $company)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('companies', ['name' => $company['name']]);
         $this->assertDatabaseHas('addresses', ['country_id' => $company['country_id']]);
     }
@@ -117,7 +117,7 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_updates_company_settings(): void
     {
-        // Arrange
+        /* Arrange */
         $settings = [
             'currency' => 1,
             'time_zone' => 'Asia/Kolkata',
@@ -134,10 +134,10 @@ class CompanySettingTest extends TestCase
             'discount_per_item' => 'YES',
         ];
 
-        // Act
+        /* Act */
         $response = $this->postJson('/api/v1/company/settings', ['settings' => $settings]);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         foreach ($settings as $key => $value) {
             $this->assertDatabaseHas('company_settings', ['option' => $key, 'value' => $value]);
@@ -147,13 +147,13 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_updates_company_settings_without_a_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $settings = ['notification_email' => 'noreply@invoiceshelf.com'];
 
-        // Act
+        /* Act */
         $response = $this->postJson('/api/v1/company/settings', ['settings' => $settings]);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         foreach ($settings as $key => $value) {
             $this->assertDatabaseHas('company_settings', ['option' => $key, 'value' => $value]);
@@ -163,7 +163,7 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_prevents_updating_currency_when_transactions_exist(): void
     {
-        // Arrange
+        /* Arrange */
         $this->postJson('/api/v1/company/settings', ['settings' => ['currency' => 1]])
             ->assertOk()
             ->assertJson(['success' => true]);
@@ -173,10 +173,10 @@ class CompanySettingTest extends TestCase
             'items' => [InvoiceItem::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('/api/v1/company/settings', ['settings' => ['currency' => 2]]);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson([
             'success' => false,
             'message' => 'Cannot update company currency after transactions are created.',
@@ -187,7 +187,7 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_retrieves_company_notification_settings(): void
     {
-        // Arrange
+        /* Arrange */
         $settingKeys = [
             'currency', 'time_zone', 'language', 'fiscal_year',
             'carbon_date_format', 'moment_date_format', 'notification_email',
@@ -195,10 +195,10 @@ class CompanySettingTest extends TestCase
             'tax_per_item', 'discount_per_item',
         ];
 
-        // Act
+        /* Act */
         $response = $this->getJson('/api/v1/company/settings?'.http_build_query(['settings' => $settingKeys]));
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

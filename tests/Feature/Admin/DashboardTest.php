@@ -28,24 +28,24 @@ class DashboardTest extends TestCase
     #[Test]
     public function it_retrieves_dashboard_data(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/dashboard');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_searches_by_name(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/search?name=ab');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

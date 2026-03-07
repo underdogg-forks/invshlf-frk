@@ -29,20 +29,20 @@ class UnitTest extends TestCase
     #[Test]
     public function it_has_many_items(): void
     {
-        // Arrange
+        /* Arrange */
         $unit = Unit::factory()->hasItems(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($unit->items()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $unit = Unit::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($unit->company()->exists());
     }
 }

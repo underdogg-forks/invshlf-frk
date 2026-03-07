@@ -29,27 +29,27 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_retrieves_all_payments_for_the_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/payments?page=1");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_retrieves_a_single_payment_for_the_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
         $payment = Payment::factory()->create(['customer_id' => $customer->id]);
 
-        // Act
+        /* Act */
         $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/payments/{$payment->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

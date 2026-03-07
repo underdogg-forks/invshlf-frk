@@ -29,25 +29,25 @@ class FileDiskTest extends TestCase
     #[Test]
     public function it_retrieves_all_file_disks(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('/api/v1/disks');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_a_file_disk(): void
     {
-        // Arrange
+        /* Arrange */
         $disk = FileDisk::factory()->raw();
 
-        // Act
+        /* Act */
         $this->postJson('/api/v1/disks', $disk);
 
-        // Assert
+        /* Assert */
         $disk['credentials'] = json_encode($disk['credentials']);
         $this->assertDatabaseHas('file_disks', $disk);
     }
@@ -55,14 +55,14 @@ class FileDiskTest extends TestCase
     #[Test]
     public function it_updates_a_file_disk(): void
     {
-        // Arrange
+        /* Arrange */
         $disk = FileDisk::factory()->create();
         $updatedDisk = FileDisk::factory()->raw();
 
-        // Act
+        /* Act */
         $this->putJson("/api/v1/disks/{$disk->id}", $updatedDisk)->assertStatus(200);
 
-        // Assert
+        /* Assert */
         $updatedDisk['credentials'] = json_encode($updatedDisk['credentials']);
         $this->assertDatabaseHas('file_disks', $updatedDisk);
     }
@@ -70,25 +70,25 @@ class FileDiskTest extends TestCase
     #[Test]
     public function it_retrieves_a_single_disk_by_driver(): void
     {
-        // Arrange
+        /* Arrange */
         $disk = FileDisk::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->getJson("/api/v1/disks/{$disk->driver}");
 
-        // Assert
+        /* Assert */
         $response->assertStatus(200);
     }
 
     #[Test]
     public function it_retrieves_available_disk_drivers(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('/api/v1/disk/drivers');
 
-        // Assert
+        /* Assert */
         $response->assertStatus(200);
     }
 }

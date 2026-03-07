@@ -28,14 +28,14 @@ class NextNumberTest extends TestCase
     #[Test]
     public function it_returns_the_next_sequential_number_for_each_document_type(): void
     {
-        // Arrange
+        /* Arrange */
         $documentTypes = [
             'invoice' => 'INV-000001',
             'estimate' => 'EST-000001',
             'payment' => 'PAY-000001',
         ];
 
-        // Act & Assert
+        /* Act & Assert */
         foreach ($documentTypes as $key => $expectedNumber) {
             $this->getJson('api/v1/next-number?key='.$key)
                 ->assertStatus(200)

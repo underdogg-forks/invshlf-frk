@@ -29,34 +29,34 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_retrieves_all_estimates_for_the_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/estimates?page=1");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_retrieves_a_single_estimate_for_the_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
         $estimate = Estimate::factory()->create(['customer_id' => $customer->id]);
 
-        // Act
+        /* Act */
         $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/estimates/{$estimate->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_marks_a_customer_estimate_as_accepted(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
         $estimate = Estimate::factory()->create([
             'estimate_date' => '1988-07-18',
@@ -65,20 +65,20 @@ class EstimateTest extends TestCase
         ]);
         $status = ['status' => Estimate::STATUS_ACCEPTED];
 
-        // Act
+        /* Act */
         $response = $this->postJson(
             "api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status",
             $status
         )->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertEquals(Estimate::STATUS_ACCEPTED, $response->json()['data']['status']);
     }
 
     #[Test]
     public function it_marks_a_customer_estimate_as_rejected(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
         $estimate = Estimate::factory()->create([
             'estimate_date' => '1988-07-18',
@@ -87,13 +87,13 @@ class EstimateTest extends TestCase
         ]);
         $status = ['status' => Estimate::STATUS_REJECTED];
 
-        // Act
+        /* Act */
         $response = $this->postJson(
             "api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status",
             $status
         )->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertEquals(Estimate::STATUS_REJECTED, $response->json()['data']['status']);
     }
 }

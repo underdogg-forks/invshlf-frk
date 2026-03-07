@@ -32,19 +32,19 @@ class ItemTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_items(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/items?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_an_item_with_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->raw([
             'taxes' => [
                 Tax::factory()->raw(),
@@ -52,10 +52,10 @@ class ItemTest extends TestCase
             ],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/items', $item);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('items', [
             'name' => $item['name'],
             'description' => $item['description'],
@@ -71,9 +71,9 @@ class ItemTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             ItemsController::class,
             'store',
@@ -84,13 +84,13 @@ class ItemTest extends TestCase
     #[Test]
     public function it_retrieves_a_single_item(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/items/{$item->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('items', [
             'name' => $item['name'],
@@ -103,16 +103,16 @@ class ItemTest extends TestCase
     #[Test]
     public function it_updates_an_item(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->create();
         $updatedItem = Item::factory()->raw([
             'taxes' => [Tax::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->putJson('api/v1/items/'.$item->id, $updatedItem);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('items', [
             'name' => $updatedItem['name'],
@@ -128,9 +128,9 @@ class ItemTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             ItemsController::class,
             'update',
@@ -141,14 +141,14 @@ class ItemTest extends TestCase
     #[Test]
     public function it_deletes_multiple_items(): void
     {
-        // Arrange
+        /* Arrange */
         $items = Item::factory()->count(5)->create();
         $data = ['ids' => $items->pluck('id')];
 
-        // Act
+        /* Act */
         $this->postJson('/api/v1/items/delete', $data)->assertOk();
 
-        // Assert
+        /* Assert */
         foreach ($items as $item) {
             $this->assertModelMissing($item);
         }
@@ -157,7 +157,7 @@ class ItemTest extends TestCase
     #[Test]
     public function it_searches_items_by_filters(): void
     {
-        // Arrange
+        /* Arrange */
         $filters = [
             'page' => 1,
             'limit' => 15,
@@ -166,17 +166,17 @@ class ItemTest extends TestCase
             'unit' => 'kg',
         ];
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/items?'.http_build_query($filters, '', '&'));
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_an_item_with_a_fixed_amount_tax(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->raw([
             'taxes' => [
                 Tax::factory()->raw([
@@ -186,10 +186,10 @@ class ItemTest extends TestCase
             ],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/items', $item);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('items', [
             'name' => $item['name'],

@@ -28,7 +28,7 @@ class ConfigTest extends TestCase
     #[Test]
     public function it_retrieves_config_values_for_supported_keys(): void
     {
-        // Arrange
+        /* Arrange */
         $supportedKeys = [
             'languages',
             'fiscal_years',
@@ -39,7 +39,7 @@ class ConfigTest extends TestCase
             'custom_field_models',
         ];
 
-        // Act & Assert
+        /* Act & Assert */
         foreach ($supportedKeys as $key) {
             $this->getJson('api/v1/config?key='.$key)->assertOk();
         }

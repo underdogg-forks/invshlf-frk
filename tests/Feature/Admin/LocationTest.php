@@ -28,12 +28,12 @@ class LocationTest extends TestCase
     #[Test]
     public function it_retrieves_all_countries(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/countries');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

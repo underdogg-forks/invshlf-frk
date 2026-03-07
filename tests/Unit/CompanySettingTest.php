@@ -24,42 +24,42 @@ class CompanySettingTest extends TestCase
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $setting = CompanySetting::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($setting->company()->exists());
     }
 
     #[Test]
     public function it_sets_and_retrieves_a_single_setting(): void
     {
-        // Arrange
+        /* Arrange */
         $key = fake()->name();
         $value = fake()->word();
         $company = Company::factory()->create();
 
-        // Act
+        /* Act */
         CompanySetting::setSettings([$key => $value], $company->id);
         $result = CompanySetting::getSetting($key, $company->id);
 
-        // Assert
+        /* Assert */
         $this->assertEquals($value, $result);
     }
 
     #[Test]
     public function it_sets_and_retrieves_multiple_settings(): void
     {
-        // Arrange
+        /* Arrange */
         $key = fake()->name();
         $value = fake()->word();
         $company = Company::factory()->create();
 
-        // Act
+        /* Act */
         CompanySetting::setSettings([$key => $value], $company->id);
         $result = CompanySetting::getSettings([$key], $company->id);
 
-        // Assert
+        /* Assert */
         $this->assertEquals([$key => $value], $result->toArray());
     }
 }

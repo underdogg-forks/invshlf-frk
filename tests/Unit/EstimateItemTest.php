@@ -25,35 +25,35 @@ class EstimateItemTest extends TestCase
     #[Test]
     public function it_belongs_to_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $estimateItem = EstimateItem::factory()->forEstimate()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($estimateItem->estimate()->exists());
     }
 
     #[Test]
     public function it_belongs_to_an_item(): void
     {
-        // Arrange
+        /* Arrange */
         $estimateItem = EstimateItem::factory()->create([
             'item_id' => Item::factory(),
             'estimate_id' => Estimate::factory(),
         ]);
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($estimateItem->item()->exists());
     }
 
     #[Test]
     public function it_has_many_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $estimateItem = EstimateItem::factory()->hasTaxes(5)->create([
             'estimate_id' => Estimate::factory(),
         ]);
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $estimateItem->taxes);
         $this->assertTrue($estimateItem->taxes()->exists());
     }

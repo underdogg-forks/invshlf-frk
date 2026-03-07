@@ -23,10 +23,10 @@ class ExpenseCategoryTest extends TestCase
     #[Test]
     public function it_has_many_expenses(): void
     {
-        // Arrange
+        /* Arrange */
         $category = ExpenseCategory::factory()->hasExpenses(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $category->expenses);
         $this->assertTrue($category->expenses()->exists());
     }

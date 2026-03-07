@@ -31,9 +31,9 @@ class CompanyTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             CompaniesController::class,
             'store',
@@ -44,51 +44,51 @@ class CompanyTest extends TestCase
     #[Test]
     public function it_creates_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $company = Company::factory()->raw([
             'currency' => 12,
             'address' => ['country_id' => 12],
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('/api/v1/companies', $company)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('companies', collect($company)->only(['name'])->toArray());
     }
 
     #[Test]
     public function it_returns_a_validation_error_when_deleting_with_invalid_data(): void
     {
-        // Arrange - invalid payload
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->postJson('/api/v1/companies/delete', ['xyz']);
 
-        // Assert
+        /* Assert */
         $response->assertStatus(422);
     }
 
     #[Test]
     public function it_transfers_ownership_to_another_user(): void
     {
-        // Arrange
+        /* Arrange */
         $company = Company::factory()->create();
         $user = User::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->postJson('/api/v1/transfer/ownership/'.$user->id)->assertOk();
     }
 
     #[Test]
     public function it_retrieves_all_companies(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('/api/v1/companies');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

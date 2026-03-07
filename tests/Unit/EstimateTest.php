@@ -27,13 +27,13 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_has_many_estimate_items(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->hasItems(5)->create();
 
-        // Act
+        /* Act */
         $itemCount = $estimate->items()->count();
 
-        // Assert
+        /* Assert */
         $this->assertCount(5, $estimate->items);
         $this->assertEquals(5, $itemCount);
         $this->assertTrue($estimate->items()->exists());
@@ -42,23 +42,23 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_belongs_to_a_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->forCustomer()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($estimate->customer()->exists());
     }
 
     #[Test]
     public function it_has_many_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->hasTaxes(5)->create();
 
-        // Act
+        /* Act */
         $taxCount = $estimate->taxes()->count();
 
-        // Assert
+        /* Assert */
         $this->assertCount(5, $estimate->taxes);
         $this->assertEquals(5, $taxCount);
         $this->assertTrue($estimate->taxes()->exists());
@@ -67,7 +67,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_creates_an_estimate_with_items_and_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $estimateData = Estimate::factory()->raw();
         $item = EstimateItem::factory()->raw();
 
@@ -77,10 +77,10 @@ class EstimateTest extends TestCase
         $request = new EstimatesRequest;
         $request->replace($estimateData);
 
-        // Act
+        /* Act */
         $response = Estimate::createEstimate($request);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimate_items', [
             'estimate_id' => $response->id,
             'name' => $item['name'],
@@ -106,7 +106,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_updates_an_estimate_with_new_items_and_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->hasItems()->hasTaxes()->create();
         $newEstimateData = Estimate::factory()->raw();
         $item = EstimateItem::factory()->raw(['estimate_id' => $estimate->id]);
@@ -117,10 +117,10 @@ class EstimateTest extends TestCase
         $request = new EstimatesRequest;
         $request->replace($newEstimateData);
 
-        // Act
+        /* Act */
         $estimate->updateEstimate($request);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimate_items', [
             'estimate_id' => $estimate->id,
             'name' => $item['name'],
@@ -146,16 +146,16 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_creates_items_for_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->create();
         $item = EstimateItem::factory()->raw(['invoice_id' => $estimate->id]);
         $request = new Request;
         $request->replace(['items' => [$item]]);
 
-        // Act
+        /* Act */
         Estimate::createItems($estimate, $request, $estimate->exchange_rate);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimate_items', [
             'estimate_id' => $estimate->id,
             'description' => $item['description'],
@@ -170,7 +170,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_creates_taxes_for_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->create();
         $taxes = [
             Tax::factory()->raw(['estimate_id' => $estimate->id]),
@@ -179,10 +179,10 @@ class EstimateTest extends TestCase
         $request = new Request;
         $request->replace(['taxes' => $taxes]);
 
-        // Act
+        /* Act */
         Estimate::createTaxes($estimate, $request, $estimate->exchange_rate);
 
-        // Assert
+        /* Assert */
         $this->assertCount(2, $estimate->taxes);
         $this->assertDatabaseHas('taxes', [
             'estimate_id' => $estimate->id,

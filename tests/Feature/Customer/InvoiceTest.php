@@ -29,27 +29,27 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_retrieves_all_invoices_for_the_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/invoices?page=1");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_retrieves_a_single_invoice_for_the_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Auth::guard('customer')->user();
         $invoice = Invoice::factory()->create(['customer_id' => $customer->id]);
 
-        // Act
+        /* Act */
         $this->getJson("/api/v1/{$customer->company->slug}/customer/invoices/{$invoice->id}")->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoices', [
             'template_name' => $invoice['template_name'],
             'invoice_number' => $invoice['invoice_number'],

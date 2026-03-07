@@ -23,20 +23,20 @@ class CustomFieldTest extends TestCase
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $customField = CustomField::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($customField->company()->exists());
     }
 
     #[Test]
     public function it_has_many_custom_field_values(): void
     {
-        // Arrange
+        /* Arrange */
         $customField = CustomField::factory()->hasCustomFieldValues(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $customField->customFieldValues);
         $this->assertTrue($customField->customFieldValues()->exists());
     }

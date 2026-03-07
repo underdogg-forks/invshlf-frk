@@ -31,34 +31,34 @@ class TaxTypeTest extends TestCase
     #[Test]
     public function it_retrieves_all_tax_types(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/tax-types');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_a_tax_type(): void
     {
-        // Arrange
+        /* Arrange */
         $taxType = TaxType::factory()->raw();
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/tax-types', $taxType);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('tax_types', $taxType);
     }
 
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             TaxTypesController::class,
             'store',
@@ -69,36 +69,36 @@ class TaxTypeTest extends TestCase
     #[Test]
     public function it_retrieves_a_single_tax_type(): void
     {
-        // Arrange
+        /* Arrange */
         $taxType = TaxType::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/tax-types/'.$taxType->id);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_updates_a_tax_type(): void
     {
-        // Arrange
+        /* Arrange */
         $taxType = TaxType::factory()->create();
         $updatedData = TaxType::factory()->raw();
 
-        // Act
+        /* Act */
         $response = $this->putJson('api/v1/tax-types/'.$taxType->id, $updatedData);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             TaxTypesController::class,
             'update',
@@ -109,13 +109,13 @@ class TaxTypeTest extends TestCase
     #[Test]
     public function it_deletes_a_tax_type(): void
     {
-        // Arrange
+        /* Arrange */
         $taxType = TaxType::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->deleteJson('api/v1/tax-types/'.$taxType->id);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertModelMissing($taxType);
     }
@@ -123,30 +123,30 @@ class TaxTypeTest extends TestCase
     #[Test]
     public function it_creates_a_tax_type_with_a_negative_percentage(): void
     {
-        // Arrange
+        /* Arrange */
         $taxType = TaxType::factory()->raw(['percent' => -9.99]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/tax-types', $taxType)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('tax_types', $taxType);
     }
 
     #[Test]
     public function it_creates_a_tax_type_with_a_fixed_amount(): void
     {
-        // Arrange
+        /* Arrange */
         $taxType = TaxType::factory()->raw([
             'calculation_type' => 'fixed',
             'percent' => null,
             'fixed_amount' => 5000,
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/tax-types', $taxType)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('tax_types', $taxType);
     }
 }

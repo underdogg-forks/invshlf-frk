@@ -24,11 +24,11 @@ class CountryTest extends TestCase
     #[Test]
     public function it_has_many_addresses(): void
     {
-        // Arrange
+        /* Arrange */
         $country = Country::find(1);
         Address::factory()->count(5)->create(['country_id' => $country->id]);
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($country->address()->exists());
     }
 }

@@ -27,20 +27,20 @@ class ItemTest extends TestCase
     #[Test]
     public function it_belongs_to_a_unit(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->forUnit()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($item->unit()->exists());
     }
 
     #[Test]
     public function it_has_many_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->hasTaxes(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $item->taxes);
         $this->assertTrue($item->taxes()->exists());
     }
@@ -48,12 +48,12 @@ class ItemTest extends TestCase
     #[Test]
     public function it_has_many_invoice_items(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->has(InvoiceItem::factory()->count(5)->state([
             'invoice_id' => Invoice::factory(),
         ]))->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $item->invoiceItems);
         $this->assertTrue($item->invoiceItems()->exists());
     }
@@ -61,13 +61,13 @@ class ItemTest extends TestCase
     #[Test]
     public function it_has_many_estimate_items(): void
     {
-        // Arrange
+        /* Arrange */
         $item = Item::factory()->has(EstimateItem::factory()
             ->count(5)
             ->state(['estimate_id' => Estimate::factory()])
         )->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $item->estimateItems);
         $this->assertTrue($item->estimateItems()->exists());
     }

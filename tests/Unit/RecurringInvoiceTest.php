@@ -23,10 +23,10 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_has_many_invoices(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->hasInvoices(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $recurringInvoice->invoices);
         $this->assertTrue($recurringInvoice->invoices()->exists());
     }
@@ -34,10 +34,10 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_has_many_invoice_items(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->hasItems(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $recurringInvoice->items);
         $this->assertTrue($recurringInvoice->items()->exists());
     }
@@ -45,10 +45,10 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_has_many_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->hasTaxes(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $recurringInvoice->taxes);
         $this->assertTrue($recurringInvoice->taxes()->exists());
     }
@@ -56,10 +56,10 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_belongs_to_a_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->forCustomer()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($recurringInvoice->customer()->exists());
     }
 }

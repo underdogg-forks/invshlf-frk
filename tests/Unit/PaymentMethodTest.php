@@ -23,10 +23,10 @@ class PaymentMethodTest extends TestCase
     #[Test]
     public function it_has_many_payments(): void
     {
-        // Arrange
+        /* Arrange */
         $method = PaymentMethod::factory()->hasPayments(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $method->payments);
         $this->assertTrue($method->payments()->exists());
     }
@@ -34,10 +34,10 @@ class PaymentMethodTest extends TestCase
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $method = PaymentMethod::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($method->company()->exists());
     }
 }

@@ -23,30 +23,30 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_belongs_to_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $payment = Payment::factory()->forInvoice()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($payment->invoice()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $payment = Payment::factory()->forCustomer()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($payment->customer()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_payment_method(): void
     {
-        // Arrange
+        /* Arrange */
         $payment = Payment::factory()->forPaymentMethod()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($payment->paymentMethod()->exists());
     }
 }

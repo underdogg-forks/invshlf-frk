@@ -23,30 +23,30 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_belongs_to_a_category(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->forCategory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($expense->category()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->forCustomer()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($expense->customer()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->forCompany()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($expense->company()->exists());
     }
 }
