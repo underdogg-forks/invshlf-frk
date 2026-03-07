@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Estimate\EstimatesController;
 use App\Http\Controllers\V1\Admin\Estimate\SendEstimateController;
 use App\Http\Requests\DeleteEstimatesRequest;
@@ -10,324 +12,339 @@ use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Tax;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class EstimateTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get estimates', function () {
-    $response = getJson('api/v1/estimates?page=1');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_a_paginated_list_of_estimates(): void
+    {
+        // Arrange - data seeded in setUp
 
-test('create estimate', function () {
-    $estimate = Estimate::factory()->raw([
-        'estimate_number' => 'EST-000006',
-        'items' => [
-            EstimateItem::factory()->raw(),
-        ],
-        'taxes' => [
-            Tax::factory()->raw(),
-        ],
-    ]);
+        // Act
+        $response = $this->getJson('api/v1/estimates?page=1');
 
-    postJson('api/v1/estimates', $estimate)
-        ->assertStatus(201);
+        // Assert
+        $response->assertOk();
+    }
 
-    $this->assertDatabaseHas('estimates', [
-        'template_name' => $estimate['template_name'],
-        'estimate_number' => $estimate['estimate_number'],
-        'discount_type' => $estimate['discount_type'],
-        'discount_val' => $estimate['discount_val'],
-        'sub_total' => $estimate['sub_total'],
-        'discount' => $estimate['discount'],
-        'customer_id' => $estimate['customer_id'],
-        'total' => $estimate['total'],
-        'notes' => $estimate['notes'],
-        'tax' => $estimate['tax'],
-    ]);
-});
+    #[Test]
+    public function it_creates_an_estimate(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->raw([
+            'estimate_number' => 'EST-000006',
+            'items' => [EstimateItem::factory()->raw()],
+            'taxes' => [Tax::factory()->raw()],
+        ]);
 
-test('clone estimate', function () {
+        // Act
+        $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-    $estimate = Estimate::factory()->create();
+        // Assert
+        $this->assertDatabaseHas('estimates', [
+            'template_name' => $estimate['template_name'],
+            'estimate_number' => $estimate['estimate_number'],
+            'discount_type' => $estimate['discount_type'],
+            'discount_val' => $estimate['discount_val'],
+            'sub_total' => $estimate['sub_total'],
+            'discount' => $estimate['discount'],
+            'customer_id' => $estimate['customer_id'],
+            'total' => $estimate['total'],
+            'notes' => $estimate['notes'],
+            'tax' => $estimate['tax'],
+        ]);
+    }
 
-    $beforeCount = Estimate::count();
+    #[Test]
+    public function it_clones_an_estimate(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->create();
+        $beforeCount = Estimate::count();
 
-    $response = $this->post("/api/v1/estimates/{$estimate->id}/clone");
+        // Act
+        $this->post("/api/v1/estimates/{$estimate->id}/clone");
 
-    $this->assertDatabaseCount('estimates', $beforeCount + 1);
+        // Assert
+        $this->assertDatabaseCount('estimates', $beforeCount + 1);
+    }
 
-});
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-test('store validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        EstimatesController::class,
-        'store',
-        EstimatesRequest::class
-    );
-});
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            EstimatesController::class,
+            'store',
+            EstimatesRequest::class
+        );
+    }
 
-test('update estimate', function () {
-    $estimate = Estimate::factory()
-        ->hasItems(1)
-        ->hasTaxes(1)
-        ->create([
+    #[Test]
+    public function it_updates_an_estimate(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()
+            ->hasItems(1)
+            ->hasTaxes(1)
+            ->create(['estimate_date' => '1988-07-18', 'expiry_date' => '1988-08-18']);
+
+        $updatedEstimate = Estimate::factory()->raw([
+            'items' => [EstimateItem::factory()->raw(['estimate_id' => $estimate->id])],
+            'taxes' => [Tax::factory()->raw(['tax_type_id' => $estimate->taxes[0]->tax_type_id])],
+        ]);
+
+        // Act
+        $response = $this->putJson('api/v1/estimates/'.$estimate->id, $updatedEstimate);
+
+        // Assert
+        $this->assertDatabaseHas('estimates', [
+            'template_name' => $updatedEstimate['template_name'],
+            'estimate_number' => $updatedEstimate['estimate_number'],
+            'discount_type' => $updatedEstimate['discount_type'],
+            'discount_val' => $updatedEstimate['discount_val'],
+            'sub_total' => $updatedEstimate['sub_total'],
+            'discount' => $updatedEstimate['discount'],
+            'customer_id' => $updatedEstimate['customer_id'],
+            'total' => $updatedEstimate['total'],
+            'notes' => $updatedEstimate['notes'],
+            'tax' => $updatedEstimate['tax'],
+        ]);
+        $this->assertDatabaseHas('estimate_items', [
+            'estimate_id' => $updatedEstimate['items'][0]['estimate_id'],
+        ]);
+        $response->assertStatus(200);
+    }
+
+    #[Test]
+    public function it_validates_the_update_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
+
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            EstimatesController::class,
+            'update',
+            EstimatesRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_searches_estimates_by_filters(): void
+    {
+        // Arrange
+        $filters = [
+            'page' => 1,
+            'limit' => 15,
+            'search' => 'doe',
+            'from_date' => '2020-07-18',
+            'to_date' => '2020-07-20',
+            'estimate_number' => '000003',
+        ];
+
+        // Act
+        $response = $this->getJson('api/v1/estimates?'.http_build_query($filters, '', '&'));
+
+        // Assert
+        $response->assertStatus(200);
+    }
+
+    #[Test]
+    public function it_validates_the_send_estimate_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
+
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            SendEstimateController::class,
+            '__invoke',
+            SendEstimatesRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_sends_an_estimate_to_a_customer_via_email(): void
+    {
+        // Arrange
+        Mail::fake();
+        $estimate = Estimate::factory()->create([
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
+        $data = [
+            'subject' => 'test',
+            'body' => 'test',
+            'from' => 'john@example.com',
+            'to' => 'doe@example.com',
+        ];
 
-    $estimate2 = Estimate::factory()->raw([
-        'items' => [
-            EstimateItem::factory()->raw([
-                'estimate_id' => $estimate->id,
-            ]),
-        ],
-        'taxes' => [
-            Tax::factory()->raw([
-                'tax_type_id' => $estimate->taxes[0]->tax_type_id,
-            ]),
-        ],
-    ]);
+        // Act
+        $response = $this->postJson("api/v1/estimates/{$estimate->id}/send", $data);
 
-    $response = putJson('api/v1/estimates/'.$estimate->id, $estimate2);
+        // Assert
+        $response->assertStatus(200)->assertJson(['success' => true]);
+        Mail::assertSent(SendEstimateMail::class);
+    }
 
-    $this->assertDatabaseHas('estimates', [
-        'template_name' => $estimate2['template_name'],
-        'estimate_number' => $estimate2['estimate_number'],
-        'discount_type' => $estimate2['discount_type'],
-        'discount_val' => $estimate2['discount_val'],
-        'sub_total' => $estimate2['sub_total'],
-        'discount' => $estimate2['discount'],
-        'customer_id' => $estimate2['customer_id'],
-        'total' => $estimate2['total'],
-        'notes' => $estimate2['notes'],
-        'tax' => $estimate2['tax'],
-    ]);
-
-    $this->assertDatabaseHas('estimate_items', [
-        'estimate_id' => $estimate2['items'][0]['estimate_id'],
-    ]);
-
-    $response->assertStatus(200);
-});
-
-test('update validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        EstimatesController::class,
-        'update',
-        EstimatesRequest::class
-    );
-});
-
-test('search estimates', function () {
-    $filters = [
-        'page' => 1,
-        'limit' => 15,
-        'search' => 'doe',
-        'from_date' => '2020-07-18',
-        'to_date' => '2020-07-20',
-        'estimate_number' => '000003',
-    ];
-
-    $queryString = http_build_query($filters, '', '&');
-
-    $response = getJson('api/v1/estimates?'.$queryString);
-
-    $response->assertStatus(200);
-});
-
-test('send estimate using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        SendEstimateController::class,
-        '__invoke',
-        SendEstimatesRequest::class
-    );
-});
-
-test('send estimate to customer', function () {
-    Mail::fake();
-
-    $estimate = Estimate::factory()->create([
-        'estimate_date' => '1988-07-18',
-        'expiry_date' => '1988-08-18',
-    ]);
-
-    $data = [
-        'subject' => 'test',
-        'body' => 'test',
-        'from' => 'john@example.com',
-        'to' => 'doe@example.com',
-    ];
-
-    postJson("api/v1/estimates/{$estimate->id}/send", $data)
-        ->assertStatus(200)
-        ->assertJson([
-            'success' => true,
+    #[Test]
+    public function it_marks_an_estimate_as_accepted(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->create([
+            'estimate_date' => '1988-07-18',
+            'expiry_date' => '1988-08-18',
         ]);
+        $data = ['status' => Estimate::STATUS_ACCEPTED];
 
-    Mail::assertSent(SendEstimateMail::class);
-});
+        // Act
+        $response = $this->postJson("api/v1/estimates/{$estimate->id}/status", $data);
 
-test('estimate mark as accepted', function () {
-    $estimate = Estimate::factory()->create([
-        'estimate_date' => '1988-07-18',
-        'expiry_date' => '1988-08-18',
-    ]);
+        // Assert
+        $response->assertOk()->assertJson(['success' => true]);
+        $this->assertEquals(Estimate::STATUS_ACCEPTED, Estimate::find($estimate->id)->status);
+    }
 
-    $data = [
-        'status' => Estimate::STATUS_ACCEPTED,
-    ];
-
-    $response = postJson("api/v1/estimates/{$estimate->id}/status", $data);
-
-    $response
-        ->assertOk()
-        ->assertJson([
-            'success' => true,
+    #[Test]
+    public function it_marks_an_estimate_as_rejected(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->create([
+            'estimate_date' => '1988-07-18',
+            'expiry_date' => '1988-08-18',
         ]);
+        $data = ['status' => Estimate::STATUS_REJECTED];
 
-    $estimate2 = Estimate::find($estimate->id);
-    $this->assertEquals($estimate2->status, Estimate::STATUS_ACCEPTED);
-});
+        // Act
+        $response = $this->postJson("api/v1/estimates/{$estimate->id}/status", $data);
 
-test('estimate mark as rejected', function () {
-    $estimate = Estimate::factory()->create([
-        'estimate_date' => '1988-07-18',
-        'expiry_date' => '1988-08-18',
-    ]);
+        // Assert
+        $response->assertOk()->assertJson(['success' => true]);
+        $this->assertEquals(Estimate::STATUS_REJECTED, Estimate::find($estimate->id)->status);
+    }
 
-    $data = [
-        'status' => Estimate::STATUS_REJECTED,
-    ];
-
-    $response = postJson("api/v1/estimates/{$estimate->id}/status", $data);
-
-    $response
-        ->assertOk()
-        ->assertJson([
-            'success' => true,
-        ]);
-
-    $estimate2 = Estimate::find($estimate->id);
-    $this->assertEquals($estimate2->status, Estimate::STATUS_REJECTED);
-});
-
-test('create invoice from estimate', function () {
-
-    $estimate = Estimate::factory()
-        ->create([
+    #[Test]
+    public function it_converts_an_estimate_to_an_invoice(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->create([
             'estimate_date' => now(),
             'expiry_date' => now()->addMonth(),
         ]);
 
-    $response = postJson("api/v1/estimates/{$estimate->id}/convert-to-invoice");
+        // Act
+        $response = $this->postJson("api/v1/estimates/{$estimate->id}/convert-to-invoice");
 
-    if ($response->status() !== 200) {
-        $this->fail('Response status is not 200. Response body: '.json_encode($response->json()));
+        // Assert
+        if ($response->status() !== 200) {
+            $this->fail('Response status is not 200. Response body: '.json_encode($response->json()));
+        }
+        $response->assertStatus(200);
     }
 
-    $response->assertStatus(200);
-});
+    #[Test]
+    public function it_validates_the_delete_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-test('delete multiple estimates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        EstimatesController::class,
-        'delete',
-        DeleteEstimatesRequest::class
-    );
-});
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            EstimatesController::class,
+            'delete',
+            DeleteEstimatesRequest::class
+        );
+    }
 
-test('delete multiple estimates', function () {
-    $estimates = Estimate::factory()
-        ->count(3)
-        ->create([
+    #[Test]
+    public function it_deletes_multiple_estimates(): void
+    {
+        // Arrange
+        $estimates = Estimate::factory()->count(3)->create([
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
+        $data = ['ids' => $estimates->pluck('id')];
 
-    $ids = $estimates->pluck('id');
+        // Act
+        $response = $this->postJson('api/v1/estimates/delete', $data);
 
-    $data = [
-        'ids' => $ids,
-    ];
+        // Assert
+        $response->assertStatus(200)->assertJson(['success' => true]);
+        foreach ($estimates as $estimate) {
+            $this->assertModelMissing($estimate);
+        }
+    }
 
-    $response = postJson('api/v1/estimates/delete', $data);
+    #[Test]
+    public function it_retrieves_available_estimate_templates(): void
+    {
+        // Arrange - no setup required
 
-    $response
-        ->assertStatus(200)
-        ->assertJson([
-            'success' => true,
+        // Act & Assert
+        $this->getJson('api/v1/estimates/templates')->assertStatus(200);
+    }
+
+    #[Test]
+    public function it_creates_an_estimate_with_tax_per_item(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->raw([
+            'estimate_number' => 'EST-000006',
+            'tax_per_item' => 'YES',
+            'items' => [
+                EstimateItem::factory()->raw(['taxes' => [Tax::factory()->raw()]]),
+                EstimateItem::factory()->raw(['taxes' => [Tax::factory()->raw()]]),
+            ],
         ]);
 
-    foreach ($estimates as $estimate) {
-        $this->assertModelMissing($estimate);
+        // Act
+        $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
+
+        // Assert
+        $this->assertDatabaseHas('estimates', [
+            'template_name' => $estimate['template_name'],
+            'estimate_number' => $estimate['estimate_number'],
+            'discount_type' => $estimate['discount_type'],
+            'discount_val' => $estimate['discount_val'],
+            'sub_total' => $estimate['sub_total'],
+            'discount' => $estimate['discount'],
+            'customer_id' => $estimate['customer_id'],
+            'total' => $estimate['total'],
+            'notes' => $estimate['notes'],
+            'tax' => $estimate['tax'],
+        ]);
+        $this->assertDatabaseHas('estimate_items', ['name' => $estimate['items'][0]['name']]);
+        $this->assertDatabaseHas('taxes', [
+            'tax_type_id' => $estimate['items'][0]['taxes'][0]['tax_type_id'],
+        ]);
     }
-});
 
-test('get estimate templates', function () {
-    getJson('api/v1/estimates/templates')->assertStatus(200);
-});
-
-test('create estimate with tax per item', function () {
-    $estimate = Estimate::factory()->raw([
-        'estimate_number' => 'EST-000006',
-        'tax_per_item' => 'YES',
-        'items' => [
-            EstimateItem::factory()->raw([
-                'taxes' => [Tax::factory()->raw()],
-            ]),
-            EstimateItem::factory()->raw([
-                'taxes' => [Tax::factory()->raw()],
-            ]),
-        ],
-    ]);
-
-    postJson('api/v1/estimates', $estimate)
-        ->assertStatus(201);
-
-    $this->assertDatabaseHas('estimates', [
-        'template_name' => $estimate['template_name'],
-        'estimate_number' => $estimate['estimate_number'],
-        'discount_type' => $estimate['discount_type'],
-        'discount_val' => $estimate['discount_val'],
-        'sub_total' => $estimate['sub_total'],
-        'discount' => $estimate['discount'],
-        'customer_id' => $estimate['customer_id'],
-        'total' => $estimate['total'],
-        'notes' => $estimate['notes'],
-        'tax' => $estimate['tax'],
-    ]);
-
-    $this->assertDatabaseHas('estimate_items', [
-        'name' => $estimate['items'][0]['name'],
-    ]);
-
-    $this->assertDatabaseHas('taxes', [
-        'tax_type_id' => $estimate['items'][0]['taxes'][0]['tax_type_id'],
-    ]);
-});
-
-test('create estimate with EUR currency', function () {
-    $estimate = Estimate::factory()
-        ->raw([
+    #[Test]
+    public function it_creates_an_estimate_with_foreign_currency(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->raw([
             'discount_type' => 'fixed',
             'discount_val' => 20,
             'sub_total' => 200,
@@ -360,43 +377,42 @@ test('create estimate with EUR currency', function () {
             ])],
         ]);
 
-    $response = postJson('api/v1/estimates', $estimate)->assertStatus(201);
+        // Act
+        $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-    $this->assertDatabaseHas('estimates', [
-        'template_name' => $estimate['template_name'],
-        'estimate_number' => $estimate['estimate_number'],
-        'discount_type' => $estimate['discount_type'],
-        'discount_val' => $estimate['discount_val'],
-        'sub_total' => $estimate['sub_total'],
-        'discount' => $estimate['discount'],
-        'customer_id' => $estimate['customer_id'],
-        'total' => $estimate['total'],
-        'notes' => $estimate['notes'],
-        'tax' => $estimate['tax'],
-    ]);
-
-    $this->assertDatabaseHas('taxes', [
-        'tax_type_id' => $estimate['taxes'][0]['tax_type_id'],
-        'amount' => $estimate['tax'],
-    ]);
-
-    $this->assertDatabaseHas('estimate_items', [
-        'item_id' => $estimate['items'][0]['item_id'],
-        'name' => $estimate['items'][0]['name'],
-    ]);
-});
-
-test('update estimate with EUR currency', function () {
-    $estimate = Estimate::factory()
-        ->hasItems(1)
-        ->hasTaxes(1)
-        ->create([
-            'estimate_date' => '1988-07-18',
-            'expiry_date' => '1988-08-18',
+        // Assert
+        $this->assertDatabaseHas('estimates', [
+            'template_name' => $estimate['template_name'],
+            'estimate_number' => $estimate['estimate_number'],
+            'discount_type' => $estimate['discount_type'],
+            'discount_val' => $estimate['discount_val'],
+            'sub_total' => $estimate['sub_total'],
+            'discount' => $estimate['discount'],
+            'customer_id' => $estimate['customer_id'],
+            'total' => $estimate['total'],
+            'notes' => $estimate['notes'],
+            'tax' => $estimate['tax'],
         ]);
+        $this->assertDatabaseHas('taxes', [
+            'tax_type_id' => $estimate['taxes'][0]['tax_type_id'],
+            'amount' => $estimate['tax'],
+        ]);
+        $this->assertDatabaseHas('estimate_items', [
+            'item_id' => $estimate['items'][0]['item_id'],
+            'name' => $estimate['items'][0]['name'],
+        ]);
+    }
 
-    $estimate2 = Estimate::factory()
-        ->raw([
+    #[Test]
+    public function it_updates_an_estimate_with_foreign_currency(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()
+            ->hasItems(1)
+            ->hasTaxes(1)
+            ->create(['estimate_date' => '1988-07-18', 'expiry_date' => '1988-08-18']);
+
+        $updatedEstimate = Estimate::factory()->raw([
             'id' => $estimate->id,
             'discount_type' => 'fixed',
             'discount_val' => 20,
@@ -432,54 +448,55 @@ test('update estimate with EUR currency', function () {
             ])],
         ]);
 
-    $response = putJson('api/v1/estimates/'.$estimate->id, $estimate2);
+        // Act
+        $response = $this->putJson('api/v1/estimates/'.$estimate->id, $updatedEstimate);
 
-    $this->assertDatabaseHas('estimates', [
-        'id' => $estimate['id'],
-        'template_name' => $estimate2['template_name'],
-        'estimate_number' => $estimate2['estimate_number'],
-        'discount_type' => $estimate2['discount_type'],
-        'discount_val' => $estimate2['discount_val'],
-        'sub_total' => $estimate2['sub_total'],
-        'discount' => $estimate2['discount'],
-        'customer_id' => $estimate2['customer_id'],
-        'total' => $estimate2['total'],
-        'tax' => $estimate2['tax'],
-        'exchange_rate' => $estimate2['exchange_rate'],
-        'base_discount_val' => $estimate2['base_discount_val'],
-        'base_sub_total' => $estimate2['base_sub_total'],
-        'base_total' => $estimate2['base_total'],
-        'base_tax' => $estimate2['base_tax'],
-    ]);
+        // Assert
+        $this->assertDatabaseHas('estimates', [
+            'id' => $estimate['id'],
+            'template_name' => $updatedEstimate['template_name'],
+            'estimate_number' => $updatedEstimate['estimate_number'],
+            'discount_type' => $updatedEstimate['discount_type'],
+            'discount_val' => $updatedEstimate['discount_val'],
+            'sub_total' => $updatedEstimate['sub_total'],
+            'discount' => $updatedEstimate['discount'],
+            'customer_id' => $updatedEstimate['customer_id'],
+            'total' => $updatedEstimate['total'],
+            'tax' => $updatedEstimate['tax'],
+            'exchange_rate' => $updatedEstimate['exchange_rate'],
+            'base_discount_val' => $updatedEstimate['base_discount_val'],
+            'base_sub_total' => $updatedEstimate['base_sub_total'],
+            'base_total' => $updatedEstimate['base_total'],
+            'base_tax' => $updatedEstimate['base_tax'],
+        ]);
+        $this->assertDatabaseHas('estimate_items', [
+            'estimate_id' => $updatedEstimate['items'][0]['estimate_id'],
+            'exchange_rate' => $updatedEstimate['items'][0]['exchange_rate'],
+            'base_price' => $updatedEstimate['items'][0]['base_price'],
+            'base_discount_val' => $updatedEstimate['items'][0]['base_discount_val'],
+            'base_tax' => $updatedEstimate['items'][0]['base_tax'],
+            'base_total' => $updatedEstimate['items'][0]['base_total'],
+        ]);
+        $response->assertStatus(200);
+    }
 
-    $this->assertDatabaseHas('estimate_items', [
-        'estimate_id' => $estimate2['items'][0]['estimate_id'],
-        'exchange_rate' => $estimate2['items'][0]['exchange_rate'],
-        'base_price' => $estimate2['items'][0]['base_price'],
-        'base_discount_val' => $estimate2['items'][0]['base_discount_val'],
-        'base_tax' => $estimate2['items'][0]['base_tax'],
-        'base_total' => $estimate2['items'][0]['base_total'],
-    ]);
+    #[Test]
+    public function it_creates_an_estimate_with_tax_included(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->raw([
+            'estimate_number' => 'EST-000006',
+            'items' => [EstimateItem::factory()->raw()],
+            'taxes' => [Tax::factory()->raw()],
+            'tax_included' => true,
+        ]);
 
-    $response->assertStatus(200);
-});
+        // Act
+        $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-test('create estimate with tax included', function () {
-    $estimate = Estimate::factory()->raw([
-        'estimate_number' => 'EST-000006',
-        'items' => [
-            EstimateItem::factory()->raw(),
-        ],
-        'taxes' => [
-            Tax::factory()->raw(),
-        ],
-        'tax_included' => true,
-    ]);
-
-    postJson('api/v1/estimates', $estimate)
-        ->assertStatus(201);
-
-    $this->assertDatabaseHas('estimates', [
-        'tax_included' => $estimate['tax_included'],
-    ]);
-});
+        // Assert
+        $this->assertDatabaseHas('estimates', [
+            'tax_included' => $estimate['tax_included'],
+        ]);
+    }
+}
