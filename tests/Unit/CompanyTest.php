@@ -48,6 +48,7 @@ class CompanyTest extends TestCase
         $company = Company::factory()->hasUsers(5)->create();
 
         /* Act & Assert */
-        $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $company->users);
+        $this->assertCount(5, $company->users);
+        $this->assertTrue($company->users()->exists());
     }
 }

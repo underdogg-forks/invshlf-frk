@@ -47,17 +47,13 @@ class InvoiceTest extends TestCase
         $invoice = Invoice::factory()->create(['customer_id' => $customer->id]);
 
         /* Act */
-        $this->getJson("/api/v1/{$customer->company->slug}/customer/invoices/{$invoice->id}")->assertOk();
+        $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/invoices/{$invoice->id}");
 
         /* Assert */
-        $this->assertDatabaseHas('invoices', [
-            'template_name' => $invoice['template_name'],
-            'invoice_number' => $invoice['invoice_number'],
-            'sub_total' => $invoice['sub_total'],
-            'discount' => $invoice['discount'],
-            'customer_id' => $invoice['customer_id'],
-            'total' => $invoice['total'],
-            'tax' => $invoice['tax'],
-        ]);
+        $response->assertOk()
+            ->assertJsonFragment([
+                'id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+            ]);
     }
 }

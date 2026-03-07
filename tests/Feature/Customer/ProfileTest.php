@@ -52,12 +52,13 @@ class ProfileTest extends TestCase
 
         /* Act */
         $this->postJson("api/v1/{$customer->company->slug}/customer/profile", $updatedCustomer)->assertOk();
+        $customer->refresh();
 
         /* Assert */
-        $this->assertDatabaseHas('customers', [
-            'name' => $customer['name'],
-            'email' => $customer['email'],
-        ]);
+        $this->assertSame('newName', $customer->shipping['name']);
+        $this->assertSame('address', $customer->shipping['address_street_1']);
+        $this->assertSame('newName', $customer->billing['name']);
+        $this->assertSame('address', $customer->billing['address_street_1']);
     }
 
     #[Test]

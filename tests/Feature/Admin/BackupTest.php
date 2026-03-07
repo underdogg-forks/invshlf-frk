@@ -35,7 +35,7 @@ class BackupTest extends TestCase
         $disk = FileDisk::factory()->create(['set_as_default' => true]);
 
         /* Act */
-        $response = $this->getJson("/api/v1/backups?disk={$disk->driver}&&file_disk_id={$disk->id}");
+        $response = $this->getJson("/api/v1/backups?disk={$disk->driver}&file_disk_id={$disk->id}");
 
         /* Assert */
         $response->assertOk();
@@ -53,7 +53,7 @@ class BackupTest extends TestCase
         ];
 
         /* Act */
-        $this->postJson('/api/v1/backups', $data);
+        $this->postJson('/api/v1/backups', $data)->assertOk();
 
         /* Assert */
         Queue::assertPushed(CreateBackupJob::class);

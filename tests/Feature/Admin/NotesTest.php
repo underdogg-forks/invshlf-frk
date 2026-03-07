@@ -69,7 +69,10 @@ class NotesTest extends TestCase
         $this->putJson("/api/v1/notes/{$note->id}", $updatedData)->assertStatus(200);
 
         /* Assert */
-        $this->assertDatabaseHas('notes', $updatedData);
+        $this->assertDatabaseHas('notes', array_merge(
+            ['id' => $note->id],
+            $updatedData
+        ));
     }
 
     #[Test]
