@@ -2,19 +2,19 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Expense extends Model implements HasMedia
+class Expense extends BaseModel implements HasMedia
 {
+    use BelongsToFranchise;
     use HasCustomFieldsTrait;
-    use HasFactory;
     use InteractsWithMedia;
 
     protected $dates = [
@@ -38,14 +38,24 @@ class Expense extends Model implements HasMedia
         ];
     }
 
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function category(): BelongsTo
     {
         return $this->belongsTo(ExpenseCategory::class, 'expense_category_id');
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
     public function company(): BelongsTo
@@ -53,9 +63,9 @@ class Expense extends Model implements HasMedia
         return $this->belongsTo(Company::class, 'company_id');
     }
 
-    public function paymentMethod(): BelongsTo
+    public function creator(): BelongsTo
     {
-        return $this->belongsTo(PaymentMethod::class);
+        return $this->belongsTo(\App\Models\User::class, 'creator_id');
     }
 
     public function currency(): BelongsTo
@@ -63,17 +73,23 @@ class Expense extends Model implements HasMedia
         return $this->belongsTo(Currency::class, 'currency_id');
     }
 
-    public function creator(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\User::class, 'creator_id');
+        return $this->belongsTo(Customer::class, 'customer_id');
     }
 
-    public function getFormattedExpenseDateAttribute($value)
+    public function paymentMethod(): BelongsTo
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->expense_date)->translatedFormat($dateFormat);
+        return $this->belongsTo(PaymentMethod::class);
     }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
 
     public function getFormattedCreatedAtAttribute($value)
     {
@@ -82,18 +98,11 @@ class Expense extends Model implements HasMedia
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
 
-    public function getReceiptUrlAttribute($value)
+    public function getFormattedExpenseDateAttribute($value)
     {
-        $media = $this->getFirstMedia('receipts');
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
 
-        if ($media) {
-            return [
-                'url' => $media->getFullUrl(),
-                'type' => $media->type,
-            ];
-        }
-
-        return null;
+        return Carbon::parse($this->expense_date)->translatedFormat($dateFormat);
     }
 
     public function getReceiptAttribute($value)
@@ -118,37 +127,35 @@ class Expense extends Model implements HasMedia
         return null;
     }
 
-    public function scopeExpensesBetween($query, $start, $end)
+    public function getReceiptUrlAttribute($value)
     {
-        return $query->whereBetween(
-            'expenses.expense_date',
-            [$start->format('Y-m-d'), $end->format('Y-m-d')]
-        );
-    }
+        $media = $this->getFirstMedia('receipts');
 
-    public function scopeWhereCategoryName($query, $search)
-    {
-        foreach (explode(' ', $search) as $term) {
-            $query->whereHas('category', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%');
-            });
+        if ($media) {
+            return [
+                'url' => $media->getFullUrl(),
+                'type' => $media->type,
+            ];
         }
+
+        return null;
     }
 
-    public function scopeWhereNotes($query, $search)
-    {
-        $query->where('notes', 'LIKE', '%'.$search.'%');
-    }
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
 
-    public function scopeWhereCategory($query, $categoryId)
-    {
-        return $query->where('expenses.expense_category_id', $categoryId);
-    }
-
-    public function scopeWhereUser($query, $customer_id)
-    {
-        return $query->where('expenses.customer_id', $customer_id);
-    }
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -183,24 +190,46 @@ class Expense extends Model implements HasMedia
         }
     }
 
-    public function scopeWhereExpense($query, $expense_id)
+    public function scopeExpensesAttributes($query)
     {
-        $query->orWhere('id', $expense_id);
+        $query->select(
+            DB::raw('
+                count(*) as expenses_count,
+                sum(base_amount) as total_amount,
+                expense_category_id')
+        )
+            ->groupBy('expense_category_id');
     }
 
-    public function scopeWhereSearch($query, $search)
+    public function scopeExpensesBetween($query, $start, $end)
+    {
+        return $query->whereBetween(
+            'expenses.expense_date',
+            [$start->format('Y-m-d'), $end->format('Y-m-d')]
+        );
+    }
+
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
+    public function scopeWhereCategoryName($query, $search)
     {
         foreach (explode(' ', $search) as $term) {
             $query->whereHas('category', function ($query) use ($term) {
                 $query->where('name', 'LIKE', '%'.$term.'%');
-            })
-                ->orWhere('notes', 'LIKE', '%'.$term.'%');
+            });
         }
     }
 
-    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    public function scopeWhereCategory($query, $categoryId)
     {
-        $query->orderBy($orderByField, $orderBy);
+        return $query->where('expenses.expense_category_id', $categoryId);
     }
 
     public function scopeWhereCompany($query)
@@ -213,25 +242,43 @@ class Expense extends Model implements HasMedia
         $query->where('expenses.company_id', $company);
     }
 
-    public function scopePaginateData($query, $limit)
+    public function scopeWhereExpense($query, $expense_id)
     {
-        if ($limit == 'all') {
-            return $query->get();
+        $query->orWhere('id', $expense_id);
+    }
+
+    public function scopeWhereNotes($query, $search)
+    {
+        $query->where('notes', 'LIKE', '%'.$search.'%');
+    }
+
+    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    {
+        $query->orderBy($orderByField, $orderBy);
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        foreach (explode(' ', $search) as $term) {
+            $query->whereHas('category', function ($query) use ($term) {
+                $query->where('name', 'LIKE', '%'.$term.'%');
+            })
+                ->orWhere('notes', 'LIKE', '%'.$term.'%');
         }
-
-        return $query->paginate($limit);
     }
 
-    public function scopeExpensesAttributes($query)
+    public function scopeWhereUser($query, $customer_id)
     {
-        $query->select(
-            DB::raw('
-                count(*) as expenses_count,
-                sum(base_amount) as total_amount,
-                expense_category_id')
-        )
-            ->groupBy('expense_category_id');
+        return $query->where('expenses.customer_id', $customer_id);
     }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
 
     public static function createExpense($request)
     {
@@ -280,4 +327,6 @@ class Expense extends Model implements HasMedia
 
         return true;
     }
+
+    #endregion
 }

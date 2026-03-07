@@ -2,14 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class TaxType extends Model
+class TaxType extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
+
+    public const TYPE_GENERAL = 'GENERAL';
+
+    public const TYPE_MODULE = 'MODULE';
 
     protected $guarded = [
         'id',
@@ -24,29 +28,54 @@ class TaxType extends Model
         ];
     }
 
-    public const TYPE_GENERAL = 'GENERAL';
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
-    public const TYPE_MODULE = 'MODULE';
-
-    public function taxes(): HasMany
-    {
-        return $this->hasMany(Tax::class);
-    }
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function scopeWhereCompany($query)
+    public function taxes(): HasMany
     {
-        $query->where('company_id', request()->header('company'));
+        return $this->hasMany(Tax::class);
     }
 
-    public function scopeWhereTaxType($query, $tax_type_id)
-    {
-        $query->orWhere('id', $tax_type_id);
-    }
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -71,6 +100,20 @@ class TaxType extends Model
         }
     }
 
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
+    public function scopeWhereCompany($query)
+    {
+        $query->where('company_id', request()->header('company'));
+    }
+
     public function scopeWhereOrder($query, $orderByField, $orderBy)
     {
         $query->orderBy($orderByField, $orderBy);
@@ -81,12 +124,18 @@ class TaxType extends Model
         $query->where('name', 'LIKE', '%'.$search.'%');
     }
 
-    public function scopePaginateData($query, $limit)
+    public function scopeWhereTaxType($query, $tax_type_id)
     {
-        if ($limit == 'all') {
-            return $query->get();
-        }
-
-        return $query->paginate($limit);
+        $query->orWhere('id', $tax_type_id);
     }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

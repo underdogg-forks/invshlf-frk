@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,149 +13,27 @@ use Silber\Bouncer\Database\Role;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Company extends Model implements HasMedia
+class Company extends BaseModel implements HasMedia
 {
-    use HasFactory;
+    use BelongsToFranchise;
     use InteractsWithMedia;
-
-    protected $guarded = [
-        'id',
-    ];
 
     public const COMPANY_LEVEL = 'company_level';
 
     public const CUSTOMER_LEVEL = 'customer_level';
 
+    protected $guarded = [
+        'id',
+    ];
+
     protected $appends = ['logo', 'logo_path'];
 
-    public function getRolesAttribute()
-    {
-        return Role::where('scope', $this->id)
-            ->get();
-    }
-
-    public function getLogoPathAttribute()
-    {
-        $logo = $this->getMedia('logo')->first();
-
-        $isSystem = FileDisk::whereSetAsDefault(true)->first()->isSystem();
-
-        if ($logo) {
-            if ($isSystem) {
-                return $logo->getPath();
-            } else {
-                return $logo->getFullUrl();
-            }
-        }
-
-        return null;
-    }
-
-    public function getLogoAttribute()
-    {
-        $logo = $this->getMedia('logo')->first();
-
-        if ($logo) {
-            return $logo->getFullUrl();
-        }
-
-        return null;
-    }
-
-    public function customers(): HasMany
-    {
-        return $this->hasMany(Customer::class);
-    }
-
-    public function owner(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'owner_id');
-    }
-
-    public function settings(): HasMany
-    {
-        return $this->hasMany(CompanySetting::class);
-    }
-
-    public function recurringInvoices(): HasMany
-    {
-        return $this->hasMany(RecurringInvoice::class);
-    }
-
-    public function customFields(): HasMany
-    {
-        return $this->hasMany(CustomField::class);
-    }
-
-    public function customFieldValues(): HasMany
-    {
-        return $this->hasMany(CustomFieldValue::class);
-    }
-
-    public function exchangeRateLogs(): HasMany
-    {
-        return $this->hasMany(ExchangeRateLog::class);
-    }
-
-    public function exchangeRateProviders(): HasMany
-    {
-        return $this->hasMany(ExchangeRateProvider::class);
-    }
-
-    public function invoices(): HasMany
-    {
-        return $this->hasMany(Invoice::class);
-    }
-
-    public function expenses(): HasMany
-    {
-        return $this->hasMany(Expense::class);
-    }
-
-    public function units(): HasMany
-    {
-        return $this->hasMany(Unit::class);
-    }
-
-    public function expenseCategories(): HasMany
-    {
-        return $this->hasMany(ExpenseCategory::class);
-    }
-
-    public function taxTypes(): HasMany
-    {
-        return $this->hasMany(TaxType::class);
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(Item::class);
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
-    public function paymentMethods(): HasMany
-    {
-        return $this->hasMany(PaymentMethod::class);
-    }
-
-    public function estimates(): HasMany
-    {
-        return $this->hasMany(Estimate::class);
-    }
-
-    public function address(): HasOne
-    {
-        return $this->hasOne(Address::class);
-    }
-
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'user_company', 'company_id', 'user_id');
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
     public function setupRoles()
     {
@@ -235,13 +113,9 @@ class Company extends Model implements HasMedia
             'notify_estimate_viewed' => 'NO',
             'tax_per_item' => 'NO',
             'discount_per_item' => 'NO',
-            'invoice_auto_generate' => 'YES',
             'invoice_email_attachment' => 'NO',
-            'estimate_auto_generate' => 'YES',
             'estimate_email_attachment' => 'NO',
-            'payment_auto_generate' => 'YES',
             'payment_email_attachment' => 'NO',
-            'save_pdf_to_disk' => 'NO',
             'retrospective_edits' => 'allow',
             'invoice_number_format' => '{{SERIES:INV}}{{DELIMITER:-}}{{SEQUENCE:6}}',
             'estimate_number_format' => '{{SERIES:EST}}{{DELIMITER:-}}{{SEQUENCE:6}}',
@@ -268,6 +142,207 @@ class Company extends Model implements HasMedia
 
         return true;
     }
+
+    public function checkModelData($model)
+    {
+        $model->items->map(function ($item) {
+            if ($item->taxes()->exists()) {
+                $item->taxes()->delete();
+            }
+
+            $item->delete();
+        });
+
+        if ($model->taxes()->exists()) {
+            $model->taxes()->delete();
+        }
+    }
+
+    public function hasTransactions()
+    {
+        if (
+            $this->customers()->exists() ||
+            $this->items()->exists() ||
+            $this->invoices()->exists() ||
+            $this->estimates()->exists() ||
+            $this->expenses()->exists() ||
+            $this->payments()->exists() ||
+            $this->recurringInvoices()->exists()
+        ) {
+            return true;
+        }
+
+        return false;
+    }
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function address(): HasOne
+    {
+        return $this->hasOne(Address::class);
+    }
+
+    public function customers(): HasMany
+    {
+        return $this->hasMany(Customer::class);
+    }
+
+    public function customFields(): HasMany
+    {
+        return $this->hasMany(CustomField::class);
+    }
+
+    public function customFieldValues(): HasMany
+    {
+        return $this->hasMany(CustomFieldValue::class);
+    }
+
+    public function estimates(): HasMany
+    {
+        return $this->hasMany(Estimate::class);
+    }
+
+    public function exchangeRateLogs(): HasMany
+    {
+        return $this->hasMany(ExchangeRateLog::class);
+    }
+
+    public function exchangeRateProviders(): HasMany
+    {
+        return $this->hasMany(ExchangeRateProvider::class);
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class);
+    }
+
+    public function expenseCategories(): HasMany
+    {
+        return $this->hasMany(ExpenseCategory::class);
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class);
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(Item::class);
+    }
+
+    public function owner(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'owner_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function paymentMethods(): HasMany
+    {
+        return $this->hasMany(PaymentMethod::class);
+    }
+
+    public function recurringInvoices(): HasMany
+    {
+        return $this->hasMany(RecurringInvoice::class);
+    }
+
+    public function settings(): HasMany
+    {
+        return $this->hasMany(CompanySetting::class);
+    }
+
+    public function taxTypes(): HasMany
+    {
+        return $this->hasMany(TaxType::class);
+    }
+
+    public function units(): HasMany
+    {
+        return $this->hasMany(Unit::class);
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_company', 'company_id', 'user_id');
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getLogoAttribute()
+    {
+        $logo = $this->getMedia('logo')->first();
+
+        if ($logo) {
+            return $logo->getFullUrl();
+        }
+
+        return null;
+    }
+
+    public function getLogoPathAttribute()
+    {
+        $logo = $this->getMedia('logo')->first();
+
+        $isSystem = FileDisk::whereSetAsDefault(true)->first()->isSystem();
+
+        if ($logo) {
+            if ($isSystem) {
+                return $logo->getPath();
+            } else {
+                return $logo->getFullUrl();
+            }
+        }
+
+        return null;
+    }
+
+    public function getRolesAttribute()
+    {
+        return Role::where('scope', $this->id)
+            ->get();
+    }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
 
     public function deleteCompany($user)
     {
@@ -372,35 +447,5 @@ class Company extends Model implements HasMedia
         return true;
     }
 
-    public function checkModelData($model)
-    {
-        $model->items->map(function ($item) {
-            if ($item->taxes()->exists()) {
-                $item->taxes()->delete();
-            }
-
-            $item->delete();
-        });
-
-        if ($model->taxes()->exists()) {
-            $model->taxes()->delete();
-        }
-    }
-
-    public function hasTransactions()
-    {
-        if (
-            $this->customers()->exists() ||
-            $this->items()->exists() ||
-            $this->invoices()->exists() ||
-            $this->estimates()->exists() ||
-            $this->expenses()->exists() ||
-            $this->payments()->exists() ||
-            $this->recurringInvoices()->exists()
-        ) {
-            return true;
-        }
-
-        return false;
-    }
+    #endregion
 }

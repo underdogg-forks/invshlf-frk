@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
-class Tax extends Model
+class Tax extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $guarded = [
         'id',
@@ -25,19 +25,24 @@ class Tax extends Model
         ];
     }
 
-    public function taxType(): BelongsTo
-    {
-        return $this->belongsTo(TaxType::class);
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
-    public function recurringInvoice(): BelongsTo
+    public function currency(): BelongsTo
     {
-        return $this->belongsTo(RecurringInvoice::class);
+        return $this->belongsTo(Currency::class);
     }
 
     public function estimate(): BelongsTo
@@ -45,9 +50,14 @@ class Tax extends Model
         return $this->belongsTo(Estimate::class);
     }
 
-    public function currency(): BelongsTo
+    public function estimateItem(): BelongsTo
     {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(EstimateItem::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function invoiceItem(): BelongsTo
@@ -55,27 +65,44 @@ class Tax extends Model
         return $this->belongsTo(InvoiceItem::class);
     }
 
-    public function estimateItem(): BelongsTo
-    {
-        return $this->belongsTo(EstimateItem::class);
-    }
-
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
     }
 
-    public function scopeWhereCompany($query, $company_id)
+    public function recurringInvoice(): BelongsTo
     {
-        $query->where('company_id', $company_id);
+        return $this->belongsTo(RecurringInvoice::class);
     }
 
-    public function scopeTaxAttributes($query)
+    public function taxType(): BelongsTo
     {
-        $query->select(
-            DB::raw('sum(base_amount) as total_tax_amount, tax_type_id')
-        )->groupBy('tax_type_id');
+        return $this->belongsTo(TaxType::class);
     }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeInvoicesBetween($query, $start, $end)
     {
@@ -95,6 +122,18 @@ class Tax extends Model
             });
     }
 
+    public function scopeTaxAttributes($query)
+    {
+        $query->select(
+            DB::raw('sum(base_amount) as total_tax_amount, tax_type_id')
+        )->groupBy('tax_type_id');
+    }
+
+    public function scopeWhereCompany($query, $company_id)
+    {
+        $query->where('company_id', $company_id);
+    }
+
     public function scopeWhereInvoicesFilters($query, array $filters)
     {
         $filters = collect($filters);
@@ -106,4 +145,14 @@ class Tax extends Model
             $query->invoicesBetween($start, $end);
         }
     }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

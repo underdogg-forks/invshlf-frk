@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Address extends Model
+class Address extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     public const BILLING_TYPE = 'billing';
 
@@ -16,22 +16,20 @@ class Address extends Model
 
     protected $guarded = ['id'];
 
-    public function getCountryNameAttribute()
-    {
-        $name = $this->country ? $this->country->name : null;
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
-        return $name;
-    }
-
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
-    }
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company(): BelongsTo
     {
@@ -42,4 +40,55 @@ class Address extends Model
     {
         return $this->belongsTo(Country::class);
     }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getCountryNameAttribute()
+    {
+        $name = $this->country ? $this->country->name : null;
+
+        return $name;
+    }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

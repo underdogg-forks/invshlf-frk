@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-class CustomFieldValue extends Model
+class CustomFieldValue extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $dates = [
         'date_answer',
@@ -24,21 +24,20 @@ class CustomFieldValue extends Model
         'defaultAnswer',
     ];
 
-    public function setTimeAnswerAttribute($value)
-    {
-        if ($value && $value != null) {
-            $this->attributes['time_answer'] = date('H:i:s', strtotime($value));
-        } else {
-            $this->attributes['time_answer'] = null;
-        }
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
-    public function getDefaultAnswerAttribute()
-    {
-        $value_type = getCustomFieldValueKey($this->type);
-
-        return $this->$value_type;
-    }
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company(): BelongsTo
     {
@@ -54,4 +53,54 @@ class CustomFieldValue extends Model
     {
         return $this->morphTo();
     }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getDefaultAnswerAttribute()
+    {
+        $value_type = getCustomFieldValueKey($this->type);
+
+        return $this->$value_type;
+    }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    public function setTimeAnswerAttribute($value)
+    {
+        if ($value && $value != null) {
+            $this->attributes['time_answer'] = date('H:i:s', strtotime($value));
+        } else {
+            $this->attributes['time_answer'] = null;
+        }
+    }
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

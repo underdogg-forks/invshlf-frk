@@ -2,16 +2,22 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Vinkla\Hashids\Facades\Hashids;
 
-class Transaction extends Model
+class Transaction extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
+
+    public const PENDING = 'PENDING';
+
+    public const FAILED = 'FAILED';
+
+    public const SUCCESS = 'SUCCESS';
 
     protected $guarded = [
         'id',
@@ -21,26 +27,12 @@ class Transaction extends Model
         'transaction_date',
     ];
 
-    public const PENDING = 'PENDING';
-
-    public const FAILED = 'FAILED';
-
-    public const SUCCESS = 'SUCCESS';
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
     public function completeTransaction()
     {
@@ -52,15 +44,6 @@ class Transaction extends Model
     {
         $this->status = self::FAILED;
         $this->save();
-    }
-
-    public static function createTransaction($data)
-    {
-        $transaction = self::create($data);
-        $transaction->unique_hash = Hashids::connection(Transaction::class)->encode($transaction->id);
-        $transaction->save();
-
-        return $transaction;
     }
 
     public function isExpired()
@@ -76,4 +59,70 @@ class Transaction extends Model
 
         return false;
     }
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    public static function createTransaction($data)
+    {
+        $transaction = self::create($data);
+        $transaction->unique_hash = Hashids::connection(Transaction::class)->encode($transaction->id);
+        $transaction->save();
+
+        return $transaction;
+    }
+
+    #endregion
 }

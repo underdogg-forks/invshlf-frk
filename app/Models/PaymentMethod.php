@@ -2,22 +2,22 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class PaymentMethod extends Model
+class PaymentMethod extends BaseModel
 {
-    use HasFactory;
-
-    protected $guarded = [
-        'id',
-    ];
+    use BelongsToFranchise;
 
     public const TYPE_GENERAL = 'GENERAL';
 
     public const TYPE_MODULE = 'MODULE';
+
+    protected $guarded = [
+        'id',
+    ];
 
     protected function casts(): array
     {
@@ -27,14 +27,24 @@ class PaymentMethod extends Model
         ];
     }
 
-    public function setSettingsAttribute($value)
-    {
-        $this->attributes['settings'] = json_encode($value);
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
-    public function payments(): HasMany
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
     {
-        return $this->hasMany(Payment::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function expenses(): HasMany
@@ -42,30 +52,39 @@ class PaymentMethod extends Model
         return $this->hasMany(Expense::class);
     }
 
-    public function company(): BelongsTo
+    public function payments(): HasMany
     {
-        return $this->belongsTo(Company::class);
+        return $this->hasMany(Payment::class);
     }
 
-    public function scopeWhereCompanyId($query, $id)
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    public function setSettingsAttribute($value)
     {
-        $query->where('company_id', $id);
+        $this->attributes['settings'] = json_encode($value);
     }
 
-    public function scopeWhereCompany($query)
-    {
-        $query->where('company_id', request()->header('company'));
-    }
-
-    public function scopeWherePaymentMethod($query, $payment_id)
-    {
-        $query->orWhere('id', $payment_id);
-    }
-
-    public function scopeWhereSearch($query, $search)
-    {
-        $query->where('name', 'LIKE', '%'.$search.'%');
-    }
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -93,6 +112,34 @@ class PaymentMethod extends Model
         return $query->paginate($limit);
     }
 
+    public function scopeWhereCompany($query)
+    {
+        $query->where('company_id', request()->header('company'));
+    }
+
+    public function scopeWhereCompanyId($query, $id)
+    {
+        $query->where('company_id', $id);
+    }
+
+    public function scopeWherePaymentMethod($query, $payment_id)
+    {
+        $query->orWhere('id', $payment_id);
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        $query->where('name', 'LIKE', '%'.$search.'%');
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
     public static function createPaymentMethod($request)
     {
         $data = $request->getPaymentMethodPayload();
@@ -109,4 +156,6 @@ class PaymentMethod extends Model
 
         return $settings;
     }
+
+    #endregion
 }
