@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class CustomField extends Model
+class CustomField extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $guarded = [
         'id',
@@ -31,17 +31,38 @@ class CustomField extends Model
         ];
     }
 
-    public function setTimeAnswerAttribute($value)
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
     {
-        if ($value && $value != null) {
-            $this->attributes['time_answer'] = date('H:i:s', strtotime($value));
-        }
+        return $this->belongsTo(Company::class);
     }
 
-    public function setOptionsAttribute($value)
+    public function customFieldValues(): HasMany
     {
-        $this->attributes['options'] = json_encode($value);
+        return $this->hasMany(CustomFieldValue::class);
     }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
 
     public function getDefaultAnswerAttribute()
     {
@@ -55,14 +76,54 @@ class CustomField extends Model
         return $this->customFieldValues()->exists();
     }
 
-    public function company(): BelongsTo
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    public function setOptionsAttribute($value)
     {
-        return $this->belongsTo(Company::class);
+        $this->attributes['options'] = json_encode($value);
     }
 
-    public function customFieldValues(): HasMany
+    public function setTimeAnswerAttribute($value)
     {
-        return $this->hasMany(CustomFieldValue::class);
+        if ($value && $value != null) {
+            $this->attributes['time_answer'] = date('H:i:s', strtotime($value));
+        }
+    }
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeApplyFilters($query, array $filters)
+    {
+        $filters = collect($filters);
+
+        if ($filters->get('type')) {
+            $query->whereType($filters->get('type'));
+        }
+
+        if ($filters->get('search')) {
+            $query->whereSearch($filters->get('search'));
+        }
+    }
+
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
     }
 
     public function scopeWhereCompany($query)
@@ -78,32 +139,18 @@ class CustomField extends Model
         });
     }
 
-    public function scopePaginateData($query, $limit)
-    {
-        if ($limit == 'all') {
-            return $query->get();
-        }
-
-        return $query->paginate($limit);
-    }
-
-    public function scopeApplyFilters($query, array $filters)
-    {
-        $filters = collect($filters);
-
-        if ($filters->get('type')) {
-            $query->whereType($filters->get('type'));
-        }
-
-        if ($filters->get('search')) {
-            $query->whereSearch($filters->get('search'));
-        }
-    }
-
     public function scopeWhereType($query, $type)
     {
         $query->where('custom_fields.model_type', $type);
     }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
 
     public static function createCustomField($request)
     {
@@ -123,4 +170,6 @@ class CustomField extends Model
 
         return $this;
     }
+
+    #endregion
 }

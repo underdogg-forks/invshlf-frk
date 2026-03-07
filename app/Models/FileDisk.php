@@ -2,13 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class FileDisk extends Model
+class FileDisk extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     public const DISK_TYPE_SYSTEM = 'SYSTEM';
 
@@ -25,60 +25,12 @@ class FileDisk extends Model
         ];
     }
 
-    public function setCredentialsAttribute($value)
-    {
-        $this->attributes['credentials'] = json_encode($value);
-    }
-
-    public function scopeWhereOrder($query, $orderByField, $orderBy)
-    {
-        $query->orderBy($orderByField, $orderBy);
-    }
-
-    public function scopeFileDisksBetween($query, $start, $end)
-    {
-        return $query->whereBetween(
-            'file_disks.created_at',
-            [$start->format('Y-m-d'), $end->format('Y-m-d')]
-        );
-    }
-
-    public function scopeWhereSearch($query, $search)
-    {
-        foreach (explode(' ', $search) as $term) {
-            $query->where('name', 'LIKE', '%'.$term.'%')
-                ->orWhere('driver', 'LIKE', '%'.$term.'%');
-        }
-    }
-
-    public function scopePaginateData($query, $limit)
-    {
-        if ($limit == 'all') {
-            return $query->get();
-        }
-
-        return $query->paginate($limit);
-    }
-
-    public function scopeApplyFilters($query, array $filters)
-    {
-        $filters = collect($filters);
-        if ($filters->get('search')) {
-            $query->whereSearch($filters->get('search'));
-        }
-
-        if ($filters->get('from_date') && $filters->get('to_date')) {
-            $start = Carbon::createFromFormat('Y-m-d', $filters->get('from_date'));
-            $end = Carbon::createFromFormat('Y-m-d', $filters->get('to_date'));
-            $query->fileDisksBetween($start, $end);
-        }
-
-        if ($filters->get('orderByField') || $filters->get('orderBy')) {
-            $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'sequence_number';
-            $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'asc';
-            $query->whereOrder($field, $orderBy);
-        }
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
     public function setConfig()
     {
@@ -136,6 +88,111 @@ class FileDisk extends Model
 
         return $exists;
     }
+
+    public function isSystem()
+    {
+        return $this->type === self::DISK_TYPE_SYSTEM;
+    }
+
+    public function isRemote()
+    {
+        return $this->type === self::DISK_TYPE_REMOTE;
+    }
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    public function setCredentialsAttribute($value)
+    {
+        $this->attributes['credentials'] = json_encode($value);
+    }
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeApplyFilters($query, array $filters)
+    {
+        $filters = collect($filters);
+        if ($filters->get('search')) {
+            $query->whereSearch($filters->get('search'));
+        }
+
+        if ($filters->get('from_date') && $filters->get('to_date')) {
+            $start = Carbon::createFromFormat('Y-m-d', $filters->get('from_date'));
+            $end = Carbon::createFromFormat('Y-m-d', $filters->get('to_date'));
+            $query->fileDisksBetween($start, $end);
+        }
+
+        if ($filters->get('orderByField') || $filters->get('orderBy')) {
+            $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'sequence_number';
+            $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'asc';
+            $query->whereOrder($field, $orderBy);
+        }
+    }
+
+    public function scopeFileDisksBetween($query, $start, $end)
+    {
+        return $query->whereBetween(
+            'file_disks.created_at',
+            [$start->format('Y-m-d'), $end->format('Y-m-d')]
+        );
+    }
+
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
+    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    {
+        $query->orderBy($orderByField, $orderBy);
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        foreach (explode(' ', $search) as $term) {
+            $query->where('name', 'LIKE', '%'.$term.'%')
+                ->orWhere('driver', 'LIKE', '%'.$term.'%');
+        }
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
 
     public static function createDisk($request)
     {
@@ -197,13 +254,5 @@ class FileDisk extends Model
         return $this;
     }
 
-    public function isSystem()
-    {
-        return $this->type === self::DISK_TYPE_SYSTEM;
-    }
-
-    public function isRemote()
-    {
-        return $this->type === self::DISK_TYPE_REMOTE;
-    }
+    #endregion
 }

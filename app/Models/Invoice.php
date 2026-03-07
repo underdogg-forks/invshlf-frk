@@ -5,13 +5,13 @@ namespace App\Models;
 use App;
 use App\Facades\PDF;
 use App\Mail\SendInvoiceMail;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use App\Services\SerialNumberFormatter;
 use App\Space\PdfTemplateUtils;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -20,11 +20,11 @@ use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Vinkla\Hashids\Facades\Hashids;
 
-class Invoice extends Model implements HasMedia
+class Invoice extends BaseModel implements HasMedia
 {
+    use BelongsToFranchise;
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
-    use HasFactory;
     use InteractsWithMedia;
 
     public const STATUS_DRAFT = 'DRAFT';
@@ -72,93 +72,12 @@ class Invoice extends Model implements HasMedia
         ];
     }
 
-    public function transactions(): HasMany
-    {
-        return $this->hasMany(Transaction::class);
-    }
-
-    public function emailLogs(): MorphMany
-    {
-        return $this->morphMany('App\Models\EmailLog', 'mailable');
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(\App\Models\InvoiceItem::class);
-    }
-
-    public function taxes(): HasMany
-    {
-        return $this->hasMany(Tax::class);
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class);
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
-
-    public function recurringInvoice(): BelongsTo
-    {
-        return $this->belongsTo(RecurringInvoice::class);
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'creator_id');
-    }
-
-    public function getInvoicePdfUrlAttribute()
-    {
-        return url('/invoices/pdf/'.$this->unique_hash);
-    }
-
-    public function getPaymentModuleEnabledAttribute()
-    {
-        if (Module::has('Payments')) {
-            return Module::isEnabled('Payments');
-        }
-
-        return false;
-    }
-
-    public function getAllowEditAttribute()
-    {
-        $retrospective_edit = CompanySetting::getSetting('retrospective_edits', $this->company_id);
-
-        $allowed = true;
-
-        $status = [
-            self::STATUS_DRAFT,
-            self::STATUS_SENT,
-            self::STATUS_VIEWED,
-            self::STATUS_COMPLETED,
-        ];
-
-        if ($retrospective_edit == 'disable_on_invoice_sent' && (in_array($this->status, $status)) && ($this->paid_status === Invoice::STATUS_PARTIALLY_PAID || $this->paid_status === Invoice::STATUS_PAID)) {
-            $allowed = false;
-        } elseif ($retrospective_edit == 'disable_on_invoice_partial_paid' && ($this->paid_status === Invoice::STATUS_PARTIALLY_PAID || $this->paid_status === Invoice::STATUS_PAID)) {
-            $allowed = false;
-        } elseif ($retrospective_edit == 'disable_on_invoice_paid' && $this->paid_status === Invoice::STATUS_PAID) {
-            $allowed = false;
-        }
-
-        return $allowed;
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
     public function getPreviousStatus()
     {
@@ -169,273 +88,6 @@ class Invoice extends Model implements HasMedia
         } else {
             return self::STATUS_DRAFT;
         }
-    }
-
-    public function getFormattedNotesAttribute($value)
-    {
-        return $this->getNotes();
-    }
-
-    public function getFormattedCreatedAtAttribute($value)
-    {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->created_at)->format($dateFormat);
-    }
-
-    public function getFormattedDueDateAttribute($value)
-    {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
-    }
-
-    public function getFormattedInvoiceDateAttribute($value)
-    {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-        $timeFormat = CompanySetting::getSetting('carbon_time_format', $this->company_id);
-        $invoiceTimeEnabled = CompanySetting::getSetting('invoice_use_time', $this->company_id);
-
-        if ($invoiceTimeEnabled === 'YES') {
-            $dateFormat .= ' '.$timeFormat;
-        }
-
-        return Carbon::parse($this->invoice_date)->translatedFormat($dateFormat);
-    }
-
-    public function scopeWhereStatus($query, $status)
-    {
-        return $query->where('invoices.status', $status);
-    }
-
-    public function scopeWherePaidStatus($query, $status)
-    {
-        return $query->where('invoices.paid_status', $status);
-    }
-
-    public function scopeWhereDueStatus($query, $status)
-    {
-        return $query->whereIn('invoices.paid_status', [
-            self::STATUS_UNPAID,
-            self::STATUS_PARTIALLY_PAID,
-        ]);
-    }
-
-    public function scopeWhereInvoiceNumber($query, $invoiceNumber)
-    {
-        return $query->where('invoices.invoice_number', 'LIKE', '%'.$invoiceNumber.'%');
-    }
-
-    public function scopeInvoicesBetween($query, $start, $end)
-    {
-        return $query->whereBetween(
-            'invoices.invoice_date',
-            [$start->format('Y-m-d'), $end->format('Y-m-d')]
-        );
-    }
-
-    public function scopeWhereSearch($query, $search)
-    {
-        foreach (explode(' ', $search) as $term) {
-            $query->whereHas('customer', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
-            });
-        }
-    }
-
-    public function scopeWhereOrder($query, $orderByField, $orderBy)
-    {
-        $query->orderBy($orderByField, $orderBy);
-    }
-
-    public function scopeApplyFilters($query, array $filters)
-    {
-        $filters = collect($filters)->filter()->all();
-
-        return $query->when($filters['search'] ?? null, function ($query, $search) {
-            $query->whereSearch($search);
-        })->when($filters['status'] ?? null, function ($query, $status) {
-            match ($status) {
-                self::STATUS_UNPAID, self::STATUS_PARTIALLY_PAID, self::STATUS_PAID => $query->wherePaidStatus($status),
-                'DUE' => $query->whereDueStatus($status),
-                default => $query->whereStatus($status),
-            };
-        })->when($filters['paid_status'] ?? null, function ($query, $paidStatus) {
-            $query->wherePaidStatus($paidStatus);
-        })->when($filters['invoice_id'] ?? null, function ($query, $invoiceId) {
-            $query->whereInvoice($invoiceId);
-        })->when($filters['invoice_number'] ?? null, function ($query, $invoiceNumber) {
-            $query->whereInvoiceNumber($invoiceNumber);
-        })->when(($filters['from_date'] ?? null) && ($filters['to_date'] ?? null), function ($query) use ($filters) {
-            $start = Carbon::parse($filters['from_date']);
-            $end = Carbon::parse($filters['to_date']);
-            $query->invoicesBetween($start, $end);
-        })->when($filters['customer_id'] ?? null, function ($query, $customerId) {
-            $query->where('customer_id', $customerId);
-        })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
-            $orderBy = $filters['orderBy'] ?? 'desc';
-            $query->orderBy($orderByField, $orderBy);
-        }, function ($query) {
-            $query->orderBy('sequence_number', 'desc');
-        });
-    }
-
-    public function scopeWhereInvoice($query, $invoice_id)
-    {
-        $query->orWhere('id', $invoice_id);
-    }
-
-    public function scopeWhereCompany($query)
-    {
-        $query->where('invoices.company_id', request()->header('company'));
-    }
-
-    public function scopeWhereCompanyId($query, $company)
-    {
-        $query->where('invoices.company_id', $company);
-    }
-
-    public function scopeWhereCustomer($query, $customer_id)
-    {
-        $query->where('invoices.customer_id', $customer_id);
-    }
-
-    public function scopePaginateData($query, $limit)
-    {
-        if ($limit == 'all') {
-            return $query->get();
-        }
-
-        return $query->paginate($limit);
-    }
-
-    public static function createInvoice($request)
-    {
-        $data = $request->getInvoicePayload();
-
-        if ($request->has('invoiceSend')) {
-            $data['status'] = Invoice::STATUS_SENT;
-        }
-
-        $invoice = Invoice::create($data);
-
-        $serial = (new SerialNumberFormatter)
-            ->setModel($invoice)
-            ->setCompany($invoice->company_id)
-            ->setCustomer($invoice->customer_id)
-            ->setNextNumbers();
-
-        $invoice->sequence_number = $serial->nextSequenceNumber;
-        $invoice->customer_sequence_number = $serial->nextCustomerSequenceNumber;
-        $invoice->unique_hash = Hashids::connection(Invoice::class)->encode($invoice->id);
-        $invoice->save();
-
-        self::createItems($invoice, $request->items);
-
-        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
-
-        if ((string) $data['currency_id'] !== $company_currency) {
-            ExchangeRateLog::addExchangeRateLog($invoice);
-        }
-
-        if ($request->has('taxes') && (! empty($request->taxes))) {
-            self::createTaxes($invoice, $request->taxes);
-        }
-
-        if ($request->customFields) {
-            $invoice->addCustomFields($request->customFields);
-        }
-
-        $invoice = Invoice::with([
-            'items',
-            'items.fields',
-            'items.fields.customField',
-            'customer',
-            'taxes',
-        ])
-            ->find($invoice->id);
-
-        return $invoice;
-    }
-
-    public function updateInvoice($request)
-    {
-        $serial = (new SerialNumberFormatter)
-            ->setModel($this)
-            ->setCompany($this->company_id)
-            ->setCustomer($request->customer_id)
-            ->setModelObject($this->id)
-            ->setNextNumbers();
-
-        $data = $request->getInvoicePayload();
-        $oldTotal = $this->total;
-
-        $total_paid_amount = $this->total - $this->due_amount;
-
-        if ($total_paid_amount > 0 && $this->customer_id !== $request->customer_id) {
-            return 'customer_cannot_be_changed_after_payment_is_added';
-        }
-
-        if ($request->total >= 0 && $request->total < $total_paid_amount) {
-            return 'total_invoice_amount_must_be_more_than_paid_amount';
-        }
-
-        if ($oldTotal != $request->total) {
-            $oldTotal = (int) round($request->total) - (int) $oldTotal;
-        } else {
-            $oldTotal = 0;
-        }
-
-        $data['due_amount'] = ($this->due_amount + $oldTotal);
-        $data['base_due_amount'] = $data['due_amount'] * $data['exchange_rate'];
-        $data['customer_sequence_number'] = $serial->nextCustomerSequenceNumber;
-
-        $this->update($data);
-
-        $statusData = $this->getInvoiceStatusByAmount($data['due_amount']);
-        if (! empty($statusData)) {
-            $this->update($statusData);
-        }
-
-        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
-
-        if ((string) $data['currency_id'] !== $company_currency) {
-            ExchangeRateLog::addExchangeRateLog($this);
-        }
-
-        $this->items->map(function ($item) {
-            $fields = $item->fields()->get();
-
-            $fields->map(function ($field) {
-                $field->delete();
-            });
-        });
-
-        $this->items()->delete();
-        $this->taxes()->delete();
-
-        self::createItems($this, $request->items);
-
-        if ($request->has('taxes') && (! empty($request->taxes))) {
-            self::createTaxes($this, $request->taxes);
-        }
-
-        if ($request->customFields) {
-            $this->updateCustomFields($request->customFields);
-        }
-
-        $invoice = Invoice::with([
-            'items',
-            'items.fields',
-            'items.fields.customField',
-            'customer',
-            'taxes',
-        ])
-            ->find($this->id);
-
-        return $invoice;
     }
 
     public function sendInvoiceData($data)
@@ -483,68 +135,6 @@ class Invoice extends Model implements HasMedia
             'success' => true,
             'type' => 'send',
         ];
-    }
-
-    public static function createItems($invoice, $invoiceItems)
-    {
-        $exchange_rate = $invoice->exchange_rate;
-
-        foreach ($invoiceItems as $invoiceItem) {
-            $invoiceItem['company_id'] = $invoice->company_id;
-            $invoiceItem['exchange_rate'] = $exchange_rate;
-            $invoiceItem['base_price'] = $invoiceItem['price'] * $exchange_rate;
-            $invoiceItem['base_discount_val'] = $invoiceItem['discount_val'] * $exchange_rate;
-            $invoiceItem['base_tax'] = $invoiceItem['tax'] * $exchange_rate;
-            $invoiceItem['base_total'] = $invoiceItem['total'] * $exchange_rate;
-
-            if (array_key_exists('recurring_invoice_id', $invoiceItem)) {
-                unset($invoiceItem['recurring_invoice_id']);
-            }
-
-            $item = $invoice->items()->create($invoiceItem);
-
-            if (array_key_exists('taxes', $invoiceItem) && $invoiceItem['taxes']) {
-                foreach ($invoiceItem['taxes'] as $tax) {
-                    $tax['company_id'] = $invoice->company_id;
-                    $tax['exchange_rate'] = $invoice->exchange_rate;
-                    $tax['base_amount'] = $tax['amount'] * $exchange_rate;
-                    $tax['currency_id'] = $invoice->currency_id;
-
-                    if (gettype($tax['amount']) !== 'NULL') {
-                        if (array_key_exists('recurring_invoice_id', $invoiceItem)) {
-                            unset($invoiceItem['recurring_invoice_id']);
-                        }
-
-                        $item->taxes()->create($tax);
-                    }
-                }
-            }
-
-            if (array_key_exists('custom_fields', $invoiceItem) && $invoiceItem['custom_fields']) {
-                $item->addCustomFields($invoiceItem['custom_fields']);
-            }
-        }
-    }
-
-    public static function createTaxes($invoice, $taxes)
-    {
-
-        $exchange_rate = $invoice->exchange_rate;
-
-        foreach ($taxes as $tax) {
-            $tax['company_id'] = $invoice->company_id;
-            $tax['exchange_rate'] = $invoice->exchange_rate;
-            $tax['base_amount'] = $tax['amount'] * $exchange_rate;
-            $tax['currency_id'] = $invoice->currency_id;
-
-            if (gettype($tax['amount']) !== 'NULL') {
-                if (array_key_exists('recurring_invoice_id', $tax)) {
-                    unset($tax['recurring_invoice_id']);
-                }
-
-                $invoice->taxes()->create($tax);
-            }
-        }
     }
 
     public function getPDFData()
@@ -730,6 +320,385 @@ class Invoice extends Model implements HasMedia
         }
     }
 
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function emailLogs(): MorphMany
+    {
+        return $this->morphMany('App\Models\EmailLog', 'mailable');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(\App\Models\InvoiceItem::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
+    public function recurringInvoice(): BelongsTo
+    {
+        return $this->belongsTo(RecurringInvoice::class);
+    }
+
+    public function taxes(): HasMany
+    {
+        return $this->hasMany(Tax::class);
+    }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getAllowEditAttribute()
+    {
+        $retrospective_edit = CompanySetting::getSetting('retrospective_edits', $this->company_id);
+
+        $allowed = true;
+
+        $status = [
+            self::STATUS_DRAFT,
+            self::STATUS_SENT,
+            self::STATUS_VIEWED,
+            self::STATUS_COMPLETED,
+        ];
+
+        if ($retrospective_edit == 'disable_on_invoice_sent' && (in_array($this->status, $status)) && ($this->paid_status === Invoice::STATUS_PARTIALLY_PAID || $this->paid_status === Invoice::STATUS_PAID)) {
+            $allowed = false;
+        } elseif ($retrospective_edit == 'disable_on_invoice_partial_paid' && ($this->paid_status === Invoice::STATUS_PARTIALLY_PAID || $this->paid_status === Invoice::STATUS_PAID)) {
+            $allowed = false;
+        } elseif ($retrospective_edit == 'disable_on_invoice_paid' && $this->paid_status === Invoice::STATUS_PAID) {
+            $allowed = false;
+        }
+
+        return $allowed;
+    }
+
+    public function getFormattedCreatedAtAttribute($value)
+    {
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
+        return Carbon::parse($this->created_at)->format($dateFormat);
+    }
+
+    public function getFormattedDueDateAttribute($value)
+    {
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
+        return Carbon::parse($this->due_date)->translatedFormat($dateFormat);
+    }
+
+    public function getFormattedInvoiceDateAttribute($value)
+    {
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+        $timeFormat = CompanySetting::getSetting('carbon_time_format', $this->company_id);
+        $invoiceTimeEnabled = CompanySetting::getSetting('invoice_use_time', $this->company_id);
+
+        if ($invoiceTimeEnabled === 'YES') {
+            $dateFormat .= ' '.$timeFormat;
+        }
+
+        return Carbon::parse($this->invoice_date)->translatedFormat($dateFormat);
+    }
+
+    public function getFormattedNotesAttribute($value)
+    {
+        return $this->getNotes();
+    }
+
+    public function getInvoicePdfUrlAttribute()
+    {
+        return url('/invoices/pdf/'.$this->unique_hash);
+    }
+
+    public function getPaymentModuleEnabledAttribute()
+    {
+        if (Module::has('Payments')) {
+            return Module::isEnabled('Payments');
+        }
+
+        return false;
+    }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeApplyFilters($query, array $filters)
+    {
+        $filters = collect($filters)->filter()->all();
+
+        return $query->when($filters['search'] ?? null, function ($query, $search) {
+            $query->whereSearch($search);
+        })->when($filters['status'] ?? null, function ($query, $status) {
+            match ($status) {
+                self::STATUS_UNPAID, self::STATUS_PARTIALLY_PAID, self::STATUS_PAID => $query->wherePaidStatus($status),
+                'DUE' => $query->whereDueStatus($status),
+                default => $query->whereStatus($status),
+            };
+        })->when($filters['paid_status'] ?? null, function ($query, $paidStatus) {
+            $query->wherePaidStatus($paidStatus);
+        })->when($filters['invoice_id'] ?? null, function ($query, $invoiceId) {
+            $query->whereInvoice($invoiceId);
+        })->when($filters['invoice_number'] ?? null, function ($query, $invoiceNumber) {
+            $query->whereInvoiceNumber($invoiceNumber);
+        })->when(($filters['from_date'] ?? null) && ($filters['to_date'] ?? null), function ($query) use ($filters) {
+            $start = Carbon::parse($filters['from_date']);
+            $end = Carbon::parse($filters['to_date']);
+            $query->invoicesBetween($start, $end);
+        })->when($filters['customer_id'] ?? null, function ($query, $customerId) {
+            $query->where('customer_id', $customerId);
+        })->when($filters['orderByField'] ?? null, function ($query, $orderByField) use ($filters) {
+            $orderBy = $filters['orderBy'] ?? 'desc';
+            $query->orderBy($orderByField, $orderBy);
+        }, function ($query) {
+            $query->orderBy('sequence_number', 'desc');
+        });
+    }
+
+    public function scopeInvoicesBetween($query, $start, $end)
+    {
+        return $query->whereBetween(
+            'invoices.invoice_date',
+            [$start->format('Y-m-d'), $end->format('Y-m-d')]
+        );
+    }
+
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
+    public function scopeWhereDueStatus($query, $status)
+    {
+        return $query->whereIn('invoices.paid_status', [
+            self::STATUS_UNPAID,
+            self::STATUS_PARTIALLY_PAID,
+        ]);
+    }
+
+    public function scopeWhereCompany($query)
+    {
+        $query->where('invoices.company_id', request()->header('company'));
+    }
+
+    public function scopeWhereCompanyId($query, $company)
+    {
+        $query->where('invoices.company_id', $company);
+    }
+
+    public function scopeWhereCustomer($query, $customer_id)
+    {
+        $query->where('invoices.customer_id', $customer_id);
+    }
+
+    public function scopeWhereInvoice($query, $invoice_id)
+    {
+        $query->orWhere('id', $invoice_id);
+    }
+
+    public function scopeWhereInvoiceNumber($query, $invoiceNumber)
+    {
+        return $query->where('invoices.invoice_number', 'LIKE', '%'.$invoiceNumber.'%');
+    }
+
+    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    {
+        $query->orderBy($orderByField, $orderBy);
+    }
+
+    public function scopeWherePaidStatus($query, $status)
+    {
+        return $query->where('invoices.paid_status', $status);
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        foreach (explode(' ', $search) as $term) {
+            $query->whereHas('customer', function ($query) use ($term) {
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
+            });
+        }
+    }
+
+    public function scopeWhereStatus($query, $status)
+    {
+        return $query->where('invoices.status', $status);
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    public static function createInvoice($request)
+    {
+        $data = $request->getInvoicePayload();
+
+        if ($request->has('invoiceSend')) {
+            $data['status'] = Invoice::STATUS_SENT;
+        }
+
+        $invoice = Invoice::create($data);
+
+        $serial = (new SerialNumberFormatter)
+            ->setModel($invoice)
+            ->setCompany($invoice->company_id)
+            ->setCustomer($invoice->customer_id)
+            ->setNextNumbers();
+
+        $invoice->sequence_number = $serial->nextSequenceNumber;
+        $invoice->customer_sequence_number = $serial->nextCustomerSequenceNumber;
+        $invoice->unique_hash = Hashids::connection(Invoice::class)->encode($invoice->id);
+        $invoice->save();
+
+        self::createItems($invoice, $request->items);
+
+        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
+
+        if ((string) $data['currency_id'] !== $company_currency) {
+            ExchangeRateLog::addExchangeRateLog($invoice);
+        }
+
+        if ($request->has('taxes') && (! empty($request->taxes))) {
+            self::createTaxes($invoice, $request->taxes);
+        }
+
+        if ($request->customFields) {
+            $invoice->addCustomFields($request->customFields);
+        }
+
+        $invoice = Invoice::with([
+            'items',
+            'items.fields',
+            'items.fields.customField',
+            'customer',
+            'taxes',
+        ])
+            ->find($invoice->id);
+
+        return $invoice;
+    }
+
+    public static function createItems($invoice, $invoiceItems)
+    {
+        $exchange_rate = $invoice->exchange_rate;
+
+        foreach ($invoiceItems as $invoiceItem) {
+            $invoiceItem['company_id'] = $invoice->company_id;
+            $invoiceItem['exchange_rate'] = $exchange_rate;
+            $invoiceItem['base_price'] = $invoiceItem['price'] * $exchange_rate;
+            $invoiceItem['base_discount_val'] = $invoiceItem['discount_val'] * $exchange_rate;
+            $invoiceItem['base_tax'] = $invoiceItem['tax'] * $exchange_rate;
+            $invoiceItem['base_total'] = $invoiceItem['total'] * $exchange_rate;
+
+            if (array_key_exists('recurring_invoice_id', $invoiceItem)) {
+                unset($invoiceItem['recurring_invoice_id']);
+            }
+
+            $item = $invoice->items()->create($invoiceItem);
+
+            if (array_key_exists('taxes', $invoiceItem) && $invoiceItem['taxes']) {
+                foreach ($invoiceItem['taxes'] as $tax) {
+                    $tax['company_id'] = $invoice->company_id;
+                    $tax['exchange_rate'] = $invoice->exchange_rate;
+                    $tax['base_amount'] = $tax['amount'] * $exchange_rate;
+                    $tax['currency_id'] = $invoice->currency_id;
+
+                    if (gettype($tax['amount']) !== 'NULL') {
+                        if (array_key_exists('recurring_invoice_id', $invoiceItem)) {
+                            unset($invoiceItem['recurring_invoice_id']);
+                        }
+
+                        $item->taxes()->create($tax);
+                    }
+                }
+            }
+
+            if (array_key_exists('custom_fields', $invoiceItem) && $invoiceItem['custom_fields']) {
+                $item->addCustomFields($invoiceItem['custom_fields']);
+            }
+        }
+    }
+
+    public static function createTaxes($invoice, $taxes)
+    {
+
+        $exchange_rate = $invoice->exchange_rate;
+
+        foreach ($taxes as $tax) {
+            $tax['company_id'] = $invoice->company_id;
+            $tax['exchange_rate'] = $invoice->exchange_rate;
+            $tax['base_amount'] = $tax['amount'] * $exchange_rate;
+            $tax['currency_id'] = $invoice->currency_id;
+
+            if (gettype($tax['amount']) !== 'NULL') {
+                if (array_key_exists('recurring_invoice_id', $tax)) {
+                    unset($tax['recurring_invoice_id']);
+                }
+
+                $invoice->taxes()->create($tax);
+            }
+        }
+    }
+
     public static function deleteInvoices($ids)
     {
         foreach ($ids as $id) {
@@ -744,4 +713,84 @@ class Invoice extends Model implements HasMedia
 
         return true;
     }
+
+    public function updateInvoice($request)
+    {
+        $serial = (new SerialNumberFormatter)
+            ->setModel($this)
+            ->setCompany($this->company_id)
+            ->setCustomer($request->customer_id)
+            ->setModelObject($this->id)
+            ->setNextNumbers();
+
+        $data = $request->getInvoicePayload();
+        $oldTotal = $this->total;
+
+        $total_paid_amount = $this->total - $this->due_amount;
+
+        if ($total_paid_amount > 0 && $this->customer_id !== $request->customer_id) {
+            return 'customer_cannot_be_changed_after_payment_is_added';
+        }
+
+        if ($request->total >= 0 && $request->total < $total_paid_amount) {
+            return 'total_invoice_amount_must_be_more_than_paid_amount';
+        }
+
+        if ($oldTotal != $request->total) {
+            $oldTotal = (int) round($request->total) - (int) $oldTotal;
+        } else {
+            $oldTotal = 0;
+        }
+
+        $data['due_amount'] = ($this->due_amount + $oldTotal);
+        $data['base_due_amount'] = $data['due_amount'] * $data['exchange_rate'];
+        $data['customer_sequence_number'] = $serial->nextCustomerSequenceNumber;
+
+        $this->update($data);
+
+        $statusData = $this->getInvoiceStatusByAmount($data['due_amount']);
+        if (! empty($statusData)) {
+            $this->update($statusData);
+        }
+
+        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
+
+        if ((string) $data['currency_id'] !== $company_currency) {
+            ExchangeRateLog::addExchangeRateLog($this);
+        }
+
+        $this->items->map(function ($item) {
+            $fields = $item->fields()->get();
+
+            $fields->map(function ($field) {
+                $field->delete();
+            });
+        });
+
+        $this->items()->delete();
+        $this->taxes()->delete();
+
+        self::createItems($this, $request->items);
+
+        if ($request->has('taxes') && (! empty($request->taxes))) {
+            self::createTaxes($this, $request->taxes);
+        }
+
+        if ($request->customFields) {
+            $this->updateCustomFields($request->customFields);
+        }
+
+        $invoice = Invoice::with([
+            'items',
+            'items.fields',
+            'items.fields.customField',
+            'customer',
+            'taxes',
+        ])
+            ->find($this->id);
+
+        return $invoice;
+    }
+
+    #endregion
 }

@@ -4,24 +4,24 @@ namespace App\Models;
 
 use App\Jobs\GeneratePaymentPdfJob;
 use App\Mail\SendPaymentMail;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use App\Services\SerialNumberFormatter;
 use App\Traits\GeneratesPdfTrait;
 use App\Traits\HasCustomFieldsTrait;
 use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Vinkla\Hashids\Facades\Hashids;
 
-class Payment extends Model implements HasMedia
+class Payment extends BaseModel implements HasMedia
 {
+    use BelongsToFranchise;
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
-    use HasFactory;
     use InteractsWithMedia;
 
     public const PAYMENT_MODE_CHECK = 'CHECK';
@@ -52,6 +52,13 @@ class Payment extends Model implements HasMedia
         ];
     }
 
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
     protected static function booted()
     {
         static::created(function ($payment) {
@@ -61,72 +68,6 @@ class Payment extends Model implements HasMedia
         static::updated(function ($payment) {
             GeneratePaymentPdfJob::dispatch($payment, true);
         });
-    }
-
-    public function setSettingsAttribute($value)
-    {
-        if ($value) {
-            $this->attributes['settings'] = json_encode($value);
-        }
-    }
-
-    public function getFormattedCreatedAtAttribute($value)
-    {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
-    }
-
-    public function getFormattedPaymentDateAttribute($value)
-    {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
-
-        return Carbon::parse($this->payment_date)->translatedFormat($dateFormat);
-    }
-
-    public function getPaymentPdfUrlAttribute()
-    {
-        return url('/payments/pdf/'.$this->unique_hash);
-    }
-
-    public function transaction(): BelongsTo
-    {
-        return $this->belongsTo(Transaction::class);
-    }
-
-    public function emailLogs(): MorphMany
-    {
-        return $this->morphMany('App\Models\EmailLog', 'mailable');
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class, 'customer_id');
-    }
-
-    public function company(): BelongsTo
-    {
-        return $this->belongsTo(Company::class);
-    }
-
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\User::class, 'creator_id');
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class);
-    }
-
-    public function paymentMethod(): BelongsTo
-    {
-        return $this->belongsTo(PaymentMethod::class);
     }
 
     public function sendPaymentData($data)
@@ -156,222 +97,6 @@ class Payment extends Model implements HasMedia
         return [
             'success' => true,
         ];
-    }
-
-    public static function createPayment($request)
-    {
-        $data = $request->getPaymentPayload();
-
-        if ($request->invoice_id) {
-            $invoice = Invoice::find($request->invoice_id);
-            $invoice->subtractInvoicePayment($request->amount);
-        }
-
-        $payment = Payment::create($data);
-        $payment->unique_hash = Hashids::connection(Payment::class)->encode($payment->id);
-
-        $serial = (new SerialNumberFormatter)
-            ->setModel($payment)
-            ->setCompany($payment->company_id)
-            ->setCustomer($payment->customer_id)
-            ->setNextNumbers();
-
-        $payment->sequence_number = $serial->nextSequenceNumber;
-        $payment->customer_sequence_number = $serial->nextCustomerSequenceNumber;
-        $payment->save();
-
-        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
-
-        if ((string) $payment['currency_id'] !== $company_currency) {
-            ExchangeRateLog::addExchangeRateLog($payment);
-        }
-
-        $customFields = $request->customFields;
-
-        if ($customFields) {
-            $payment->addCustomFields($customFields);
-        }
-
-        $payment = Payment::with([
-            'customer',
-            'invoice',
-            'paymentMethod',
-            'fields',
-        ])->find($payment->id);
-
-        return $payment;
-    }
-
-    public function updatePayment($request)
-    {
-        $data = $request->getPaymentPayload();
-
-        if ($request->invoice_id && (! $this->invoice_id || $this->invoice_id !== $request->invoice_id)) {
-            $invoice = Invoice::find($request->invoice_id);
-            $invoice->subtractInvoicePayment($request->amount);
-        }
-
-        if ($this->invoice_id && (! $request->invoice_id || $this->invoice_id !== $request->invoice_id)) {
-            $invoice = Invoice::find($this->invoice_id);
-            $invoice->addInvoicePayment($this->amount);
-        }
-
-        if ($this->invoice_id && $this->invoice_id === $request->invoice_id && $request->amount !== $this->amount) {
-            $invoice = Invoice::find($this->invoice_id);
-            $invoice->addInvoicePayment($this->amount);
-            $invoice->subtractInvoicePayment($request->amount);
-        }
-
-        $serial = (new SerialNumberFormatter)
-            ->setModel($this)
-            ->setCompany($this->company_id)
-            ->setCustomer($request->customer_id)
-            ->setModelObject($this->id)
-            ->setNextNumbers();
-
-        $data['customer_sequence_number'] = $serial->nextCustomerSequenceNumber;
-        $this->update($data);
-
-        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
-
-        if ((string) $data['currency_id'] !== $company_currency) {
-            ExchangeRateLog::addExchangeRateLog($this);
-        }
-
-        $customFields = $request->customFields;
-
-        if ($customFields) {
-            $this->updateCustomFields($customFields);
-        }
-
-        $payment = Payment::with([
-            'customer',
-            'invoice',
-            'paymentMethod',
-        ])
-            ->find($this->id);
-
-        return $payment;
-    }
-
-    public static function deletePayments($ids)
-    {
-        foreach ($ids as $id) {
-            $payment = Payment::find($id);
-
-            if ($payment->invoice_id != null) {
-                $invoice = Invoice::find($payment->invoice_id);
-                $invoice->due_amount = ((int) $invoice->due_amount + (int) $payment->amount);
-
-                if ($invoice->due_amount == $invoice->total) {
-                    $invoice->paid_status = Invoice::STATUS_UNPAID;
-                } else {
-                    $invoice->paid_status = Invoice::STATUS_PARTIALLY_PAID;
-                }
-
-                $invoice->status = $invoice->getPreviousStatus();
-                $invoice->save();
-            }
-
-            $payment->delete();
-        }
-
-        return true;
-    }
-
-    public function scopeWhereSearch($query, $search)
-    {
-        foreach (explode(' ', $search) as $term) {
-            $query->whereHas('customer', function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
-            });
-        }
-    }
-
-    public function scopePaymentNumber($query, $paymentNumber)
-    {
-        return $query->where('payments.payment_number', 'LIKE', '%'.$paymentNumber.'%');
-    }
-
-    public function scopePaymentMethod($query, $paymentMethodId)
-    {
-        return $query->where('payments.payment_method_id', $paymentMethodId);
-    }
-
-    public function scopePaginateData($query, $limit)
-    {
-        if ($limit == 'all') {
-            return $query->get();
-        }
-
-        return $query->paginate($limit);
-    }
-
-    public function scopeApplyFilters($query, array $filters)
-    {
-        $filters = collect($filters);
-
-        if ($filters->get('search')) {
-            $query->whereSearch($filters->get('search'));
-        }
-
-        if ($filters->get('payment_number')) {
-            $query->paymentNumber($filters->get('payment_number'));
-        }
-
-        if ($filters->get('payment_id')) {
-            $query->wherePayment($filters->get('payment_id'));
-        }
-
-        if ($filters->get('payment_method_id')) {
-            $query->paymentMethod($filters->get('payment_method_id'));
-        }
-
-        if ($filters->get('customer_id')) {
-            $query->whereCustomer($filters->get('customer_id'));
-        }
-
-        if ($filters->get('from_date') && $filters->get('to_date')) {
-            $start = Carbon::createFromFormat('Y-m-d', $filters->get('from_date'));
-            $end = Carbon::createFromFormat('Y-m-d', $filters->get('to_date'));
-            $query->paymentsBetween($start, $end);
-        }
-
-        if ($filters->get('orderByField') || $filters->get('orderBy')) {
-            $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'sequence_number';
-            $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'desc';
-            $query->whereOrder($field, $orderBy);
-        }
-    }
-
-    public function scopePaymentsBetween($query, $start, $end)
-    {
-        return $query->whereBetween(
-            'payments.payment_date',
-            [$start->format('Y-m-d'), $end->format('Y-m-d')]
-        );
-    }
-
-    public function scopeWhereOrder($query, $orderByField, $orderBy)
-    {
-        $query->orderBy($orderByField, $orderBy);
-    }
-
-    public function scopeWherePayment($query, $payment_id)
-    {
-        $query->orWhere('id', $payment_id);
-    }
-
-    public function scopeWhereCompany($query)
-    {
-        $query->where('payments.company_id', request()->header('company'));
-    }
-
-    public function scopeWhereCustomer($query, $customer_id)
-    {
-        $query->where('payments.customer_id', $customer_id);
     }
 
     public function getPDFData()
@@ -455,6 +180,276 @@ class Payment extends Model implements HasMedia
         ];
     }
 
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'creator_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function emailLogs(): MorphMany
+    {
+        return $this->morphMany('App\Models\EmailLog', 'mailable');
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
+    public function paymentMethod(): BelongsTo
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function transaction(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class);
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getFormattedCreatedAtAttribute($value)
+    {
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
+        return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
+    }
+
+    public function getFormattedPaymentDateAttribute($value)
+    {
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->company_id);
+
+        return Carbon::parse($this->payment_date)->translatedFormat($dateFormat);
+    }
+
+    public function getPaymentPdfUrlAttribute()
+    {
+        return url('/payments/pdf/'.$this->unique_hash);
+    }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    public function setSettingsAttribute($value)
+    {
+        if ($value) {
+            $this->attributes['settings'] = json_encode($value);
+        }
+    }
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeApplyFilters($query, array $filters)
+    {
+        $filters = collect($filters);
+
+        if ($filters->get('search')) {
+            $query->whereSearch($filters->get('search'));
+        }
+
+        if ($filters->get('payment_number')) {
+            $query->paymentNumber($filters->get('payment_number'));
+        }
+
+        if ($filters->get('payment_id')) {
+            $query->wherePayment($filters->get('payment_id'));
+        }
+
+        if ($filters->get('payment_method_id')) {
+            $query->paymentMethod($filters->get('payment_method_id'));
+        }
+
+        if ($filters->get('customer_id')) {
+            $query->whereCustomer($filters->get('customer_id'));
+        }
+
+        if ($filters->get('from_date') && $filters->get('to_date')) {
+            $start = Carbon::createFromFormat('Y-m-d', $filters->get('from_date'));
+            $end = Carbon::createFromFormat('Y-m-d', $filters->get('to_date'));
+            $query->paymentsBetween($start, $end);
+        }
+
+        if ($filters->get('orderByField') || $filters->get('orderBy')) {
+            $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'sequence_number';
+            $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'desc';
+            $query->whereOrder($field, $orderBy);
+        }
+    }
+
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
+    public function scopePaymentMethod($query, $paymentMethodId)
+    {
+        return $query->where('payments.payment_method_id', $paymentMethodId);
+    }
+
+    public function scopePaymentNumber($query, $paymentNumber)
+    {
+        return $query->where('payments.payment_number', 'LIKE', '%'.$paymentNumber.'%');
+    }
+
+    public function scopePaymentsBetween($query, $start, $end)
+    {
+        return $query->whereBetween(
+            'payments.payment_date',
+            [$start->format('Y-m-d'), $end->format('Y-m-d')]
+        );
+    }
+
+    public function scopeWhereCompany($query)
+    {
+        $query->where('payments.company_id', request()->header('company'));
+    }
+
+    public function scopeWhereCustomer($query, $customer_id)
+    {
+        $query->where('payments.customer_id', $customer_id);
+    }
+
+    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    {
+        $query->orderBy($orderByField, $orderBy);
+    }
+
+    public function scopeWherePayment($query, $payment_id)
+    {
+        $query->orWhere('id', $payment_id);
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        foreach (explode(' ', $search) as $term) {
+            $query->whereHas('customer', function ($query) use ($term) {
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('contact_name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('company_name', 'LIKE', '%'.$term.'%');
+            });
+        }
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    public static function createPayment($request)
+    {
+        $data = $request->getPaymentPayload();
+
+        if ($request->invoice_id) {
+            $invoice = Invoice::find($request->invoice_id);
+            $invoice->subtractInvoicePayment($request->amount);
+        }
+
+        $payment = Payment::create($data);
+        $payment->unique_hash = Hashids::connection(Payment::class)->encode($payment->id);
+
+        $serial = (new SerialNumberFormatter)
+            ->setModel($payment)
+            ->setCompany($payment->company_id)
+            ->setCustomer($payment->customer_id)
+            ->setNextNumbers();
+
+        $payment->sequence_number = $serial->nextSequenceNumber;
+        $payment->customer_sequence_number = $serial->nextCustomerSequenceNumber;
+        $payment->save();
+
+        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
+
+        if ((string) $payment['currency_id'] !== $company_currency) {
+            ExchangeRateLog::addExchangeRateLog($payment);
+        }
+
+        $customFields = $request->customFields;
+
+        if ($customFields) {
+            $payment->addCustomFields($customFields);
+        }
+
+        $payment = Payment::with([
+            'customer',
+            'invoice',
+            'paymentMethod',
+            'fields',
+        ])->find($payment->id);
+
+        return $payment;
+    }
+
+    public static function deletePayments($ids)
+    {
+        foreach ($ids as $id) {
+            $payment = Payment::find($id);
+
+            if ($payment->invoice_id != null) {
+                $invoice = Invoice::find($payment->invoice_id);
+                $invoice->due_amount = ((int) $invoice->due_amount + (int) $payment->amount);
+
+                if ($invoice->due_amount == $invoice->total) {
+                    $invoice->paid_status = Invoice::STATUS_UNPAID;
+                } else {
+                    $invoice->paid_status = Invoice::STATUS_PARTIALLY_PAID;
+                }
+
+                $invoice->status = $invoice->getPreviousStatus();
+                $invoice->save();
+            }
+
+            $payment->delete();
+        }
+
+        return true;
+    }
+
     public static function generatePayment($transaction)
     {
         $invoice = Invoice::find($transaction->invoice_id);
@@ -487,4 +482,58 @@ class Payment extends Model implements HasMedia
 
         return $payment;
     }
+
+    public function updatePayment($request)
+    {
+        $data = $request->getPaymentPayload();
+
+        if ($request->invoice_id && (! $this->invoice_id || $this->invoice_id !== $request->invoice_id)) {
+            $invoice = Invoice::find($request->invoice_id);
+            $invoice->subtractInvoicePayment($request->amount);
+        }
+
+        if ($this->invoice_id && (! $request->invoice_id || $this->invoice_id !== $request->invoice_id)) {
+            $invoice = Invoice::find($this->invoice_id);
+            $invoice->addInvoicePayment($this->amount);
+        }
+
+        if ($this->invoice_id && $this->invoice_id === $request->invoice_id && $request->amount !== $this->amount) {
+            $invoice = Invoice::find($this->invoice_id);
+            $invoice->addInvoicePayment($this->amount);
+            $invoice->subtractInvoicePayment($request->amount);
+        }
+
+        $serial = (new SerialNumberFormatter)
+            ->setModel($this)
+            ->setCompany($this->company_id)
+            ->setCustomer($request->customer_id)
+            ->setModelObject($this->id)
+            ->setNextNumbers();
+
+        $data['customer_sequence_number'] = $serial->nextCustomerSequenceNumber;
+        $this->update($data);
+
+        $company_currency = CompanySetting::getSetting('currency', $request->header('company'));
+
+        if ((string) $data['currency_id'] !== $company_currency) {
+            ExchangeRateLog::addExchangeRateLog($this);
+        }
+
+        $customFields = $request->customFields;
+
+        if ($customFields) {
+            $this->updateCustomFields($customFields);
+        }
+
+        $payment = Payment::with([
+            'customer',
+            'invoice',
+            'paymentMethod',
+        ])
+            ->find($this->id);
+
+        return $payment;
+    }
+
+    #endregion
 }
