@@ -1,184 +1,193 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Http\Requests\EstimatesRequest;
 use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Tax;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class EstimateTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('estimate has many estimate items', function () {
-    $estimate = Estimate::factory()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $estimate = Estimate::factory()->hasItems(5)->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertCount(5, $estimate->items);
+    #[Test]
+    public function it_has_many_estimate_items(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->hasItems(5)->create();
 
-    $this->assertTrue($estimate->items()->exists());
-});
+        // Act
+        $itemCount = $estimate->items()->count();
 
-test('estimate belongs to customer', function () {
-    $estimate = Estimate::factory()->forCustomer()->create();
+        // Assert
+        $this->assertCount(5, $estimate->items);
+        $this->assertEquals(5, $itemCount);
+        $this->assertTrue($estimate->items()->exists());
+    }
 
-    $this->assertTrue($estimate->customer()->exists());
-});
+    #[Test]
+    public function it_belongs_to_a_customer(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->forCustomer()->create();
 
-test('estimate has many taxes', function () {
-    $estimate = Estimate::factory()->hasTaxes(5)->create();
+        // Act & Assert
+        $this->assertTrue($estimate->customer()->exists());
+    }
 
-    $this->assertCount(5, $estimate->taxes);
+    #[Test]
+    public function it_has_many_taxes(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->hasTaxes(5)->create();
 
-    $this->assertTrue($estimate->taxes()->exists());
-});
+        // Act
+        $taxCount = $estimate->taxes()->count();
 
-test('create estimate', function () {
-    $estimate = Estimate::factory()->raw();
+        // Assert
+        $this->assertCount(5, $estimate->taxes);
+        $this->assertEquals(5, $taxCount);
+        $this->assertTrue($estimate->taxes()->exists());
+    }
 
-    $item = EstimateItem::factory()->raw();
+    #[Test]
+    public function it_creates_an_estimate_with_items_and_taxes(): void
+    {
+        // Arrange
+        $estimateData = Estimate::factory()->raw();
+        $item = EstimateItem::factory()->raw();
 
-    $estimate['items'] = [];
-    array_push($estimate['items'], $item);
+        $estimateData['items'] = [$item];
+        $estimateData['taxes'] = [Tax::factory()->raw()];
 
-    $estimate['taxes'] = [];
-    array_push($estimate['taxes'], Tax::factory()->raw());
+        $request = new EstimatesRequest;
+        $request->replace($estimateData);
 
-    $request = new EstimatesRequest;
+        // Act
+        $response = Estimate::createEstimate($request);
 
-    $request->replace($estimate);
+        // Assert
+        $this->assertDatabaseHas('estimate_items', [
+            'estimate_id' => $response->id,
+            'name' => $item['name'],
+            'description' => $item['description'],
+            'price' => $item['price'],
+            'quantity' => $item['quantity'],
+            'total' => $item['total'],
+        ]);
+        $this->assertDatabaseHas('estimates', [
+            'estimate_number' => $estimateData['estimate_number'],
+            'customer_id' => $estimateData['customer_id'],
+            'template_name' => $estimateData['template_name'],
+            'sub_total' => $estimateData['sub_total'],
+            'total' => $estimateData['total'],
+            'discount' => $estimateData['discount'],
+            'discount_type' => $estimateData['discount_type'],
+            'discount_val' => $estimateData['discount_val'],
+            'tax' => $estimateData['tax'],
+            'notes' => $estimateData['notes'],
+        ]);
+    }
 
-    $response = Estimate::createEstimate($request);
+    #[Test]
+    public function it_updates_an_estimate_with_new_items_and_taxes(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->hasItems()->hasTaxes()->create();
+        $newEstimateData = Estimate::factory()->raw();
+        $item = EstimateItem::factory()->raw(['estimate_id' => $estimate->id]);
 
-    $this->assertDatabaseHas('estimate_items', [
-        'estimate_id' => $response->id,
-        'name' => $item['name'],
-        'description' => $item['description'],
-        'price' => $item['price'],
-        'quantity' => $item['quantity'],
-        'total' => $item['total'],
-    ]);
+        $newEstimateData['items'] = [$item];
+        $newEstimateData['taxes'] = [Tax::factory()->raw()];
 
-    $this->assertDatabaseHas('estimates', [
-        'estimate_number' => $estimate['estimate_number'],
-        'customer_id' => $estimate['customer_id'],
-        'template_name' => $estimate['template_name'],
-        'sub_total' => $estimate['sub_total'],
-        'total' => $estimate['total'],
-        'discount' => $estimate['discount'],
-        'discount_type' => $estimate['discount_type'],
-        'discount_val' => $estimate['discount_val'],
-        'tax' => $estimate['tax'],
-        'notes' => $estimate['notes'],
-    ]);
-});
+        $request = new EstimatesRequest;
+        $request->replace($newEstimateData);
 
-test('update estimate', function () {
-    $estimate = Estimate::factory()->hasItems()->hasTaxes()->create();
+        // Act
+        $estimate->updateEstimate($request);
 
-    $newEstimate = Estimate::factory()->raw();
+        // Assert
+        $this->assertDatabaseHas('estimate_items', [
+            'estimate_id' => $estimate->id,
+            'name' => $item['name'],
+            'description' => $item['description'],
+            'price' => $item['price'],
+            'total' => $item['total'],
+            'quantity' => $item['quantity'],
+        ]);
+        $this->assertDatabaseHas('estimates', [
+            'estimate_number' => $newEstimateData['estimate_number'],
+            'customer_id' => $newEstimateData['customer_id'],
+            'template_name' => $newEstimateData['template_name'],
+            'sub_total' => $newEstimateData['sub_total'],
+            'total' => $newEstimateData['total'],
+            'discount' => $newEstimateData['discount'],
+            'discount_type' => $newEstimateData['discount_type'],
+            'discount_val' => $newEstimateData['discount_val'],
+            'tax' => $newEstimateData['tax'],
+            'notes' => $newEstimateData['notes'],
+        ]);
+    }
 
-    $item = EstimateItem::factory()->raw([
-        'estimate_id' => $estimate->id,
-    ]);
+    #[Test]
+    public function it_creates_items_for_an_estimate(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->create();
+        $item = EstimateItem::factory()->raw(['invoice_id' => $estimate->id]);
+        $request = new Request;
+        $request->replace(['items' => [$item]]);
 
-    $newEstimate['items'] = [];
-    $newEstimate['taxes'] = [];
+        // Act
+        Estimate::createItems($estimate, $request, $estimate->exchange_rate);
 
-    array_push($newEstimate['items'], $item);
-    array_push($newEstimate['taxes'], Tax::factory()->raw());
+        // Assert
+        $this->assertDatabaseHas('estimate_items', [
+            'estimate_id' => $estimate->id,
+            'description' => $item['description'],
+            'price' => $item['price'],
+            'tax' => $item['tax'],
+            'quantity' => $item['quantity'],
+            'total' => $item['total'],
+        ]);
+        $this->assertCount(1, $estimate->items);
+    }
 
-    $request = new EstimatesRequest;
+    #[Test]
+    public function it_creates_taxes_for_an_estimate(): void
+    {
+        // Arrange
+        $estimate = Estimate::factory()->create();
+        $taxes = [
+            Tax::factory()->raw(['estimate_id' => $estimate->id]),
+            Tax::factory()->raw(['estimate_id' => $estimate->id]),
+        ];
+        $request = new Request;
+        $request->replace(['taxes' => $taxes]);
 
-    $request->replace($newEstimate);
+        // Act
+        Estimate::createTaxes($estimate, $request, $estimate->exchange_rate);
 
-    $estimate_number = explode('-', $newEstimate['estimate_number']);
-
-    $number_attributes['estimate_number'] = $estimate_number[0].'-'.sprintf('%06d', intval($estimate_number[1]));
-
-    $estimate->updateEstimate($request);
-
-    $this->assertDatabaseHas('estimate_items', [
-        'estimate_id' => $estimate->id,
-        'name' => $item['name'],
-        'description' => $item['description'],
-        'price' => $item['price'],
-        'total' => $item['total'],
-        'quantity' => $item['quantity'],
-    ]);
-
-    $this->assertDatabaseHas('estimates', [
-        'estimate_number' => $newEstimate['estimate_number'],
-        'customer_id' => $newEstimate['customer_id'],
-        'template_name' => $newEstimate['template_name'],
-        'sub_total' => $newEstimate['sub_total'],
-        'total' => $newEstimate['total'],
-        'discount' => $newEstimate['discount'],
-        'discount_type' => $newEstimate['discount_type'],
-        'discount_val' => $newEstimate['discount_val'],
-        'tax' => $newEstimate['tax'],
-        'notes' => $newEstimate['notes'],
-    ]);
-});
-
-test('create items', function () {
-    $estimate = Estimate::factory()->create();
-
-    $items = [];
-
-    $item = EstimateItem::factory()->raw([
-        'invoice_id' => $estimate->id,
-    ]);
-
-    array_push($items, $item);
-
-    $request = new Request;
-
-    $request->replace(['items' => $items]);
-
-    Estimate::createItems($estimate, $request, $estimate->exchange_rate);
-
-    $this->assertDatabaseHas('estimate_items', [
-        'estimate_id' => $estimate->id,
-        'description' => $item['description'],
-        'price' => $item['price'],
-        'tax' => $item['tax'],
-        'quantity' => $item['quantity'],
-        'total' => $item['total'],
-    ]);
-
-    $this->assertCount(1, $estimate->items);
-});
-
-test('create taxes', function () {
-    $estimate = Estimate::factory()->create();
-    $taxes = [];
-
-    $tax1 = Tax::factory()->raw([
-        'estimate_id' => $estimate->id,
-    ]);
-
-    $tax2 = Tax::factory()->raw([
-        'estimate_id' => $estimate->id,
-    ]);
-
-    array_push($taxes, $tax1);
-    array_push($taxes, $tax2);
-
-    $request = new Request;
-
-    $request->replace(['taxes' => $taxes]);
-
-    Estimate::createTaxes($estimate, $request, $estimate->exchange_rate);
-
-    $this->assertCount(2, $estimate->taxes);
-
-    $this->assertDatabaseHas('taxes', [
-        'estimate_id' => $estimate->id,
-        'name' => $tax1['name'],
-        'amount' => $tax1['amount'],
-    ]);
-});
+        // Assert
+        $this->assertCount(2, $estimate->taxes);
+        $this->assertDatabaseHas('taxes', [
+            'estimate_id' => $estimate->id,
+            'name' => $taxes[0]['name'],
+            'amount' => $taxes[0]['amount'],
+        ]);
+    }
+}
