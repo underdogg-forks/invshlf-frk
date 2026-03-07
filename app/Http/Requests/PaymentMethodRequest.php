@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\PaymentMethodType;
 use App\Models\PaymentMethod;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -46,7 +47,7 @@ class PaymentMethodRequest extends FormRequest
         return collect($this->validated())
             ->merge([
                 'company_id' => $this->header('company'),
-                'type' => PaymentMethod::TYPE_GENERAL,
+                'type' => PaymentMethodType::General,
             ])
             ->toArray();
     }

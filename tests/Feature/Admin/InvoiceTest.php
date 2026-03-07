@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\V1\Admin\Invoice\InvoicesController;
 use App\Http\Requests\InvoicesRequest;
 use App\Mail\SendInvoiceMail;
@@ -216,7 +217,7 @@ class InvoiceTest extends TestCase
 
         /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
-        $this->assertEquals(Invoice::STATUS_SENT, Invoice::find($invoice->id)->status);
+        $this->assertEquals(InvoiceStatus::Sent, Invoice::find($invoice->id)->status);
         Mail::assertSent(SendInvoiceMail::class);
     }
 
@@ -228,14 +229,14 @@ class InvoiceTest extends TestCase
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
         ]);
-        $data = ['status' => Invoice::STATUS_COMPLETED];
+        $data = ['status' => InvoiceStatus::Completed->value];
 
         /* Act */
         $response = $this->postJson('api/v1/invoices/'.$invoice->id.'/status', $data);
 
         /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
-        $this->assertEquals(Invoice::STATUS_PAID, Invoice::find($invoice->id)->paid_status);
+        $this->assertEquals(InvoiceStatus::Paid, Invoice::find($invoice->id)->paid_status);
     }
 
     #[Test]
@@ -246,14 +247,14 @@ class InvoiceTest extends TestCase
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
         ]);
-        $data = ['status' => Invoice::STATUS_SENT];
+        $data = ['status' => InvoiceStatus::Sent->value];
 
         /* Act */
         $response = $this->postJson('api/v1/invoices/'.$invoice->id.'/status', $data);
 
         /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
-        $this->assertEquals(Invoice::STATUS_SENT, Invoice::find($invoice->id)->status);
+        $this->assertEquals(InvoiceStatus::Sent, Invoice::find($invoice->id)->status);
     }
 
     #[Test]
@@ -264,7 +265,7 @@ class InvoiceTest extends TestCase
             'page' => 1,
             'limit' => 15,
             'search' => 'doe',
-            'status' => Invoice::STATUS_DRAFT,
+            'status' => InvoiceStatus::Draft->value,
             'from_date' => '2019-01-20',
             'to_date' => '2019-01-27',
             'invoice_number' => '000012',

@@ -12,10 +12,6 @@ class PaymentMethod extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const TYPE_GENERAL = PaymentMethodType::General->value;
-
-    public const TYPE_MODULE = PaymentMethodType::Module->value;
-
     protected $guarded = [
         'id',
     ];
@@ -23,6 +19,7 @@ class PaymentMethod extends BaseModel
     protected function casts(): array
     {
         return [
+            'type' => PaymentMethodType::class,
             'settings' => 'array',
             'use_test_env' => 'boolean',
         ];

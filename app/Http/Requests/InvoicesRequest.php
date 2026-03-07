@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\InvoiceStatus;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -121,8 +122,8 @@ class InvoicesRequest extends FormRequest
         return collect($this->except('items', 'taxes'))
             ->merge([
                 'creator_id' => $this->user()->id ?? null,
-                'status' => $this->has('invoiceSend') ? Invoice::STATUS_SENT : Invoice::STATUS_DRAFT,
-                'paid_status' => Invoice::STATUS_UNPAID,
+                'status' => $this->has('invoiceSend') ? InvoiceStatus::Sent : InvoiceStatus::Draft,
+                'paid_status' => InvoiceStatus::Unpaid,
                 'company_id' => $this->header('company'),
                 'tax_per_item' => CompanySetting::getSetting('tax_per_item', $this->header('company')) ?? 'NO ',
                 'discount_per_item' => CompanySetting::getSetting('discount_per_item', $this->header('company')) ?? 'NO',

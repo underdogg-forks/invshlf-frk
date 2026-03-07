@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\V1\Customer\General;
 
+use App\Enums\EstimateStatus;
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Estimate;
 use App\Models\Invoice;
@@ -21,21 +23,21 @@ class DashboardController extends Controller
         $user = Auth::guard('customer')->user();
 
         $amountDue = Invoice::whereCustomer($user->id)
-            ->where('status', '<>', 'DRAFT')
+            ->where('status', '<>', InvoiceStatus::Draft)
             ->sum('due_amount');
         $invoiceCount = Invoice::whereCustomer($user->id)
-            ->where('status', '<>', 'DRAFT')
+            ->where('status', '<>', InvoiceStatus::Draft)
             ->count();
         $estimatesCount = Estimate::whereCustomer($user->id)
-            ->where('status', '<>', 'DRAFT')
+            ->where('status', '<>', EstimateStatus::Draft)
             ->count();
         $paymentCount = Payment::whereCustomer($user->id)
             ->count();
 
         return response()->json([
             'due_amount' => $amountDue,
-            'recentInvoices' => Invoice::whereCustomer($user->id)->where('status', '<>', 'DRAFT')->take(5)->latest()->get(),
-            'recentEstimates' => Estimate::whereCustomer($user->id)->where('status', '<>', 'DRAFT')->take(5)->latest()->get(),
+            'recentInvoices' => Invoice::whereCustomer($user->id)->where('status', '<>', InvoiceStatus::Draft)->take(5)->latest()->get(),
+            'recentEstimates' => Estimate::whereCustomer($user->id)->where('status', '<>', EstimateStatus::Draft)->take(5)->latest()->get(),
             'invoice_count' => $invoiceCount,
             'estimate_count' => $estimatesCount,
             'payment_count' => $paymentCount,

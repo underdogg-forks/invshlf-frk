@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Customer\Estimate;
 
+use App\Enums\EstimateStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Customer\EstimateResource;
 use App\Models\Company;
@@ -26,7 +27,7 @@ class EstimatesController extends Controller
             'taxes',
             'creator',
         ])
-            ->where('status', '<>', 'DRAFT')
+            ->where('status', '<>', EstimateStatus::Draft)
             ->whereCustomer(Auth::guard('customer')->id())
             ->applyFilters($request->only([
                 'status',

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\TaxTypeType;
 use App\Models\TaxType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -13,14 +14,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tax_types', function (Blueprint $table) {
-            $table->enum('type', ['GENERAL', 'MODULE'])->default(TaxType::TYPE_GENERAL);
+            $table->enum('type', ['GENERAL', 'MODULE'])->default(TaxTypeType::General->value);
         });
 
         $taxTypes = TaxType::all();
 
         if ($taxTypes) {
             foreach ($taxTypes as $taxType) {
-                $taxType->type = TaxType::TYPE_GENERAL;
+                $taxType->type = TaxTypeType::General;
                 $taxType->save();
             }
         }

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Enums\EstimateStatus;
 use App\Http\Controllers\V1\Admin\Estimate\EstimatesController;
 use App\Http\Controllers\V1\Admin\Estimate\SendEstimateController;
 use App\Http\Requests\DeleteEstimatesRequest;
@@ -210,14 +211,14 @@ class EstimateTest extends TestCase
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
-        $data = ['status' => Estimate::STATUS_ACCEPTED];
+        $data = ['status' => EstimateStatus::Accepted->value];
 
         /* Act */
         $response = $this->postJson("api/v1/estimates/{$estimate->id}/status", $data);
 
         /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
-        $this->assertEquals(Estimate::STATUS_ACCEPTED, Estimate::find($estimate->id)->status);
+        $this->assertEquals(EstimateStatus::Accepted, Estimate::find($estimate->id)->status);
     }
 
     #[Test]
@@ -228,14 +229,14 @@ class EstimateTest extends TestCase
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
-        $data = ['status' => Estimate::STATUS_REJECTED];
+        $data = ['status' => EstimateStatus::Rejected->value];
 
         /* Act */
         $response = $this->postJson("api/v1/estimates/{$estimate->id}/status", $data);
 
         /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
-        $this->assertEquals(Estimate::STATUS_REJECTED, Estimate::find($estimate->id)->status);
+        $this->assertEquals(EstimateStatus::Rejected, Estimate::find($estimate->id)->status);
     }
 
     #[Test]

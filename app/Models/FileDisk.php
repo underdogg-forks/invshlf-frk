@@ -11,10 +11,6 @@ class FileDisk extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const DISK_TYPE_SYSTEM = FileDiskType::System->value;
-
-    public const DISK_TYPE_REMOTE = FileDiskType::Remote->value;
-
     protected $guarded = [
         'id',
     ];
@@ -23,6 +19,7 @@ class FileDisk extends BaseModel
     {
         return [
             'set_as_default' => 'boolean',
+            'type' => FileDiskType::class,
         ];
     }
 
@@ -92,12 +89,12 @@ class FileDisk extends BaseModel
 
     public function isSystem()
     {
-        return $this->type === self::DISK_TYPE_SYSTEM;
+        return $this->type === FileDiskType::System;
     }
 
     public function isRemote()
     {
-        return $this->type === self::DISK_TYPE_REMOTE;
+        return $this->type === FileDiskType::Remote;
     }
 
     #endregion

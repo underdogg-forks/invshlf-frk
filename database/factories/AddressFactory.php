@@ -33,7 +33,7 @@ class AddressFactory extends Factory
             'zip' => $this->faker->postcode(),
             'phone' => $this->faker->phoneNumber(),
             'fax' => $this->faker->phoneNumber(),
-            'type' => $this->faker->randomElement([AddressType::Billing->value, AddressType::Shipping->value]),
+            'type' => $this->faker->randomElement([AddressType::Billing, AddressType::Shipping]),
             'user_id' => User::factory(),
             'customer_id' => Customer::factory(),
         ];

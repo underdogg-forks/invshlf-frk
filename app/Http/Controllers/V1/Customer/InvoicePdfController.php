@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Customer;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Customer\InvoiceResource as CustomerInvoiceResource;
 use App\Mail\InvoiceViewedMail;
@@ -18,8 +19,8 @@ class InvoicePdfController extends Controller
         $invoice = Invoice::find($emailLog->mailable_id);
 
         if (! $emailLog->isExpired()) {
-            if ($invoice && ($invoice->status == Invoice::STATUS_SENT || $invoice->status == Invoice::STATUS_DRAFT)) {
-                $invoice->status = Invoice::STATUS_VIEWED;
+            if ($invoice && ($invoice->status === InvoiceStatus::Sent || $invoice->status === InvoiceStatus::Draft)) {
+                $invoice->status = InvoiceStatus::Viewed;
                 $invoice->viewed = true;
                 $invoice->save();
                 $notifyInvoiceViewed = CompanySetting::getSetting(

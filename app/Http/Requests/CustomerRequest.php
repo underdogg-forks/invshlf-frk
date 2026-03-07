@@ -156,7 +156,7 @@ class CustomerRequest extends FormRequest
     {
         return collect($this->shipping)
             ->merge([
-                'type' => AddressType::Shipping->value,
+                'type' => AddressType::Shipping,
             ])
             ->toArray();
     }
@@ -165,7 +165,7 @@ class CustomerRequest extends FormRequest
     {
         return collect($this->billing)
             ->merge([
-                'type' => AddressType::Billing->value,
+                'type' => AddressType::Billing,
             ])
             ->toArray();
     }
