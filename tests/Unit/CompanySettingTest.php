@@ -1,46 +1,65 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Company;
 use App\Models\CompanySetting;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Faker\fake;
+class CompanySettingTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-test('company setting belongs to company', function () {
-    $setting = CompanySetting::factory()->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertTrue($setting->company()->exists());
-});
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        // Arrange
+        $setting = CompanySetting::factory()->create();
 
-test('set settings', function () {
-    $key = fake()->name;
+        // Act & Assert
+        $this->assertTrue($setting->company()->exists());
+    }
 
-    $value = fake()->word;
+    #[Test]
+    public function it_sets_and_retrieves_a_single_setting(): void
+    {
+        // Arrange
+        $key = fake()->name();
+        $value = fake()->word();
+        $company = Company::factory()->create();
 
-    $company = Company::factory()->create();
+        // Act
+        CompanySetting::setSettings([$key => $value], $company->id);
+        $result = CompanySetting::getSetting($key, $company->id);
 
-    CompanySetting::setSettings([$key => $value], $company->id);
+        // Assert
+        $this->assertEquals($value, $result);
+    }
 
-    $response = CompanySetting::getSetting($key, $company->id);
+    #[Test]
+    public function it_sets_and_retrieves_multiple_settings(): void
+    {
+        // Arrange
+        $key = fake()->name();
+        $value = fake()->word();
+        $company = Company::factory()->create();
 
-    $this->assertEquals($value, $response);
-});
+        // Act
+        CompanySetting::setSettings([$key => $value], $company->id);
+        $result = CompanySetting::getSettings([$key], $company->id);
 
-test('get settings', function () {
-    $key = fake()->name;
-
-    $value = fake()->word;
-
-    $company = Company::factory()->create();
-
-    CompanySetting::setSettings([$key => $value], $company->id);
-
-    $response = CompanySetting::getSettings([$key], $company->id);
-
-    $this->assertEquals([$key => $value], $response->toArray());
-});
+        // Assert
+        $this->assertEquals([$key => $value], $result->toArray());
+    }
+}

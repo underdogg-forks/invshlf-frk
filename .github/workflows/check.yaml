@@ -50,7 +50,7 @@ jobs:
             - name: Check source code for syntax errors
               run: |
                   if [ "${{ inputs.fix_pint_errors }}" = "true" ]; then
-                      ./vendor/bin/pint
+                      ./vendor/bin/pint --fix
                   else
                       ./vendor/bin/pint --test
                   fi

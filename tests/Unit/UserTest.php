@@ -1,21 +1,42 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class UserTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('user belongs to currency', function () {
-    $user = User::factory()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($user->currency()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('user belongs to many companies', function () {
-    $user = User::factory()->hasCompanies(5)->create();
+    #[Test]
+    public function it_belongs_to_a_currency(): void
+    {
+        // Arrange
+        $user = User::factory()->create();
 
-    $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $user->companies);
-});
+        // Act & Assert
+        $this->assertTrue($user->currency()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_many_companies(): void
+    {
+        // Arrange
+        $user = User::factory()->hasCompanies(5)->create();
+
+        // Act & Assert
+        $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $user->companies);
+    }
+}

@@ -1,78 +1,122 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Address;
 use App\Models\Customer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class CustomerTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('customer has many estimates', function () {
-    $customer = Customer::factory()->hasEstimates(5)->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertCount(5, $customer->estimates);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertTrue($customer->estimates()->exists());
-});
+    #[Test]
+    public function it_has_many_estimates(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->hasEstimates(5)->create();
 
-test('customer has many expenses', function () {
-    $customer = Customer::factory()->hasExpenses(5)->create();
+        // Act & Assert
+        $this->assertCount(5, $customer->estimates);
+        $this->assertTrue($customer->estimates()->exists());
+    }
 
-    $this->assertCount(5, $customer->expenses);
+    #[Test]
+    public function it_has_many_expenses(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->hasExpenses(5)->create();
 
-    $this->assertTrue($customer->expenses()->exists());
-});
+        // Act & Assert
+        $this->assertCount(5, $customer->expenses);
+        $this->assertTrue($customer->expenses()->exists());
+    }
 
-test('customer has many invoices', function () {
-    $customer = Customer::factory()->hasInvoices(5)->create();
+    #[Test]
+    public function it_has_many_invoices(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->hasInvoices(5)->create();
 
-    $this->assertCount(5, $customer->invoices);
+        // Act & Assert
+        $this->assertCount(5, $customer->invoices);
+        $this->assertTrue($customer->invoices()->exists());
+    }
 
-    $this->assertTrue($customer->invoices()->exists());
-});
+    #[Test]
+    public function it_has_many_payments(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->hasPayments(5)->create();
 
-test('customer has many payments', function () {
-    $customer = Customer::factory()->hasPayments(5)->create();
+        // Act & Assert
+        $this->assertCount(5, $customer->payments);
+        $this->assertTrue($customer->payments()->exists());
+    }
 
-    $this->assertCount(5, $customer->payments);
+    #[Test]
+    public function it_has_many_addresses(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->hasAddresses(5)->create();
 
-    $this->assertTrue($customer->payments()->exists());
-});
+        // Act & Assert
+        $this->assertCount(5, $customer->addresses);
+        $this->assertTrue($customer->addresses()->exists());
+    }
 
-test('customer has many addresses', function () {
-    $customer = Customer::factory()->hasAddresses(5)->create();
+    #[Test]
+    public function it_belongs_to_a_currency(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->create();
 
-    $this->assertCount(5, $customer->addresses);
+        // Act & Assert
+        $this->assertTrue($customer->currency()->exists());
+    }
 
-    $this->assertTrue($customer->addresses()->exists());
-});
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->forCompany()->create();
 
-test('customer belongs to currency', function () {
-    $customer = Customer::factory()->create();
+        // Act & Assert
+        $this->assertTrue($customer->company()->exists());
+    }
 
-    $this->assertTrue($customer->currency()->exists());
-});
+    #[Test]
+    public function it_has_one_billing_address(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->has(Address::factory()->state([
+            'type' => Address::BILLING_TYPE,
+        ]))->create();
 
-test('customer belongs to company', function () {
-    $customer = Customer::factory()->forCompany()->create();
+        // Act & Assert
+        $this->assertTrue($customer->billingAddress()->exists());
+    }
 
-    $this->assertTrue($customer->company()->exists());
-});
+    #[Test]
+    public function it_has_one_shipping_address(): void
+    {
+        // Arrange
+        $customer = Customer::factory()->has(Address::factory()->state([
+            'type' => Address::SHIPPING_TYPE,
+        ]))->create();
 
-it('customer has one billing address', function () {
-    $customer = Customer::factory()->has(Address::factory()->state([
-        'type' => Address::BILLING_TYPE,
-    ]))->create();
-
-    $this->assertTrue($customer->billingAddress()->exists());
-});
-
-it('customer has one shipping address', function () {
-    $customer = Customer::factory()->has(Address::factory()->state([
-        'type' => Address::SHIPPING_TYPE,
-    ]))->create();
-
-    $this->assertTrue($customer->shippingAddress()->exists());
-});
+        // Act & Assert
+        $this->assertTrue($customer->shippingAddress()->exists());
+    }
+}

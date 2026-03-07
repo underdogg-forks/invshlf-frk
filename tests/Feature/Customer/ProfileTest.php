@@ -5,58 +5,71 @@ namespace Tests\Feature\Customer;
 use App\Http\Controllers\V1\Customer\General\ProfileController;
 use App\Http\Requests\Customer\CustomerProfileRequest;
 use App\Models\Customer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
+class ProfileTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $customer = Customer::factory()->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    Sanctum::actingAs(
-        $customer,
-        ['*'],
-        'customer'
-    );
-});
+        $customer = Customer::factory()->create();
+        Sanctum::actingAs($customer, ['*'], 'customer');
+    }
 
-test('update customer profile using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        ProfileController::class,
-        'updateProfile',
-        CustomerProfileRequest::class
-    );
-});
+    #[Test]
+    public function it_validates_the_update_profile_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-test('update customer profile', function () {
-    $customer = Auth::guard('customer')->user();
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            ProfileController::class,
+            'updateProfile',
+            CustomerProfileRequest::class
+        );
+    }
 
-    $newCustomer = Customer::factory()->raw([
-        'shipping' => [
-            'name' => 'newName',
-            'address_street_1' => 'address',
-        ],
-        'billing' => [
-            'name' => 'newName',
-            'address_street_1' => 'address',
-        ],
-    ]);
+    #[Test]
+    public function it_updates_the_customer_profile(): void
+    {
+        // Arrange
+        $customer = Auth::guard('customer')->user();
+        $updatedCustomer = Customer::factory()->raw([
+            'shipping' => ['name' => 'newName', 'address_street_1' => 'address'],
+            'billing' => ['name' => 'newName', 'address_street_1' => 'address'],
+        ]);
 
-    postJson("api/v1/{$customer->company->slug}/customer/profile", $newCustomer)->assertOk();
+        // Act
+        $this->postJson("api/v1/{$customer->company->slug}/customer/profile", $updatedCustomer)->assertOk();
 
-    $this->assertDatabaseHas('customers', [
-        'name' => $customer['name'],
-        'email' => $customer['email'],
-    ]);
-});
+        // Assert
+        $this->assertDatabaseHas('customers', [
+            'name' => $customer['name'],
+            'email' => $customer['email'],
+        ]);
+    }
 
-test('get customer', function () {
-    $customer = Auth::guard('customer')->user();
+    #[Test]
+    public function it_retrieves_the_authenticated_customer(): void
+    {
+        // Arrange
+        $customer = Auth::guard('customer')->user();
 
-    getJson("api/v1/{$customer->company->slug}/customer/me")->assertOk();
-});
+        // Act
+        $response = $this->getJson("api/v1/{$customer->company->slug}/customer/me");
+
+        // Assert
+        $response->assertOk();
+    }
+}

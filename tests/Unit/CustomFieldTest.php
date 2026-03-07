@@ -1,23 +1,43 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\CustomField;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class CustomFieldTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('custom field belongs to company', function () {
-    $customField = CustomField::factory()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($customField->company()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('custom field has many custom field value', function () {
-    $customField = CustomField::factory()->hasCustomFieldValues(5)->create();
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        // Arrange
+        $customField = CustomField::factory()->create();
 
-    $this->assertCount(5, $customField->customFieldValues);
+        // Act & Assert
+        $this->assertTrue($customField->company()->exists());
+    }
 
-    $this->assertTrue($customField->customFieldValues()->exists());
-});
+    #[Test]
+    public function it_has_many_custom_field_values(): void
+    {
+        // Arrange
+        $customField = CustomField::factory()->hasCustomFieldValues(5)->create();
+
+        // Act & Assert
+        $this->assertCount(5, $customField->customFieldValues);
+        $this->assertTrue($customField->customFieldValues()->exists());
+    }
+}

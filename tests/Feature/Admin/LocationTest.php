@@ -1,27 +1,39 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
+class LocationTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get countries', function () {
-    $response = getJson('api/v1/countries');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_all_countries(): void
+    {
+        // Arrange - data seeded in setUp
+
+        // Act
+        $response = $this->getJson('api/v1/countries');
+
+        // Assert
+        $response->assertOk();
+    }
+}

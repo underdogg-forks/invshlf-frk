@@ -1,36 +1,60 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Item;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class InvoiceItemTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('invoice item belongs to invoice', function () {
-    $invoiceItem = InvoiceItem::factory()->forInvoice()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($invoiceItem->invoice()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('invoice item belongs to item', function () {
-    $invoiceItem = InvoiceItem::factory()->create([
-        'item_id' => Item::factory(),
-        'invoice_id' => Invoice::factory(),
-    ]);
+    #[Test]
+    public function it_belongs_to_an_invoice(): void
+    {
+        // Arrange
+        $invoiceItem = InvoiceItem::factory()->forInvoice()->create();
 
-    $this->assertTrue($invoiceItem->item()->exists());
-});
+        // Act & Assert
+        $this->assertTrue($invoiceItem->invoice()->exists());
+    }
 
-test('invoice item has many taxes', function () {
-    $invoiceItem = InvoiceItem::factory()->hasTaxes(5)->create([
-        'invoice_id' => Invoice::factory(),
-    ]);
+    #[Test]
+    public function it_belongs_to_an_item(): void
+    {
+        // Arrange
+        $invoiceItem = InvoiceItem::factory()->create([
+            'item_id' => Item::factory(),
+            'invoice_id' => Invoice::factory(),
+        ]);
 
-    $this->assertCount(5, $invoiceItem->taxes);
+        // Act & Assert
+        $this->assertTrue($invoiceItem->item()->exists());
+    }
 
-    $this->assertTrue($invoiceItem->taxes()->exists());
-});
+    #[Test]
+    public function it_has_many_taxes(): void
+    {
+        // Arrange
+        $invoiceItem = InvoiceItem::factory()->hasTaxes(5)->create([
+            'invoice_id' => Invoice::factory(),
+        ]);
+
+        // Act & Assert
+        $this->assertCount(5, $invoiceItem->taxes);
+        $this->assertTrue($invoiceItem->taxes()->exists());
+    }
+}

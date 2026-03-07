@@ -1,36 +1,60 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Item;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class EstimateItemTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('estimate item belongs to estimate', function () {
-    $estimateItem = EstimateItem::factory()->forEstimate()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($estimateItem->estimate()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('estimate item belongs to item', function () {
-    $estimateItem = EstimateItem::factory()->create([
-        'item_id' => Item::factory(),
-        'estimate_id' => Estimate::factory(),
-    ]);
+    #[Test]
+    public function it_belongs_to_an_estimate(): void
+    {
+        // Arrange
+        $estimateItem = EstimateItem::factory()->forEstimate()->create();
 
-    $this->assertTrue($estimateItem->item()->exists());
-});
+        // Act & Assert
+        $this->assertTrue($estimateItem->estimate()->exists());
+    }
 
-test('estimate item has many taxes', function () {
-    $estimateItem = EstimateItem::factory()->hasTaxes(5)->create([
-        'estimate_id' => Estimate::factory(),
-    ]);
+    #[Test]
+    public function it_belongs_to_an_item(): void
+    {
+        // Arrange
+        $estimateItem = EstimateItem::factory()->create([
+            'item_id' => Item::factory(),
+            'estimate_id' => Estimate::factory(),
+        ]);
 
-    $this->assertCount(5, $estimateItem->taxes);
+        // Act & Assert
+        $this->assertTrue($estimateItem->item()->exists());
+    }
 
-    $this->assertTrue($estimateItem->taxes()->exists());
-});
+    #[Test]
+    public function it_has_many_taxes(): void
+    {
+        // Arrange
+        $estimateItem = EstimateItem::factory()->hasTaxes(5)->create([
+            'estimate_id' => Estimate::factory(),
+        ]);
+
+        // Act & Assert
+        $this->assertCount(5, $estimateItem->taxes);
+        $this->assertTrue($estimateItem->taxes()->exists());
+    }
+}

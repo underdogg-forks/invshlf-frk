@@ -4,37 +4,52 @@ namespace Tests\Feature\Customer;
 
 use App\Models\Customer;
 use App\Models\Payment;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
+class PaymentTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $customer = Customer::factory()->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    Sanctum::actingAs(
-        $customer,
-        ['*'],
-        'customer'
-    );
-});
+        $customer = Customer::factory()->create();
+        Sanctum::actingAs($customer, ['*'], 'customer');
+    }
 
-test('get customer payments', function () {
-    $customer = Auth::guard('customer')->user();
+    #[Test]
+    public function it_retrieves_all_payments_for_the_customer(): void
+    {
+        // Arrange
+        $customer = Auth::guard('customer')->user();
 
-    getJson("api/v1/{$customer->company->slug}/customer/payments?page=1")->assertOk();
-});
+        // Act
+        $response = $this->getJson("api/v1/{$customer->company->slug}/customer/payments?page=1");
 
-test('get customer payment', function () {
-    $customer = Auth::guard('customer')->user();
+        // Assert
+        $response->assertOk();
+    }
 
-    $payment = Payment::factory()->create([
-        'customer_id' => $customer->id,
-    ]);
+    #[Test]
+    public function it_retrieves_a_single_payment_for_the_customer(): void
+    {
+        // Arrange
+        $customer = Auth::guard('customer')->user();
+        $payment = Payment::factory()->create(['customer_id' => $customer->id]);
 
-    getJson("/api/v1/{$customer->company->slug}/customer/payments/{$payment->id}")->assertOk();
-});
+        // Act
+        $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/payments/{$payment->id}");
+
+        // Assert
+        $response->assertOk();
+    }
+}

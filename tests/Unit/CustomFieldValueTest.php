@@ -1,21 +1,42 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\CustomFieldValue;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class CustomFieldValueTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('custom field value belongs to company', function () {
-    $fieldValue = CustomFieldValue::factory()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($fieldValue->company()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('custom field value belongs to custom field', function () {
-    $fieldValue = CustomFieldValue::factory()->forCustomField()->create();
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        // Arrange
+        $fieldValue = CustomFieldValue::factory()->create();
 
-    $this->assertTrue($fieldValue->customField()->exists());
-});
+        // Act & Assert
+        $this->assertTrue($fieldValue->company()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_a_custom_field(): void
+    {
+        // Arrange
+        $fieldValue = CustomFieldValue::factory()->forCustomField()->create();
+
+        // Act & Assert
+        $this->assertTrue($fieldValue->customField()->exists());
+    }
+}
