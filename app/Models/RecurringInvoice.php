@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\RecurringInvoiceLimitBy;
+use App\Enums\RecurringInvoiceStatus;
 use App\Http\Requests\RecurringInvoiceRequest;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
@@ -18,17 +20,17 @@ class RecurringInvoice extends BaseModel
     use BelongsToFranchise;
     use HasCustomFieldsTrait;
 
-    public const NONE = 'NONE';
+    public const NONE = RecurringInvoiceLimitBy::None->value;
 
-    public const COUNT = 'COUNT';
+    public const COUNT = RecurringInvoiceLimitBy::Count->value;
 
-    public const DATE = 'DATE';
+    public const DATE = RecurringInvoiceLimitBy::Date->value;
 
-    public const COMPLETED = 'COMPLETED';
+    public const COMPLETED = RecurringInvoiceStatus::Completed->value;
 
-    public const ON_HOLD = 'ON_HOLD';
+    public const ON_HOLD = RecurringInvoiceStatus::OnHold->value;
 
-    public const ACTIVE = 'ACTIVE';
+    public const ACTIVE = RecurringInvoiceStatus::Active->value;
 
     protected $guarded = [
         'id',

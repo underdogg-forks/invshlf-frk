@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AddressType;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -9,10 +10,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Address extends BaseModel
 {
     use BelongsToFranchise;
-
-    public const BILLING_TYPE = 'billing';
-
-    public const SHIPPING_TYPE = 'shipping';
 
     protected $guarded = ['id'];
 

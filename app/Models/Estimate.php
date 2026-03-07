@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App;
+use App\Enums\EstimateStatus;
 use App\Facades\PDF;
 use App\Mail\SendEstimateMail;
 use App\Models\BaseModel;
@@ -27,17 +28,17 @@ class Estimate extends BaseModel implements HasMedia
     use HasCustomFieldsTrait;
     use InteractsWithMedia;
 
-    public const STATUS_DRAFT = 'DRAFT';
+    public const STATUS_DRAFT = EstimateStatus::Draft->value;
 
-    public const STATUS_SENT = 'SENT';
+    public const STATUS_SENT = EstimateStatus::Sent->value;
 
-    public const STATUS_VIEWED = 'VIEWED';
+    public const STATUS_VIEWED = EstimateStatus::Viewed->value;
 
-    public const STATUS_EXPIRED = 'EXPIRED';
+    public const STATUS_EXPIRED = EstimateStatus::Expired->value;
 
-    public const STATUS_ACCEPTED = 'ACCEPTED';
+    public const STATUS_ACCEPTED = EstimateStatus::Accepted->value;
 
-    public const STATUS_REJECTED = 'REJECTED';
+    public const STATUS_REJECTED = EstimateStatus::Rejected->value;
 
     protected $dates = [
         'created_at',

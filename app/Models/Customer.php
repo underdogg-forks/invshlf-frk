@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AddressType;
 use App\Models\Concerns\BelongsToFranchise;
 use App\Notifications\CustomerMailResetPasswordNotification;
 use App\Traits\HasCustomFieldsTrait;
@@ -79,7 +80,7 @@ class Customer extends Authenticatable implements HasMedia
 
     public function billingAddress(): HasOne
     {
-        return $this->hasOne(Address::class)->where('type', Address::BILLING_TYPE);
+        return $this->hasOne(Address::class)->where('type', AddressType::Billing->value);
     }
 
     public function company(): BelongsTo
@@ -124,7 +125,7 @@ class Customer extends Authenticatable implements HasMedia
 
     public function shippingAddress(): HasOne
     {
-        return $this->hasOne(Address::class)->where('type', Address::SHIPPING_TYPE);
+        return $this->hasOne(Address::class)->where('type', AddressType::Shipping->value);
     }
 
     #endregion

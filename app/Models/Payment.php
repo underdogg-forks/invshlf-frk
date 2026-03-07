@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentMode;
 use App\Jobs\GeneratePaymentPdfJob;
 use App\Mail\SendPaymentMail;
 use App\Models\BaseModel;
@@ -24,15 +25,15 @@ class Payment extends BaseModel implements HasMedia
     use HasCustomFieldsTrait;
     use InteractsWithMedia;
 
-    public const PAYMENT_MODE_CHECK = 'CHECK';
+    public const PAYMENT_MODE_CHECK = PaymentMode::Check->value;
 
-    public const PAYMENT_MODE_OTHER = 'OTHER';
+    public const PAYMENT_MODE_OTHER = PaymentMode::Other->value;
 
-    public const PAYMENT_MODE_CASH = 'CASH';
+    public const PAYMENT_MODE_CASH = PaymentMode::Cash->value;
 
-    public const PAYMENT_MODE_CREDIT_CARD = 'CREDIT_CARD';
+    public const PAYMENT_MODE_CREDIT_CARD = PaymentMode::CreditCard->value;
 
-    public const PAYMENT_MODE_BANK_TRANSFER = 'BANK_TRANSFER';
+    public const PAYMENT_MODE_BANK_TRANSFER = PaymentMode::BankTransfer->value;
 
     protected $dates = ['created_at', 'updated_at', 'payment_date'];
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\FileDiskType;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
@@ -10,9 +11,9 @@ class FileDisk extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const DISK_TYPE_SYSTEM = 'SYSTEM';
+    public const DISK_TYPE_SYSTEM = FileDiskType::System->value;
 
-    public const DISK_TYPE_REMOTE = 'REMOTE';
+    public const DISK_TYPE_REMOTE = FileDiskType::Remote->value;
 
     protected $guarded = [
         'id',
