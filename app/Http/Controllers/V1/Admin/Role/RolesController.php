@@ -7,8 +7,8 @@ use App\Http\Requests\RoleRequest;
 use App\Http\Resources\RoleResource;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Silber\Bouncer\BouncerFacade;
-use Silber\Bouncer\Database\Role;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RolesController extends Controller
 {
@@ -25,7 +25,7 @@ class RolesController extends Controller
             return $query->orderBy($request['orderByField'], $request['orderBy']);
         })
             ->when($request->company_id, function ($query) use ($request) {
-                return $query->where('scope', $request->company_id);
+                return $query->where('team_id', $request->company_id);
             })
             ->get();
 
@@ -90,7 +90,7 @@ class RolesController extends Controller
     {
         $this->authorize('delete', $role);
 
-        $users = User::whereIs($role->name)->get()->toArray();
+        $users = User::role($role->name)->get()->toArray();
 
         if (! empty($users)) {
             return respondJson('role_attached_to_users', 'Roles Attached to user');
@@ -105,14 +105,18 @@ class RolesController extends Controller
 
     private function syncAbilities(RoleRequest $request, $role)
     {
+        $permissionsToSync = [];
         foreach (config('abilities.abilities') as $ability) {
             $check = array_search($ability['ability'], array_column($request->abilities, 'ability'));
             if ($check !== false) {
-                BouncerFacade::allow($role)->to($ability['ability'], $ability['model']);
-            } else {
-                BouncerFacade::disallow($role)->to($ability['ability'], $ability['model']);
+                $permission = Permission::firstOrCreate([
+                    'name' => $ability['ability'],
+                    'guard_name' => 'web',
+                ]);
+                $permissionsToSync[] = $permission->id;
             }
         }
+        $role->permissions()->sync($permissionsToSync);
 
         return true;
     }

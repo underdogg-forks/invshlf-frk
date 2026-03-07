@@ -6,7 +6,7 @@ use App\Models\Item;
 use App\Models\Unit;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class UnitPolicy
 {
@@ -19,7 +19,7 @@ class UnitPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-item', Item::class)) {
+        if ($user->can('view-item', Item::class)) {
             return true;
         }
 
@@ -33,7 +33,7 @@ class UnitPolicy
      */
     public function view(User $user, Unit $unit): bool
     {
-        if (BouncerFacade::can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
+        if ($user->can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
             return true;
         }
 
@@ -47,7 +47,7 @@ class UnitPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('view-item', Item::class)) {
+        if ($user->can('view-item', Item::class)) {
             return true;
         }
 
@@ -61,7 +61,7 @@ class UnitPolicy
      */
     public function update(User $user, Unit $unit): bool
     {
-        if (BouncerFacade::can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
+        if ($user->can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
             return true;
         }
 
@@ -75,7 +75,7 @@ class UnitPolicy
      */
     public function delete(User $user, Unit $unit): bool
     {
-        if (BouncerFacade::can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
+        if ($user->can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
             return true;
         }
 
@@ -89,7 +89,7 @@ class UnitPolicy
      */
     public function restore(User $user, Unit $unit): bool
     {
-        if (BouncerFacade::can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
+        if ($user->can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
             return true;
         }
 
@@ -103,7 +103,7 @@ class UnitPolicy
      */
     public function forceDelete(User $user, Unit $unit): bool
     {
-        if (BouncerFacade::can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
+        if ($user->can('view-item', Item::class) && $user->hasCompany($unit->company_id)) {
             return true;
         }
 

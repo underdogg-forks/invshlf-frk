@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Silber\Bouncer\BouncerFacade;
-use Silber\Bouncer\Database\Role;
+use Spatie\Permission\Models\Role;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -34,17 +33,23 @@ class Company extends BaseModel implements HasMedia
 
     public function setupRoles()
     {
-        BouncerFacade::scope()->to($this->id);
+        setPermissionsTeamId($this->id);
 
-        $super_admin = BouncerFacade::role()->firstOrCreate([
+        $super_admin = Role::firstOrCreate([
             'name' => 'super admin',
-            'title' => 'Super Admin',
-            'scope' => $this->id,
+            'guard_name' => 'web',
+            'team_id' => $this->id,
         ]);
 
+        $permissions = [];
         foreach (config('abilities.abilities') as $ability) {
-            BouncerFacade::allow($super_admin)->to($ability['ability'], $ability['model']);
+            $permission = \Spatie\Permission\Models\Permission::firstOrCreate([
+                'name' => $ability['ability'],
+                'guard_name' => 'web',
+            ]);
+            $permissions[] = $permission->id;
         }
+        $super_admin->permissions()->sync($permissions);
     }
 
     public function setupDefaultPaymentMethods()
@@ -313,7 +318,7 @@ class Company extends BaseModel implements HasMedia
 
     public function getRolesAttribute()
     {
-        return Role::where('scope', $this->id)
+        return Role::where('team_id', $this->id)
             ->get();
     }
 
@@ -422,7 +427,7 @@ class Company extends BaseModel implements HasMedia
         }
 
         $roles = Role::when($this->id, function ($query) {
-            return $query->where('scope', $this->id);
+            return $query->where('team_id', $this->id);
         })->get();
 
         if ($roles) {

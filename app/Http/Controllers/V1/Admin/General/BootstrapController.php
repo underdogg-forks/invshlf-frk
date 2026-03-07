@@ -12,7 +12,6 @@ use App\Models\Module;
 use App\Models\Setting;
 use App\Traits\GeneratesMenuTrait;
 use Illuminate\Http\Request;
-use Silber\Bouncer\BouncerFacade;
 
 class BootstrapController extends Controller
 {
@@ -46,7 +45,7 @@ class BootstrapController extends Controller
             ? Currency::find($current_company_settings->get('currency'))
             : Currency::first();
 
-        BouncerFacade::refreshFor($current_user);
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         $global_settings = Setting::getSettings([
             'api_token',
@@ -62,7 +61,7 @@ class BootstrapController extends Controller
         return response()->json([
             'current_user' => new UserResource($current_user),
             'current_user_settings' => $current_user_settings,
-            'current_user_abilities' => $current_user->getAbilities(),
+            'current_user_abilities' => $current_user->getAllPermissions()->pluck('name'),
             'companies' => CompanyResource::collection($companies),
             'current_company' => new CompanyResource($current_company),
             'current_company_settings' => $current_company_settings,

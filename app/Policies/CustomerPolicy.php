@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class CustomerPolicy
 {
@@ -18,7 +18,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-customer', Customer::class)) {
+        if ($user->can('view-customer', Customer::class)) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('view-customer', $customer)) {
+        if ($user->can('view-customer', $customer)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-customer', Customer::class)) {
+        if ($user->can('create-customer', Customer::class)) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('edit-customer', $customer)) {
+        if ($user->can('edit-customer', $customer)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
+        if ($user->can('delete-customer', $customer)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
+        if ($user->can('delete-customer', $customer)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
+        if ($user->can('delete-customer', $customer)) {
             return true;
         }
 
@@ -116,7 +116,7 @@ class CustomerPolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-customer', Customer::class)) {
+        if ($user->can('delete-customer', Customer::class)) {
             return true;
         }
 

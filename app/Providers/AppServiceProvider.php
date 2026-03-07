@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Bouncer\Scopes\DefaultScope;
 use App\Policies\CompanyPolicy;
 use App\Policies\CustomerPolicy;
 use App\Policies\DashboardPolicy;
@@ -23,8 +22,7 @@ use App\Space\InstallUtils;
 use Gate;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\ServiceProvider;
-use Silber\Bouncer\Database\Models as BouncerModels;
-use Silber\Bouncer\Database\Role;
+use Spatie\Permission\Models\Role;
 use View;
 
 class AppServiceProvider extends ServiceProvider
@@ -76,7 +74,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        BouncerModels::scope(new DefaultScope);
+        //
     }
 
     public function addMenus()

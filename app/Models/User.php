@@ -17,8 +17,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\HasApiTokens;
-use Silber\Bouncer\BouncerFacade;
-use Silber\Bouncer\Database\HasRolesAndAbilities;
+use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -28,7 +27,7 @@ class User extends Authenticatable implements HasMedia
     use HasApiTokens;
     use HasCustomFieldsTrait;
     use HasFactory;
-    use HasRolesAndAbilities;
+    use HasRoles;
     use InteractsWithMedia;
     use Notifiable;
 
@@ -420,9 +419,8 @@ class User extends Authenticatable implements HasMedia
         $user->companies()->sync($companies->pluck('id'));
 
         foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($user)->roles([$company['role']]);
+            setPermissionsTeamId($company['id']);
+            $user->syncRoles([$company['role']]);
         }
 
         return $user;
@@ -479,9 +477,8 @@ class User extends Authenticatable implements HasMedia
         $this->companies()->sync($companies->pluck('id'));
 
         foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($this)->roles([$company['role']]);
+            setPermissionsTeamId($company['id']);
+            $this->syncRoles([$company['role']]);
         }
 
         return $this;

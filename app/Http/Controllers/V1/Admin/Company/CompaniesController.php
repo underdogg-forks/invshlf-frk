@@ -8,7 +8,6 @@ use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
 
 class CompaniesController extends Controller
@@ -24,7 +23,8 @@ class CompaniesController extends Controller
         $company->save();
         $company->setupDefaultData();
         $user->companies()->attach($company->id);
-        $user->assign('super admin');
+        setPermissionsTeamId($company->id);
+        $user->assignRole('super admin');
 
         if ($request->address) {
             $company->address()->create($request->address);
@@ -69,7 +69,8 @@ class CompaniesController extends Controller
         }
 
         $company->update(['owner_id' => $user->id]);
-        BouncerFacade::sync($user)->roles(['super admin']);
+        setPermissionsTeamId($company->id);
+        $user->syncRoles(['super admin']);
 
         return response()->json([
             'success' => true,

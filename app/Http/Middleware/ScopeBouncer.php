@@ -4,39 +4,26 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Silber\Bouncer\Bouncer;
+use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
 
 class ScopeBouncer
 {
-    /**
-     * The Bouncer instance.
-     *
-     * @var \Silber\Bouncer\Bouncer
-     */
-    protected $bouncer;
+    protected PermissionRegistrar $permissionRegistrar;
 
-    /**
-     * Constructor.
-     */
-    public function __construct(Bouncer $bouncer)
+    public function __construct(PermissionRegistrar $permissionRegistrar)
     {
-        $this->bouncer = $bouncer;
+        $this->permissionRegistrar = $permissionRegistrar;
     }
 
-    /**
-     * Set the proper Bouncer scope for the incoming request.
-     *
-     * @return mixed
-     */
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $tenantId = $request->header('company')
-            ? $request->header('company')
-            : $user->companies()->first()->id;
+        $teamId = $request->header('company')
+            ? (int) $request->header('company')
+            : ($user ? $user->companies()->first()?->id : null);
 
-        $this->bouncer->scope()->to($tenantId);
+        $this->permissionRegistrar->setPermissionsTeamId($teamId);
 
         return $next($request);
     }
