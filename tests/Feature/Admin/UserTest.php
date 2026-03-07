@@ -36,11 +36,8 @@ class UserTest extends TestCase
         $response = $this->getJson('/api/v1/users');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_validates_the_store_action_uses_a_form_request(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
 
@@ -59,7 +56,9 @@ class UserTest extends TestCase
         $user = User::factory()->create();
 
         /* Act & Assert */
-        $this->getJson("/api/v1/users/{$user->id}")->assertOk();
+        $this->getJson("/api/v1/users/{$user->id}")
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
     }
 
     #[Test]

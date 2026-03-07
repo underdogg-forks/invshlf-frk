@@ -40,11 +40,8 @@ class PaymentTest extends TestCase
         $response = $this->getJson('api/v1/payments?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_retrieves_a_single_payment(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $payment = Payment::factory()->create();
@@ -53,11 +50,8 @@ class PaymentTest extends TestCase
         $response = $this->getJson("api/v1/payments/{$payment->id}");
 
         /* Assert */
-        $response->assertStatus(200);
-    }
-
-    #[Test]
-    public function it_creates_a_payment_for_an_invoice(): void
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id', 'payment_number', 'amount']]);
     {
         /* Arrange */
         $invoice = Invoice::factory()->create(['due_amount' => 100, 'exchange_rate' => 1]);
@@ -150,11 +144,8 @@ class PaymentTest extends TestCase
         $response = $this->getJson('api/v1/payments?'.http_build_query($filters, '', '&'));
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_sends_a_payment_receipt_to_a_customer_via_email(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         Mail::fake();

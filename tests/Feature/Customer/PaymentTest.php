@@ -36,11 +36,8 @@ class PaymentTest extends TestCase
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/payments?page=1");
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_retrieves_a_single_payment_for_the_customer(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $customer = Auth::guard('customer')->user();
@@ -50,6 +47,5 @@ class PaymentTest extends TestCase
         $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/payments/{$payment->id}");
 
         /* Assert */
-        $response->assertOk();
-    }
-}
+        $response->assertOk()
+            ->assertJsonFragment(['id' => $payment->id, 'payment_number' => $payment->payment_number]);

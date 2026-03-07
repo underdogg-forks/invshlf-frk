@@ -35,6 +35,7 @@ class LocationTest extends TestCase
         $response = $this->getJson('api/v1/countries');
 
         /* Assert */
-        $response->assertOk();
+        $response->assertOk()
+            ->assertJsonStructure(['data' => [['id', 'code', 'name', 'phone_code']]]);
     }
 }

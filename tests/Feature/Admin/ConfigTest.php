@@ -41,7 +41,9 @@ class ConfigTest extends TestCase
 
         /* Act & Assert */
         foreach ($supportedKeys as $key) {
-            $this->getJson('api/v1/config?key='.$key)->assertOk();
+            $this->getJson('api/v1/config?key='.$key)
+                ->assertOk()
+                ->assertJsonStructure([$key]);
         }
     }
 }

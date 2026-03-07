@@ -44,11 +44,8 @@ class EstimateTest extends TestCase
         $response = $this->getJson('api/v1/estimates?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_an_estimate(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $estimate = Estimate::factory()->raw([
@@ -168,11 +165,8 @@ class EstimateTest extends TestCase
         $response = $this->getJson('api/v1/estimates?'.http_build_query($filters, '', '&'));
 
         /* Assert */
-        $response->assertStatus(200);
-    }
-
-    #[Test]
-    public function it_validates_the_send_estimate_action_uses_a_form_request(): void
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
 
@@ -302,7 +296,9 @@ class EstimateTest extends TestCase
         /* Arrange */
 
         /* Act & Assert */
-        $this->getJson('api/v1/estimates/templates')->assertStatus(200);
+        $this->getJson('api/v1/estimates/templates')
+            ->assertStatus(200)
+            ->assertJsonStructure(['estimateTemplates']);
     }
 
     #[Test]

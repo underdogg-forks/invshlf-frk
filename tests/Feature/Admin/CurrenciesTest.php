@@ -34,6 +34,7 @@ class CurrenciesTest extends TestCase
         $response = $this->getJson('/api/v1/currencies/used');
 
         /* Assert */
-        $response->assertOk();
+        $response->assertOk()
+            ->assertJsonStructure(['currencies']);
     }
 }

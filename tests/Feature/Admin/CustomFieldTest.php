@@ -37,11 +37,8 @@ class CustomFieldTest extends TestCase
         $response = $this->getJson('api/v1/custom-fields?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_a_custom_field(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $data = CustomField::factory()->raw();

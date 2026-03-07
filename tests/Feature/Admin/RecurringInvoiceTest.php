@@ -40,11 +40,8 @@ class RecurringInvoiceTest extends TestCase
         $response = $this->getJson('api/v1/recurring-invoices?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_validates_the_store_action_uses_a_form_request(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
 
@@ -77,7 +74,9 @@ class RecurringInvoiceTest extends TestCase
         $recurringInvoice = RecurringInvoice::factory()->create();
 
         /* Act & Assert */
-        $this->getJson("api/v1/recurring-invoices/{$recurringInvoice->id}")->assertOk();
+        $this->getJson("api/v1/recurring-invoices/{$recurringInvoice->id}")
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'frequency']]);
     }
 
     #[Test]
@@ -138,6 +137,9 @@ class RecurringInvoiceTest extends TestCase
         ];
 
         /* Act & Assert */
-        $this->getJson('api/v1/recurring-invoice-frequency?'.http_build_query($data, '', '&'))->assertOk();
+        $this->getJson('api/v1/recurring-invoice-frequency?'.http_build_query($data, '', '&'))
+            ->assertOk()
+            ->assertJson(['success' => true])
+            ->assertJsonStructure(['next_invoice_at']);
     }
 }

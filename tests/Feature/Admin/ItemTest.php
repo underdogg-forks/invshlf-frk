@@ -38,11 +38,8 @@ class ItemTest extends TestCase
         $response = $this->getJson('api/v1/items?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_an_item_with_taxes(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $item = Item::factory()->raw([
@@ -170,11 +167,8 @@ class ItemTest extends TestCase
         $response = $this->getJson('api/v1/items?'.http_build_query($filters, '', '&'));
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_an_item_with_a_fixed_amount_tax(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $item = Item::factory()->raw([

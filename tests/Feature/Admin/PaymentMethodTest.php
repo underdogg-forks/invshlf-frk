@@ -37,11 +37,8 @@ class PaymentMethodTest extends TestCase
         $response = $this->getJson('api/v1/payment-methods?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_a_payment_method(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $data = [

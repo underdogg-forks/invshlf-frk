@@ -37,11 +37,8 @@ class TaxTypeTest extends TestCase
         $response = $this->getJson('api/v1/tax-types');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_a_tax_type(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data']);
     {
         /* Arrange */
         $taxType = TaxType::factory()->raw();
@@ -76,7 +73,8 @@ class TaxTypeTest extends TestCase
         $response = $this->getJson('api/v1/tax-types/'.$taxType->id);
 
         /* Assert */
-        $response->assertOk();
+        $response->assertOk()
+            ->assertJson(['data' => ['id' => $taxType->id, 'name' => $taxType->name]]);
     }
 
     #[Test]
@@ -91,6 +89,7 @@ class TaxTypeTest extends TestCase
 
         /* Assert */
         $response->assertOk();
+        $this->assertDatabaseHas('tax_types', ['id' => $taxType->id, 'name' => $updatedData['name']]);
     }
 
     #[Test]

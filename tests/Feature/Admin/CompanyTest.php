@@ -76,7 +76,9 @@ class CompanyTest extends TestCase
         $user = User::factory()->create();
 
         /* Act & Assert */
-        $this->postJson('/api/v1/transfer/ownership/'.$user->id)->assertOk();
+        $this->postJson('/api/v1/transfer/ownership/'.$user->id)
+            ->assertOk()
+            ->assertJson(['success' => true]);
     }
 
     #[Test]
@@ -88,6 +90,5 @@ class CompanyTest extends TestCase
         $response = $this->getJson('/api/v1/companies');
 
         /* Assert */
-        $response->assertOk();
-    }
-}
+        $response->assertOk()
+            ->assertJsonStructure(['data']);

@@ -36,11 +36,8 @@ class EstimateTest extends TestCase
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/estimates?page=1");
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_retrieves_a_single_estimate_for_the_customer(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $customer = Auth::guard('customer')->user();
@@ -50,11 +47,8 @@ class EstimateTest extends TestCase
         $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/estimates/{$estimate->id}");
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_marks_a_customer_estimate_as_accepted(): void
+        $response->assertOk()
+            ->assertJsonFragment(['id' => $estimate->id, 'estimate_number' => $estimate->estimate_number]);
     {
         /* Arrange */
         $customer = Auth::guard('customer')->user();

@@ -35,11 +35,8 @@ class FileDiskTest extends TestCase
         $response = $this->getJson('/api/v1/disks');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_a_file_disk(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $disk = FileDisk::factory()->raw();
@@ -78,11 +75,8 @@ class FileDiskTest extends TestCase
         $response = $this->getJson("/api/v1/disks/{$disk->driver}");
 
         /* Assert */
-        $response->assertStatus(200);
-    }
-
-    #[Test]
-    public function it_retrieves_available_disk_drivers(): void
+        $response->assertStatus(200)
+            ->assertJsonStructure(['driver']);
     {
         /* Arrange */
 
@@ -90,6 +84,5 @@ class FileDiskTest extends TestCase
         $response = $this->getJson('/api/v1/disk/drivers');
 
         /* Assert */
-        $response->assertStatus(200);
-    }
-}
+        $response->assertStatus(200)
+            ->assertJsonStructure(['drivers', 'default']);
