@@ -89,6 +89,7 @@ class CustomFieldTest extends TestCase
             'label' => $updatedData['label'],
             'type' => $updatedData['type'],
             'model_type' => $updatedData['model_type'],
+            'is_required' => $updatedData['is_required'],
         ]);
     }
 
