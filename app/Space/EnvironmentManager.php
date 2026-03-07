@@ -26,7 +26,7 @@ class EnvironmentManager
      */
     public function __construct($path = null)
     {
-        $this->envPath = base_path('.env');
+        $this->envPath = $path ?? base_path('.env');
     }
 
     /**

@@ -38,7 +38,7 @@ class PDFDriverFactory
 
 class PDFService
 {
-    public static function loadView(string $template)
+    public function loadView(string $template)
     {
         $driver = config('pdf.driver');
 

@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Space\InstallUtils;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
 
@@ -24,7 +25,7 @@ class DemoSeeder extends Seeder
             'email' => 'demo@invoiceshelf.com',
             'name' => 'Demo User',
             'role' => 'super admin',
-            'password' => 'demo',
+            'password' => Hash::make('demo'),
         ]);
 
         // Create demo company
