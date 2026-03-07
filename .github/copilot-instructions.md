@@ -31,7 +31,7 @@ public function it_creates_an_invoice(): void
 - All test methods **must** be annotated with `#[\PHPUnit\Framework\Attributes\Test]`
 - Tests **must** be written as PHPUnit class-based tests — **do NOT use Pest closures**
 - Test classes must extend `Tests\TestCase`
-- Use `use \Illuminate\Foundation\Testing\RefreshDatabase;` in all test classes
+- Use `use Illuminate\Foundation\Testing\RefreshDatabase;` in all test classes
 
 ### PHPUnit Class Structure
 ```php
@@ -77,7 +77,7 @@ class InvoiceTest extends TestCase
 - Use `setUp()` for shared test setup instead of repeating in every test
 - Avoid copy-pasting similar blocks; use loops or helpers
 
-### Dynamic Programming
+### Data-Driven Testing
 - Use data-driven loops when asserting over multiple similar cases:
 ```php
 $documentTypes = [
