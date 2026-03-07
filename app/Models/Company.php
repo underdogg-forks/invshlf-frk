@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\CompanyLevel;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -17,10 +18,6 @@ class Company extends BaseModel implements HasMedia
 {
     use BelongsToFranchise;
     use InteractsWithMedia;
-
-    public const COMPANY_LEVEL = 'company_level';
-
-    public const CUSTOMER_LEVEL = 'customer_level';
 
     protected $guarded = [
         'id',

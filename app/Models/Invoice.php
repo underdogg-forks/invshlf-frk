@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App;
+use App\Enums\InvoiceStatus;
 use App\Facades\PDF;
 use App\Mail\SendInvoiceMail;
 use App\Models\BaseModel;
@@ -27,19 +28,19 @@ class Invoice extends BaseModel implements HasMedia
     use HasCustomFieldsTrait;
     use InteractsWithMedia;
 
-    public const STATUS_DRAFT = 'DRAFT';
+    public const STATUS_DRAFT = InvoiceStatus::Draft->value;
 
-    public const STATUS_SENT = 'SENT';
+    public const STATUS_SENT = InvoiceStatus::Sent->value;
 
-    public const STATUS_VIEWED = 'VIEWED';
+    public const STATUS_VIEWED = InvoiceStatus::Viewed->value;
 
-    public const STATUS_COMPLETED = 'COMPLETED';
+    public const STATUS_COMPLETED = InvoiceStatus::Completed->value;
 
-    public const STATUS_UNPAID = 'UNPAID';
+    public const STATUS_UNPAID = InvoiceStatus::Unpaid->value;
 
-    public const STATUS_PARTIALLY_PAID = 'PARTIALLY_PAID';
+    public const STATUS_PARTIALLY_PAID = InvoiceStatus::PartiallyPaid->value;
 
-    public const STATUS_PAID = 'PAID';
+    public const STATUS_PAID = InvoiceStatus::Paid->value;
 
     protected $dates = [
         'created_at',

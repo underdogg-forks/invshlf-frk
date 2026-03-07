@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\AddressType;
 use App\Models\Address;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Arr;
@@ -155,7 +156,7 @@ class CustomerRequest extends FormRequest
     {
         return collect($this->shipping)
             ->merge([
-                'type' => Address::SHIPPING_TYPE,
+                'type' => AddressType::Shipping->value,
             ])
             ->toArray();
     }
@@ -164,7 +165,7 @@ class CustomerRequest extends FormRequest
     {
         return collect($this->billing)
             ->merge([
-                'type' => Address::BILLING_TYPE,
+                'type' => AddressType::Billing->value,
             ])
             ->toArray();
     }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionStatus;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
@@ -13,11 +14,11 @@ class Transaction extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const PENDING = 'PENDING';
+    public const PENDING = TransactionStatus::Pending->value;
 
-    public const FAILED = 'FAILED';
+    public const FAILED = TransactionStatus::Failed->value;
 
-    public const SUCCESS = 'SUCCESS';
+    public const SUCCESS = TransactionStatus::Success->value;
 
     protected $guarded = [
         'id',

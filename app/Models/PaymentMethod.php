@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PaymentMethodType;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -11,9 +12,9 @@ class PaymentMethod extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const TYPE_GENERAL = 'GENERAL';
+    public const TYPE_GENERAL = PaymentMethodType::General->value;
 
-    public const TYPE_MODULE = 'MODULE';
+    public const TYPE_MODULE = PaymentMethodType::Module->value;
 
     protected $guarded = [
         'id',
