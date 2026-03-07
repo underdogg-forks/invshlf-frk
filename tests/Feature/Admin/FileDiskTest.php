@@ -1,65 +1,94 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Models\FileDisk;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class FileDiskTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get file disks', function () {
-    $response = getJson('/api/v1/disks');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_all_file_disks(): void
+    {
+        // Arrange - data seeded in setUp
 
-test('create file disk', function () {
-    $disk = FileDisk::factory()->raw();
+        // Act
+        $response = $this->getJson('/api/v1/disks');
 
-    $response = postJson('/api/v1/disks', $disk);
+        // Assert
+        $response->assertOk();
+    }
 
-    $disk['credentials'] = json_encode($disk['credentials']);
-    $this->assertDatabaseHas('file_disks', $disk);
-});
+    #[Test]
+    public function it_creates_a_file_disk(): void
+    {
+        // Arrange
+        $disk = FileDisk::factory()->raw();
 
-test('update file disk', function () {
-    $disk = FileDisk::factory()->create();
+        // Act
+        $this->postJson('/api/v1/disks', $disk);
 
-    $disk2 = FileDisk::factory()->raw();
+        // Assert
+        $disk['credentials'] = json_encode($disk['credentials']);
+        $this->assertDatabaseHas('file_disks', $disk);
+    }
 
-    $response = putJson("/api/v1/disks/{$disk->id}", $disk2)->assertStatus(200);
+    #[Test]
+    public function it_updates_a_file_disk(): void
+    {
+        // Arrange
+        $disk = FileDisk::factory()->create();
+        $updatedDisk = FileDisk::factory()->raw();
 
-    $disk2['credentials'] = json_encode($disk2['credentials']);
+        // Act
+        $this->putJson("/api/v1/disks/{$disk->id}", $updatedDisk)->assertStatus(200);
 
-    $this->assertDatabaseHas('file_disks', $disk2);
-});
+        // Assert
+        $updatedDisk['credentials'] = json_encode($updatedDisk['credentials']);
+        $this->assertDatabaseHas('file_disks', $updatedDisk);
+    }
 
-test('get disk', function () {
-    $disk = FileDisk::factory()->create();
+    #[Test]
+    public function it_retrieves_a_single_disk_by_driver(): void
+    {
+        // Arrange
+        $disk = FileDisk::factory()->create();
 
-    $response = getJson("/api/v1/disks/{$disk->driver}");
+        // Act
+        $response = $this->getJson("/api/v1/disks/{$disk->driver}");
 
-    $response->assertStatus(200);
-});
+        // Assert
+        $response->assertStatus(200);
+    }
 
-test('get drivers', function () {
-    $response = getJson('/api/v1/disk/drivers');
+    #[Test]
+    public function it_retrieves_available_disk_drivers(): void
+    {
+        // Arrange - no setup required
 
-    $response->assertStatus(200);
-});
+        // Act
+        $response = $this->getJson('/api/v1/disk/drivers');
+
+        // Assert
+        $response->assertStatus(200);
+    }
+}

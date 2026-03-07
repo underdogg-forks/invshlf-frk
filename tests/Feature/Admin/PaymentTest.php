@@ -1,241 +1,278 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Payment\PaymentsController;
 use App\Http\Requests\PaymentRequest;
 use App\Mail\SendPaymentMail;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class PaymentTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get payments', function () {
-    $response = getJson('api/v1/payments?page=1');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_a_paginated_list_of_payments(): void
+    {
+        // Arrange - data seeded in setUp
 
-test('get payment', function () {
-    $payment = Payment::factory()->create();
+        // Act
+        $response = $this->getJson('api/v1/payments?page=1');
 
-    $response = getJson("api/v1/payments/{$payment->id}");
+        // Assert
+        $response->assertOk();
+    }
 
-    $response->assertStatus(200);
-});
+    #[Test]
+    public function it_retrieves_a_single_payment(): void
+    {
+        // Arrange
+        $payment = Payment::factory()->create();
 
-test('create payment', function () {
-    $invoice = Invoice::factory()->create([
-        'due_amount' => 100,
-        'exchange_rate' => 1,
-    ]);
+        // Act
+        $response = $this->getJson("api/v1/payments/{$payment->id}");
 
-    $payment = Payment::factory()->raw([
-        'invoice_id' => $invoice->id,
-        'payment_number' => 'PAY-000001',
-        'amount' => $invoice->due_amount,
-        'exchange_rate' => 1,
-    ]);
+        // Assert
+        $response->assertStatus(200);
+    }
 
-    $response = postJson('api/v1/payments', $payment);
+    #[Test]
+    public function it_creates_a_payment_for_an_invoice(): void
+    {
+        // Arrange
+        $invoice = Invoice::factory()->create(['due_amount' => 100, 'exchange_rate' => 1]);
+        $payment = Payment::factory()->raw([
+            'invoice_id' => $invoice->id,
+            'payment_number' => 'PAY-000001',
+            'amount' => $invoice->due_amount,
+            'exchange_rate' => 1,
+        ]);
 
-    $response->assertOk();
+        // Act
+        $response = $this->postJson('api/v1/payments', $payment);
 
-    $this->assertDatabaseHas('payments', [
-        'payment_number' => $payment['payment_number'],
-        'customer_id' => $payment['customer_id'],
-        'amount' => $payment['amount'],
-        'company_id' => $payment['company_id'],
-    ]);
-});
+        // Assert
+        $response->assertOk();
+        $this->assertDatabaseHas('payments', [
+            'payment_number' => $payment['payment_number'],
+            'customer_id' => $payment['customer_id'],
+            'amount' => $payment['amount'],
+            'company_id' => $payment['company_id'],
+        ]);
+    }
 
-test('store validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        PaymentsController::class,
-        'store',
-        PaymentRequest::class
-    );
-});
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-test('update payment', function () {
-    $invoice = Invoice::factory()->create();
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            PaymentsController::class,
+            'store',
+            PaymentRequest::class
+        );
+    }
 
-    $payment = Payment::factory()->create([
-        'payment_date' => '1988-08-18',
-        'invoice_id' => $invoice->id,
-        'exchange_rate' => 1,
-    ]);
+    #[Test]
+    public function it_updates_a_payment(): void
+    {
+        // Arrange
+        $invoice = Invoice::factory()->create();
+        $payment = Payment::factory()->create([
+            'payment_date' => '1988-08-18',
+            'invoice_id' => $invoice->id,
+            'exchange_rate' => 1,
+        ]);
+        $updatedPayment = Payment::factory()->raw([
+            'invoice_id' => $invoice->id,
+            'exchange_rate' => 1,
+        ]);
 
-    $payment2 = Payment::factory()->raw([
-        'invoice_id' => $invoice->id,
-        'exchange_rate' => 1,
-    ]);
+        // Act
+        $this->putJson("api/v1/payments/{$payment->id}", $updatedPayment)->assertOk();
 
-    putJson("api/v1/payments/{$payment->id}", $payment2)
-        ->assertOk();
+        // Assert
+        $this->assertDatabaseHas('payments', [
+            'id' => $payment->id,
+            'payment_number' => $updatedPayment['payment_number'],
+            'customer_id' => $updatedPayment['customer_id'],
+            'amount' => $updatedPayment['amount'],
+        ]);
+    }
 
-    $this->assertDatabaseHas('payments', [
-        'id' => $payment->id,
-        'payment_number' => $payment2['payment_number'],
-        'customer_id' => $payment2['customer_id'],
-        'amount' => $payment2['amount'],
-    ]);
-});
+    #[Test]
+    public function it_validates_the_update_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-test('update validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        PaymentsController::class,
-        'update',
-        PaymentRequest::class
-    );
-});
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            PaymentsController::class,
+            'update',
+            PaymentRequest::class
+        );
+    }
 
-test('search payments', function () {
-    $filters = [
-        'page' => 1,
-        'limit' => 15,
-        'search' => 'doe',
-        'payment_number' => 'PAY-000001',
-        'payment_mode' => 'OTHER',
-    ];
+    #[Test]
+    public function it_searches_payments_by_filters(): void
+    {
+        // Arrange
+        $filters = [
+            'page' => 1,
+            'limit' => 15,
+            'search' => 'doe',
+            'payment_number' => 'PAY-000001',
+            'payment_mode' => 'OTHER',
+        ];
 
-    $queryString = http_build_query($filters, '', '&');
+        // Act
+        $response = $this->getJson('api/v1/payments?'.http_build_query($filters, '', '&'));
 
-    $response = getJson('api/v1/payments?'.$queryString);
+        // Assert
+        $response->assertOk();
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_sends_a_payment_receipt_to_a_customer_via_email(): void
+    {
+        // Arrange
+        Mail::fake();
+        $payment = Payment::factory()->create();
+        $data = [
+            'subject' => 'test',
+            'body' => 'test',
+            'from' => 'john@example.com',
+            'to' => 'doe@example.com',
+        ];
 
-test('send payment to customer', function () {
-    Mail::fake();
+        // Act
+        $response = $this->postJson("api/v1/payments/{$payment->id}/send", $data);
 
-    $payment = Payment::factory()->create();
+        // Assert
+        $response->assertJson(['success' => true]);
+        Mail::assertSent(SendPaymentMail::class);
+    }
 
-    $data = [
-        'subject' => 'test',
-        'body' => 'test',
-        'from' => 'john@example.com',
-        'to' => 'doe@example.com',
-    ];
+    #[Test]
+    public function it_deletes_multiple_payments(): void
+    {
+        // Arrange
+        $payments = Payment::factory()->count(5)->create();
+        $data = ['ids' => $payments->pluck('id')];
 
-    $response = postJson("api/v1/payments/{$payment->id}/send", $data);
+        // Act
+        $response = $this->postJson('api/v1/payments/delete', $data);
 
-    $response->assertJson([
-        'success' => true,
-    ]);
+        // Assert
+        $response->assertJson(['success' => true]);
+    }
 
-    Mail::assertSent(SendPaymentMail::class);
-});
+    #[Test]
+    public function it_creates_a_payment_without_an_invoice(): void
+    {
+        // Arrange
+        $payment = Payment::factory()->raw([
+            'payment_number' => 'PAY-000001',
+            'exchange_rate' => 1,
+        ]);
 
-test('delete payment', function () {
-    $payments = Payment::factory()->count(5)->create();
+        // Act
+        $this->postJson('api/v1/payments', $payment)->assertOk();
 
-    $ids = $payments->pluck('id');
+        // Assert
+        $this->assertDatabaseHas('payments', [
+            'payment_number' => $payment['payment_number'],
+            'customer_id' => $payment['customer_id'],
+            'amount' => $payment['amount'],
+            'company_id' => $payment['company_id'],
+        ]);
+    }
 
-    $data = [
-        'ids' => $ids,
-    ];
+    #[Test]
+    public function it_creates_a_payment_linked_to_an_invoice(): void
+    {
+        // Arrange
+        $invoice = Invoice::factory()->create();
+        $payment = Payment::factory()->raw([
+            'invoice_id' => $invoice->id,
+            'amount' => $invoice->due_amount,
+            'exchange_rate' => 1,
+        ]);
 
-    $response = postJson('api/v1/payments/delete', $data);
+        // Act
+        $this->postJson('api/v1/payments', $payment)->assertOk();
 
-    $response->assertJson([
-        'success' => true,
-    ]);
-});
+        // Assert
+        $this->assertDatabaseHas('payments', [
+            'payment_number' => $payment['payment_number'],
+            'customer_id' => $payment['customer_id'],
+            'invoice_id' => $payment['invoice_id'],
+            'amount' => $payment['amount'],
+            'company_id' => $payment['company_id'],
+        ]);
+    }
 
-test('create payment without invoice', function () {
-    $payment = Payment::factory()->raw([
-        'payment_number' => 'PAY-000001',
-        'exchange_rate' => 1,
-    ]);
+    #[Test]
+    public function it_creates_a_partial_payment_and_updates_the_invoice_paid_status(): void
+    {
+        // Arrange
+        $invoice = Invoice::factory()->create([
+            'sub_total' => 100,
+            'total' => 100,
+            'due_amount' => 100,
+            'exchange_rate' => 1,
+            'base_discount_val' => 100,
+            'base_sub_total' => 100,
+            'base_total' => 100,
+            'base_tax' => 100,
+            'base_due_amount' => 100,
+        ]);
+        $payment = Payment::factory()->raw([
+            'invoice_id' => $invoice->id,
+            'customer_id' => $invoice->customer_id,
+            'exchange_rate' => $invoice->exchange_rate,
+            'amount' => 100,
+            'currency_id' => $invoice->currency_id,
+        ]);
 
-    postJson('api/v1/payments', $payment)->assertOk();
+        // Act
+        $response = $this->postJson('api/v1/payments', $payment)->assertOk();
 
-    $this->assertDatabaseHas('payments', [
-        'payment_number' => $payment['payment_number'],
-        'customer_id' => $payment['customer_id'],
-        'amount' => $payment['amount'],
-        'company_id' => $payment['company_id'],
-    ]);
-});
-
-test('create payment with invoice', function () {
-    $payment = Payment::factory()->raw([
-        'payment_number' => 'PAY-000001',
-    ]);
-
-    $invoice = Invoice::factory()->create();
-
-    $payment = Payment::factory()->raw([
-        'invoice_id' => $invoice->id,
-        'amount' => $invoice->due_amount,
-        'exchange_rate' => 1,
-    ]);
-
-    postJson('api/v1/payments', $payment)->assertOk();
-
-    $this->assertDatabaseHas('payments', [
-        'payment_number' => $payment['payment_number'],
-        'customer_id' => $payment['customer_id'],
-        'invoice_id' => $payment['invoice_id'],
-        'amount' => $payment['amount'],
-        'company_id' => $payment['company_id'],
-    ]);
-});
-
-test('create payment with partially paid', function () {
-    $invoice = Invoice::factory()->create([
-        'sub_total' => 100,
-        'total' => 100,
-        'due_amount' => 100,
-        'exchange_rate' => 1,
-        'base_discount_val' => 100,
-        'base_sub_total' => 100,
-        'base_total' => 100,
-        'base_tax' => 100,
-        'base_due_amount' => 100,
-    ]);
-
-    $payment = Payment::factory()->raw([
-        'invoice_id' => $invoice->id,
-        'customer_id' => $invoice->customer_id,
-        'exchange_rate' => $invoice->exchange_rate,
-        'amount' => 100,
-        'currency_id' => $invoice->currency_id,
-    ]);
-
-    $response = postJson('api/v1/payments', $payment)->assertOk();
-
-    $this->assertDatabaseHas('payments', [
-        'payment_number' => $payment['payment_number'],
-        'customer_id' => (string) $payment['customer_id'],
-        'amount' => (string) $payment['amount'],
-    ]);
-
-    $this->assertDatabaseHas('invoices', [
-        'id' => $invoice['id'],
-        'invoice_number' => $response['data']['invoice']['invoice_number'],
-        'total' => $response['data']['invoice']['total'],
-        'customer_id' => $response['data']['invoice']['customer_id'],
-        'exchange_rate' => $response['data']['invoice']['exchange_rate'],
-        'base_total' => $response['data']['invoice']['base_total'],
-        'paid_status' => $response['data']['invoice']['paid_status'],
-    ]);
-});
+        // Assert
+        $this->assertDatabaseHas('payments', [
+            'payment_number' => $payment['payment_number'],
+            'customer_id' => (string) $payment['customer_id'],
+            'amount' => (string) $payment['amount'],
+        ]);
+        $this->assertDatabaseHas('invoices', [
+            'id' => $invoice['id'],
+            'invoice_number' => $response['data']['invoice']['invoice_number'],
+            'total' => $response['data']['invoice']['total'],
+            'customer_id' => $response['data']['invoice']['customer_id'],
+            'exchange_rate' => $response['data']['invoice']['exchange_rate'],
+            'base_total' => $response['data']['invoice']['base_total'],
+            'paid_status' => $response['data']['invoice']['paid_status'],
+        ]);
+    }
+}

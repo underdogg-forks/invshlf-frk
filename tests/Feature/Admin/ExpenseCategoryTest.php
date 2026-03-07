@@ -1,94 +1,127 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Expense\ExpenseCategoriesController;
 use App\Http\Requests\ExpenseCategoryRequest;
 use App\Models\ExpenseCategory;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\deleteJson;
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class ExpenseCategoryTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get categories', function () {
-    $response = getJson('api/v1/categories');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_all_expense_categories(): void
+    {
+        // Arrange - data seeded in setUp
 
-test('create category', function () {
-    $category = ExpenseCategory::factory()->raw();
+        // Act
+        $response = $this->getJson('api/v1/categories');
 
-    $response = postJson('api/v1/categories', $category);
+        // Assert
+        $response->assertOk();
+    }
 
-    $response->assertStatus(201);
+    #[Test]
+    public function it_creates_an_expense_category(): void
+    {
+        // Arrange
+        $category = ExpenseCategory::factory()->raw();
 
-    $this->assertDatabaseHas('expense_categories', [
-        'name' => $category['name'],
-        'description' => $category['description'],
-    ]);
-});
+        // Act
+        $response = $this->postJson('api/v1/categories', $category);
 
-test('store validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        ExpenseCategoriesController::class,
-        'store',
-        ExpenseCategoryRequest::class
-    );
-});
-
-test('get category', function () {
-    $category = ExpenseCategory::factory()->create();
-
-    getJson("api/v1/categories/{$category->id}")->assertOk();
-});
-
-test('update category', function () {
-    $category = ExpenseCategory::factory()->create();
-
-    $category2 = ExpenseCategory::factory()->raw();
-
-    putJson('api/v1/categories/'.$category->id, $category2)->assertOk();
-
-    $this->assertDatabaseHas('expense_categories', [
-        'id' => $category->id,
-        'name' => $category2['name'],
-        'description' => $category2['description'],
-    ]);
-});
-
-test('update validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        ExpenseCategoriesController::class,
-        'update',
-        ExpenseCategoryRequest::class
-    );
-});
-
-test('delete category', function () {
-    $category = ExpenseCategory::factory()->create();
-
-    deleteJson('api/v1/categories/'.$category->id)
-        ->assertOk()
-        ->assertJson([
-            'success' => true,
+        // Assert
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('expense_categories', [
+            'name' => $category['name'],
+            'description' => $category['description'],
         ]);
+    }
 
-    $this->assertModelMissing($category);
-});
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
+
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            ExpenseCategoriesController::class,
+            'store',
+            ExpenseCategoryRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_retrieves_a_single_expense_category(): void
+    {
+        // Arrange
+        $category = ExpenseCategory::factory()->create();
+
+        // Act & Assert
+        $this->getJson("api/v1/categories/{$category->id}")->assertOk();
+    }
+
+    #[Test]
+    public function it_updates_an_expense_category(): void
+    {
+        // Arrange
+        $category = ExpenseCategory::factory()->create();
+        $updatedData = ExpenseCategory::factory()->raw();
+
+        // Act
+        $this->putJson('api/v1/categories/'.$category->id, $updatedData)->assertOk();
+
+        // Assert
+        $this->assertDatabaseHas('expense_categories', [
+            'id' => $category->id,
+            'name' => $updatedData['name'],
+            'description' => $updatedData['description'],
+        ]);
+    }
+
+    #[Test]
+    public function it_validates_the_update_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
+
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            ExpenseCategoriesController::class,
+            'update',
+            ExpenseCategoryRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_deletes_an_expense_category(): void
+    {
+        // Arrange
+        $category = ExpenseCategory::factory()->create();
+
+        // Act & Assert
+        $this->deleteJson('api/v1/categories/'.$category->id)
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        $this->assertModelMissing($category);
+    }
+}

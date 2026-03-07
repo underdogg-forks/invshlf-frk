@@ -1,106 +1,135 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Payment\PaymentMethodsController;
 use App\Http\Requests\PaymentMethodRequest;
 use App\Models\PaymentMethod;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\deleteJson;
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class PaymentMethodTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get payment methods', function () {
-    $response = getJson('api/v1/payment-methods?page=1');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_a_paginated_list_of_payment_methods(): void
+    {
+        // Arrange - data seeded in setUp
 
-test('create payment method', function () {
-    $data = [
-        'name' => 'demo name',
-        'company_id' => User::find(1)->companies()->first()->id,
-    ];
+        // Act
+        $response = $this->getJson('api/v1/payment-methods?page=1');
 
-    $response = postJson('api/v1/payment-methods', $data);
+        // Assert
+        $response->assertOk();
+    }
 
-    $response->assertStatus(201);
+    #[Test]
+    public function it_creates_a_payment_method(): void
+    {
+        // Arrange
+        $data = [
+            'name' => 'demo name',
+            'company_id' => User::find(1)->companies()->first()->id,
+        ];
 
-    $this->assertDatabaseHas('payment_methods', [
-        'name' => $data['name'],
-        'company_id' => $data['company_id'],
-    ]);
-});
+        // Act
+        $response = $this->postJson('api/v1/payment-methods', $data);
 
-test('store validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        PaymentMethodsController::class,
-        'store',
-        PaymentMethodRequest::class
-    );
-});
+        // Assert
+        $response->assertStatus(201);
+        $this->assertDatabaseHas('payment_methods', [
+            'name' => $data['name'],
+            'company_id' => $data['company_id'],
+        ]);
+    }
 
-test('get payment method', function () {
-    $method = PaymentMethod::factory()->create();
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-    $response = getJson("api/v1/payment-methods/{$method->id}");
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            PaymentMethodsController::class,
+            'store',
+            PaymentMethodRequest::class
+        );
+    }
 
-    $response->assertOk();
+    #[Test]
+    public function it_retrieves_a_single_payment_method(): void
+    {
+        // Arrange
+        $method = PaymentMethod::factory()->create();
 
-    $this->assertDatabaseHas('payment_methods', [
-        'id' => $method->id,
-        'name' => $method['name'],
-        'company_id' => $method['company_id'],
-    ]);
-});
+        // Act
+        $response = $this->getJson("api/v1/payment-methods/{$method->id}");
 
-test('update payment method', function () {
-    $method = PaymentMethod::factory()->create();
+        // Assert
+        $response->assertOk();
+        $this->assertDatabaseHas('payment_methods', [
+            'id' => $method->id,
+            'name' => $method['name'],
+            'company_id' => $method['company_id'],
+        ]);
+    }
 
-    $data = [
-        'name' => 'updated name',
-    ];
+    #[Test]
+    public function it_updates_a_payment_method(): void
+    {
+        // Arrange
+        $method = PaymentMethod::factory()->create();
+        $data = ['name' => 'updated name'];
 
-    $response = putJson("api/v1/payment-methods/{$method->id}", $data);
+        // Act
+        $response = $this->putJson("api/v1/payment-methods/{$method->id}", $data);
 
-    $response->assertOk();
+        // Assert
+        $response->assertOk();
+        $this->assertDatabaseHas('payment_methods', ['id' => $method->id, 'name' => $data['name']]);
+    }
 
-    $this->assertDatabaseHas('payment_methods', [
-        'id' => $method->id,
-        'name' => $data['name'],
-    ]);
-});
+    #[Test]
+    public function it_validates_the_update_action_uses_a_form_request(): void
+    {
+        // Arrange - no setup required
 
-test('update validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        PaymentMethodsController::class,
-        'update',
-        PaymentMethodRequest::class
-    );
-});
+        // Act & Assert
+        $this->assertActionUsesFormRequest(
+            PaymentMethodsController::class,
+            'update',
+            PaymentMethodRequest::class
+        );
+    }
 
-test('delete payment method', function () {
-    $method = PaymentMethod::factory()->create();
+    #[Test]
+    public function it_deletes_a_payment_method(): void
+    {
+        // Arrange
+        $method = PaymentMethod::factory()->create();
 
-    $response = deleteJson('api/v1/payment-methods/'.$method->id);
+        // Act
+        $response = $this->deleteJson('api/v1/payment-methods/'.$method->id);
 
-    $response->assertOk();
-
-    $this->assertModelMissing($method);
-});
+        // Assert
+        $response->assertOk();
+        $this->assertModelMissing($method);
+    }
+}
