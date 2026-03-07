@@ -41,15 +41,23 @@ class Company extends BaseModel implements HasMedia
             'team_id' => $this->id,
         ]);
 
-        $permissions = [];
-        foreach (config('abilities.abilities') as $ability) {
-            $permission = \Spatie\Permission\Models\Permission::firstOrCreate([
-                'name' => $ability['ability'],
-                'guard_name' => 'web',
-            ]);
-            $permissions[] = $permission->id;
+        $abilityNames = array_column(config('abilities.abilities'), 'ability');
+        $existing = \Spatie\Permission\Models\Permission::whereIn('name', $abilityNames)
+            ->where('guard_name', 'web')
+            ->pluck('id', 'name');
+
+        $permissionsToCreate = array_filter($abilityNames, fn ($name) => ! isset($existing[$name]));
+        if (! empty($permissionsToCreate)) {
+            $now = now();
+            \Spatie\Permission\Models\Permission::insert(
+                array_map(fn ($name) => ['name' => $name, 'guard_name' => 'web', 'created_at' => $now, 'updated_at' => $now], $permissionsToCreate)
+            );
+            $existing = \Spatie\Permission\Models\Permission::whereIn('name', $abilityNames)
+                ->where('guard_name', 'web')
+                ->pluck('id', 'name');
         }
-        $super_admin->permissions()->sync($permissions);
+
+        $super_admin->permissions()->sync($existing->values()->toArray());
     }
 
     public function setupDefaultPaymentMethods()

@@ -23,7 +23,9 @@ class ScopeBouncer
             ? (int) $request->header('company')
             : ($user ? $user->companies()->first()?->id : null);
 
-        $this->permissionRegistrar->setPermissionsTeamId($teamId);
+        if ($teamId !== null) {
+            $this->permissionRegistrar->setPermissionsTeamId($teamId);
+        }
 
         return $next($request);
     }
