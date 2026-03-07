@@ -168,7 +168,7 @@ class CompanySettingTest extends TestCase
             ->assertOk()
             ->assertJson(['success' => true]);
 
-        Invoice::factory()->raw([
+        Invoice::factory()->create([
             'taxes' => [Tax::factory()->raw()],
             'items' => [InvoiceItem::factory()->raw()],
         ]);

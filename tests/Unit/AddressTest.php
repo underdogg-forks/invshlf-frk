@@ -27,7 +27,7 @@ class AddressTest extends TestCase
         $address = Address::factory()->forUser()->create();
 
         /* Act & Assert */
-        $this->assertTrue($address->user->exists());
+        $this->assertTrue($address->user()->exists());
     }
 
     #[Test]
@@ -37,7 +37,7 @@ class AddressTest extends TestCase
         $address = Address::factory()->create();
 
         /* Act & Assert */
-        $this->assertTrue($address->country->exists());
+        $this->assertTrue($address->country()->exists());
     }
 
     #[Test]

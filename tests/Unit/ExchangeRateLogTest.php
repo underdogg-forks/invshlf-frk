@@ -28,7 +28,7 @@ class ExchangeRateLogTest extends TestCase
         $exchangeRateLog = ExchangeRateLog::factory()->forCompany()->create();
 
         /* Act & Assert */
-        $this->assertTrue($exchangeRateLog->company->exists());
+        $this->assertTrue($exchangeRateLog->company()->exists());
     }
 
     #[Test]
@@ -41,7 +41,7 @@ class ExchangeRateLogTest extends TestCase
         $response = ExchangeRateLog::addExchangeRateLog($expense);
 
         /* Assert */
-        $this->assertDatabaseHas('exchange_Rate_logs', [
+        $this->assertDatabaseHas('exchange_rate_logs', [
             'exchange_rate' => $response->exchange_rate,
             'base_currency_id' => $response->base_currency_id,
             'currency_id' => $response->currency_id,

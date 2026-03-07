@@ -31,7 +31,7 @@ class TaxTest extends TestCase
         $tax = Tax::factory()->create();
 
         /* Act & Assert */
-        $this->assertTrue($tax->taxType->exists());
+        $this->assertTrue($tax->taxType()->exists());
     }
 
     #[Test]
