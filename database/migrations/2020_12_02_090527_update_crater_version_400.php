@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\FileDiskType;
 use App\Models\Address;
 use App\Models\CompanySetting;
 use App\Models\Estimate;
@@ -72,7 +73,7 @@ return new class extends Migration
         FileDisk::create([
             'credentials' => json_encode($publicDisk),
             'name' => 'local_public',
-            'type' => 'SYSTEM',
+            'type' => FileDiskType::System,
             'driver' => 'local',
             'set_as_default' => false,
         ]);
@@ -80,7 +81,7 @@ return new class extends Migration
         FileDisk::create([
             'credentials' => json_encode($privateDisk),
             'name' => 'local_private',
-            'type' => 'SYSTEM',
+            'type' => FileDiskType::System,
             'driver' => 'local',
             'set_as_default' => true,
         ]);

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PaymentMethodType;
 use App\Models\PaymentMethod;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,6 +23,7 @@ class PaymentMethodFactory extends Factory
     {
         return [
             'name' => $this->faker->name(),
+            'type' => PaymentMethodType::General,
             'company_id' => User::find(1)->companies()->first()->id,
         ];
     }
