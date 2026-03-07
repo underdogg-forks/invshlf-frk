@@ -64,6 +64,7 @@ class FileDiskTest extends TestCase
 
         /* Assert */
         $updatedDisk['credentials'] = json_encode($updatedDisk['credentials']);
+        $updatedDisk['id'] = $disk->id;
         $this->assertDatabaseHas('file_disks', $updatedDisk);
     }
 
