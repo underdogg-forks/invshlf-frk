@@ -32,7 +32,9 @@ class NotesTest extends TestCase
         /* Arrange */
 
         /* Act & Assert */
-        $this->getJson('/api/v1/notes')->assertStatus(200);
+        $this->getJson('/api/v1/notes')
+            ->assertStatus(200)
+            ->assertJsonStructure(['data']);
     }
 
     #[Test]
@@ -55,7 +57,9 @@ class NotesTest extends TestCase
         $note = Note::factory()->create();
 
         /* Act & Assert */
-        $this->getJson("/api/v1/notes/{$note->id}")->assertStatus(200);
+        $this->getJson("/api/v1/notes/{$note->id}")
+            ->assertStatus(200)
+            ->assertJson(['data' => ['id' => $note->id, 'name' => $note->name]]);
     }
 
     #[Test]

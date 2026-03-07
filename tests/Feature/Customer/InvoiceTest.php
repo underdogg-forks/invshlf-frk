@@ -36,11 +36,8 @@ class InvoiceTest extends TestCase
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/invoices?page=1");
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_retrieves_a_single_invoice_for_the_customer(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $customer = Auth::guard('customer')->user();

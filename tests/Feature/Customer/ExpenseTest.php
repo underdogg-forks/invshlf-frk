@@ -36,11 +36,8 @@ class ExpenseTest extends TestCase
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/expenses?page=1");
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_retrieves_a_single_expense_for_the_customer(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $customer = Auth::guard('customer')->user();
@@ -53,6 +50,5 @@ class ExpenseTest extends TestCase
         $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/expenses/{$expense->id}");
 
         /* Assert */
-        $response->assertOk();
-    }
-}
+        $response->assertOk()
+            ->assertJsonFragment(['id' => $expense->id, 'amount' => $expense->amount]);

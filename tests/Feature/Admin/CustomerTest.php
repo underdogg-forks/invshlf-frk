@@ -39,11 +39,8 @@ class CustomerTest extends TestCase
         $response = $this->getJson('api/v1/customers?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_retrieves_stats_for_a_customer(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $customer = Customer::factory()->create();
@@ -53,7 +50,8 @@ class CustomerTest extends TestCase
         $response = $this->getJson("api/v1/customers/{$customer->id}/stats");
 
         /* Assert */
-        $response->assertStatus(200);
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id', 'name'], 'meta' => ['chartData' => ['months', 'invoiceTotals', 'salesTotal', 'totalReceipts', 'totalExpenses']]]);
     }
 
     #[Test]
@@ -150,11 +148,8 @@ class CustomerTest extends TestCase
         $response = $this->getJson('api/v1/customers?'.http_build_query($filters, '', '&'));
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_deletes_multiple_customers(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $customers = Customer::factory()->count(4)->create();

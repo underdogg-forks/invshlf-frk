@@ -35,6 +35,5 @@ class DashboardTest extends TestCase
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/dashboard");
 
         /* Assert */
-        $response->assertOk();
-    }
-}
+        $response->assertOk()
+            ->assertJsonStructure(['due_amount', 'invoice_count', 'estimate_count', 'payment_count']);

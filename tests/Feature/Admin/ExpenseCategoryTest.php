@@ -37,11 +37,8 @@ class ExpenseCategoryTest extends TestCase
         $response = $this->getJson('api/v1/categories');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_an_expense_category(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data']);
     {
         /* Arrange */
         $category = ExpenseCategory::factory()->raw();
@@ -77,7 +74,9 @@ class ExpenseCategoryTest extends TestCase
         $category = ExpenseCategory::factory()->create();
 
         /* Act & Assert */
-        $this->getJson("api/v1/categories/{$category->id}")->assertOk();
+        $this->getJson("api/v1/categories/{$category->id}")
+            ->assertOk()
+            ->assertJson(['data' => ['id' => $category->id, 'name' => $category->name]]);
     }
 
     #[Test]

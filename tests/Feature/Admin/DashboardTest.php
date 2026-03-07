@@ -34,7 +34,8 @@ class DashboardTest extends TestCase
         $response = $this->getJson('api/v1/dashboard');
 
         /* Assert */
-        $response->assertOk();
+        $response->assertOk()
+            ->assertJsonStructure(['total_amount_due', 'total_customer_count', 'total_invoice_count', 'total_estimate_count']);
     }
 
     #[Test]
@@ -46,6 +47,7 @@ class DashboardTest extends TestCase
         $response = $this->getJson('api/v1/search?name=ab');
 
         /* Assert */
-        $response->assertOk();
+        $response->assertOk()
+            ->assertJsonStructure(['customers', 'users']);
     }
 }

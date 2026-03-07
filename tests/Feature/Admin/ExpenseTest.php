@@ -37,11 +37,8 @@ class ExpenseTest extends TestCase
         $response = $this->getJson('api/v1/expenses?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_an_expense(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $expense = Expense::factory()->raw([
@@ -148,11 +145,8 @@ class ExpenseTest extends TestCase
         $response = $this->getJson('api/v1/expenses?'.http_build_query($filters, '', '&'));
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_deletes_multiple_expenses(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $expenses = Expense::factory()->count(3)->create(['expense_date' => '2019-02-05']);

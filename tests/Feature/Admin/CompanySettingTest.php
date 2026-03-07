@@ -40,11 +40,8 @@ class CompanySettingTest extends TestCase
         $response = $this->getJson('api/v1/me');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_validates_the_update_profile_action_uses_a_form_request(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
     {
         /* Arrange */
 
@@ -199,6 +196,5 @@ class CompanySettingTest extends TestCase
         $response = $this->getJson('/api/v1/company/settings?'.http_build_query(['settings' => $settingKeys]));
 
         /* Assert */
-        $response->assertOk();
-    }
-}
+        $response->assertOk()
+            ->assertJsonStructure($settingKeys);

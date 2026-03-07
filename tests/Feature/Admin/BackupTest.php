@@ -38,11 +38,8 @@ class BackupTest extends TestCase
         $response = $this->getJson("/api/v1/backups?disk={$disk->driver}&file_disk_id={$disk->id}");
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_a_backup_and_dispatches_a_job(): void
+        $response->assertOk()
+            ->assertJsonStructure(['backups', 'disks']);
     {
         /* Arrange */
         Queue::fake();

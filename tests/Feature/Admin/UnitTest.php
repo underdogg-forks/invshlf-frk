@@ -37,11 +37,8 @@ class UnitTest extends TestCase
         $response = $this->getJson('api/v1/units?page=1');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_a_unit(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $data = [

@@ -71,6 +71,7 @@ class ProfileTest extends TestCase
         $response = $this->getJson("api/v1/{$customer->company->slug}/customer/me");
 
         /* Assert */
-        $response->assertOk();
+        $response->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
     }
 }

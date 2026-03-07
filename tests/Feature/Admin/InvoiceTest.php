@@ -41,11 +41,8 @@ class InvoiceTest extends TestCase
         $response = $this->getJson('api/v1/invoices?page=1&type=OVERDUE&limit=20');
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_creates_an_invoice(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $invoice = Invoice::factory()->raw([
@@ -277,11 +274,8 @@ class InvoiceTest extends TestCase
         $response = $this->getJson('api/v1/invoices?'.http_build_query($filters, '', '&'));
 
         /* Assert */
-        $response->assertOk();
-    }
-
-    #[Test]
-    public function it_deletes_multiple_invoices(): void
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
     {
         /* Arrange */
         $invoices = Invoice::factory()->count(3)->create([
