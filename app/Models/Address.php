@@ -13,6 +13,13 @@ class Address extends BaseModel
 
     protected $guarded = ['id'];
 
+    protected function casts(): array
+    {
+        return [
+            'type' => AddressType::class,
+        ];
+    }
+
     #region Static Methods
     /*
     |--------------------------------------------------------------------------

@@ -180,7 +180,7 @@
             </td>
         </tr>
 
-        @if($invoice->paid_status === App\Models\Invoice::STATUS_PARTIALLY_PAID || $invoice->paid_status === App\Models\Invoice::STATUS_PAID)
+        @if($invoice->paid_status === App\Enums\InvoiceStatus::PartiallyPaid || $invoice->paid_status === App\Enums\InvoiceStatus::Paid)
             <tr>
                 <td class="border-0 total-border-left total-table-attribute-label">
                     @lang('pdf_amount_paid')

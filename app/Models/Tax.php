@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
@@ -107,14 +108,14 @@ class Tax extends BaseModel
     public function scopeInvoicesBetween($query, $start, $end)
     {
         $query->whereHas('invoice', function ($query) use ($start, $end) {
-            $query->where('paid_status', Invoice::STATUS_PAID)
+            $query->where('paid_status', InvoiceStatus::Paid)
                 ->whereBetween(
                     'invoice_date',
                     [$start->format('Y-m-d'), $end->format('Y-m-d')]
                 );
         })
             ->orWhereHas('invoiceItem.invoice', function ($query) use ($start, $end) {
-                $query->where('paid_status', Invoice::STATUS_PAID)
+                $query->where('paid_status', InvoiceStatus::Paid)
                     ->whereBetween(
                         'invoice_date',
                         [$start->format('Y-m-d'), $end->format('Y-m-d')]

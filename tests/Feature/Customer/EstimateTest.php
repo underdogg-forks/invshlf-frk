@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Customer;
 
+use App\Enums\EstimateStatus;
 use App\Models\Customer;
 use App\Models\Estimate;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -57,7 +58,7 @@ class EstimateTest extends TestCase
             'expiry_date' => '1988-08-18',
             'customer_id' => $customer->id,
         ]);
-        $status = ['status' => Estimate::STATUS_ACCEPTED];
+        $status = ['status' => EstimateStatus::Accepted->value];
 
         /* Act */
         $response = $this->postJson(
@@ -69,7 +70,7 @@ class EstimateTest extends TestCase
         $response->assertOk();
 
         /* Assert */
-        $this->assertEquals(Estimate::STATUS_ACCEPTED, $response->json()['data']['status']);
+        $this->assertEquals(EstimateStatus::Accepted->value, $response->json()['data']['status']);
     }
 
     #[Test]
@@ -82,7 +83,7 @@ class EstimateTest extends TestCase
             'expiry_date' => '1988-08-18',
             'customer_id' => $customer->id,
         ]);
-        $status = ['status' => Estimate::STATUS_REJECTED];
+        $status = ['status' => EstimateStatus::Rejected->value];
 
         /* Act */
         $response = $this->postJson(
@@ -91,6 +92,6 @@ class EstimateTest extends TestCase
         )->assertOk();
 
         /* Assert */
-        $this->assertEquals(Estimate::STATUS_REJECTED, $response->json()['data']['status']);
+        $this->assertEquals(EstimateStatus::Rejected->value, $response->json()['data']['status']);
     }
 }

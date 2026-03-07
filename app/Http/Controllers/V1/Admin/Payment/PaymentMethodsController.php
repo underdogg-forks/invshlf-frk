@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Payment;
 
+use App\Enums\PaymentMethodType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\PaymentMethodRequest;
 use App\Http\Resources\PaymentMethodResource;
@@ -22,7 +23,7 @@ class PaymentMethodsController extends Controller
         $limit = $request->has('limit') ? $request->limit : 5;
 
         $paymentMethods = PaymentMethod::applyFilters($request->all())
-            ->where('type', PaymentMethod::TYPE_GENERAL)
+            ->where('type', PaymentMethodType::General)
             ->whereCompany()
             ->latest()
             ->paginateData($limit);

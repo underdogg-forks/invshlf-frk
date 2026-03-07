@@ -28,18 +28,6 @@ class Estimate extends BaseModel implements HasMedia
     use HasCustomFieldsTrait;
     use InteractsWithMedia;
 
-    public const STATUS_DRAFT = EstimateStatus::Draft->value;
-
-    public const STATUS_SENT = EstimateStatus::Sent->value;
-
-    public const STATUS_VIEWED = EstimateStatus::Viewed->value;
-
-    public const STATUS_EXPIRED = EstimateStatus::Expired->value;
-
-    public const STATUS_ACCEPTED = EstimateStatus::Accepted->value;
-
-    public const STATUS_REJECTED = EstimateStatus::Rejected->value;
-
     protected $dates = [
         'created_at',
         'updated_at',
@@ -59,6 +47,7 @@ class Estimate extends BaseModel implements HasMedia
     protected function casts(): array
     {
         return [
+            'status' => EstimateStatus::class,
             'total' => 'integer',
             'tax' => 'integer',
             'sub_total' => 'integer',
@@ -90,8 +79,8 @@ class Estimate extends BaseModel implements HasMedia
     {
         $data = $this->sendEstimateData($data);
 
-        if ($this->status == Estimate::STATUS_DRAFT) {
-            $this->status = Estimate::STATUS_SENT;
+        if ($this->status === EstimateStatus::Draft) {
+            $this->status = EstimateStatus::Sent;
             $this->save();
         }
 
@@ -258,7 +247,7 @@ class Estimate extends BaseModel implements HasMedia
         }
 
         if ($convertEstimateAction === 'mark_estimate_as_accepted') {
-            $this->status = self::STATUS_ACCEPTED;
+            $this->status = EstimateStatus::Accepted;
             $this->save();
         }
 
@@ -459,7 +448,7 @@ class Estimate extends BaseModel implements HasMedia
         $data = $request->getEstimatePayload();
 
         if ($request->has('estimateSend')) {
-            $data['status'] = self::STATUS_SENT;
+            $data['status'] = EstimateStatus::Sent;
         }
 
         $estimate = self::create($data);

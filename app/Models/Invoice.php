@@ -28,20 +28,6 @@ class Invoice extends BaseModel implements HasMedia
     use HasCustomFieldsTrait;
     use InteractsWithMedia;
 
-    public const STATUS_DRAFT = InvoiceStatus::Draft->value;
-
-    public const STATUS_SENT = InvoiceStatus::Sent->value;
-
-    public const STATUS_VIEWED = InvoiceStatus::Viewed->value;
-
-    public const STATUS_COMPLETED = InvoiceStatus::Completed->value;
-
-    public const STATUS_UNPAID = InvoiceStatus::Unpaid->value;
-
-    public const STATUS_PARTIALLY_PAID = InvoiceStatus::PartiallyPaid->value;
-
-    public const STATUS_PAID = InvoiceStatus::Paid->value;
-
     protected $dates = [
         'created_at',
         'updated_at',
@@ -64,6 +50,8 @@ class Invoice extends BaseModel implements HasMedia
     protected function casts(): array
     {
         return [
+            'status' => InvoiceStatus::class,
+            'paid_status' => InvoiceStatus::class,
             'total' => 'integer',
             'tax' => 'integer',
             'sub_total' => 'integer',
@@ -80,14 +68,14 @@ class Invoice extends BaseModel implements HasMedia
     |--------------------------------------------------------------------------
     */
 
-    public function getPreviousStatus()
+    public function getPreviousStatus(): InvoiceStatus
     {
         if ($this->viewed) {
-            return self::STATUS_VIEWED;
+            return InvoiceStatus::Viewed;
         } elseif ($this->sent) {
-            return self::STATUS_SENT;
+            return InvoiceStatus::Sent;
         } else {
-            return self::STATUS_DRAFT;
+            return InvoiceStatus::Draft;
         }
     }
 
@@ -126,8 +114,8 @@ class Invoice extends BaseModel implements HasMedia
         }
         $mail->send(new SendInvoiceMail($data));
 
-        if ($this->status == Invoice::STATUS_DRAFT) {
-            $this->status = Invoice::STATUS_SENT;
+        if ($this->status === InvoiceStatus::Draft) {
+            $this->status = InvoiceStatus::Sent;
             $this->sent = true;
             $this->save();
         }
@@ -286,19 +274,19 @@ class Invoice extends BaseModel implements HasMedia
 
         if ($amount == 0) {
             $data = [
-                'status' => Invoice::STATUS_COMPLETED,
-                'paid_status' => Invoice::STATUS_PAID,
+                'status' => InvoiceStatus::Completed,
+                'paid_status' => InvoiceStatus::Paid,
                 'overdue' => false,
             ];
         } elseif ($amount == $this->total) {
             $data = [
                 'status' => $this->getPreviousStatus(),
-                'paid_status' => Invoice::STATUS_UNPAID,
+                'paid_status' => InvoiceStatus::Unpaid,
             ];
         } else {
             $data = [
                 'status' => $this->getPreviousStatus(),
-                'paid_status' => Invoice::STATUS_PARTIALLY_PAID,
+                'paid_status' => InvoiceStatus::PartiallyPaid,
             ];
         }
 
@@ -394,17 +382,17 @@ class Invoice extends BaseModel implements HasMedia
         $allowed = true;
 
         $status = [
-            self::STATUS_DRAFT,
-            self::STATUS_SENT,
-            self::STATUS_VIEWED,
-            self::STATUS_COMPLETED,
+            InvoiceStatus::Draft,
+            InvoiceStatus::Sent,
+            InvoiceStatus::Viewed,
+            InvoiceStatus::Completed,
         ];
 
-        if ($retrospective_edit == 'disable_on_invoice_sent' && (in_array($this->status, $status)) && ($this->paid_status === Invoice::STATUS_PARTIALLY_PAID || $this->paid_status === Invoice::STATUS_PAID)) {
+        if ($retrospective_edit == 'disable_on_invoice_sent' && (in_array($this->status, $status)) && ($this->paid_status === InvoiceStatus::PartiallyPaid || $this->paid_status === InvoiceStatus::Paid)) {
             $allowed = false;
-        } elseif ($retrospective_edit == 'disable_on_invoice_partial_paid' && ($this->paid_status === Invoice::STATUS_PARTIALLY_PAID || $this->paid_status === Invoice::STATUS_PAID)) {
+        } elseif ($retrospective_edit == 'disable_on_invoice_partial_paid' && ($this->paid_status === InvoiceStatus::PartiallyPaid || $this->paid_status === InvoiceStatus::Paid)) {
             $allowed = false;
-        } elseif ($retrospective_edit == 'disable_on_invoice_paid' && $this->paid_status === Invoice::STATUS_PAID) {
+        } elseif ($retrospective_edit == 'disable_on_invoice_paid' && $this->paid_status === InvoiceStatus::Paid) {
             $allowed = false;
         }
 
@@ -481,7 +469,7 @@ class Invoice extends BaseModel implements HasMedia
             $query->whereSearch($search);
         })->when($filters['status'] ?? null, function ($query, $status) {
             match ($status) {
-                self::STATUS_UNPAID, self::STATUS_PARTIALLY_PAID, self::STATUS_PAID => $query->wherePaidStatus($status),
+                InvoiceStatus::Unpaid->value, InvoiceStatus::PartiallyPaid->value, InvoiceStatus::Paid->value => $query->wherePaidStatus($status),
                 'DUE' => $query->whereDueStatus($status),
                 default => $query->whereStatus($status),
             };
@@ -525,8 +513,8 @@ class Invoice extends BaseModel implements HasMedia
     public function scopeWhereDueStatus($query, $status)
     {
         return $query->whereIn('invoices.paid_status', [
-            self::STATUS_UNPAID,
-            self::STATUS_PARTIALLY_PAID,
+            InvoiceStatus::Unpaid,
+            InvoiceStatus::PartiallyPaid,
         ]);
     }
 
@@ -594,7 +582,7 @@ class Invoice extends BaseModel implements HasMedia
         $data = $request->getInvoicePayload();
 
         if ($request->has('invoiceSend')) {
-            $data['status'] = Invoice::STATUS_SENT;
+            $data['status'] = InvoiceStatus::Sent;
         }
 
         $invoice = Invoice::create($data);

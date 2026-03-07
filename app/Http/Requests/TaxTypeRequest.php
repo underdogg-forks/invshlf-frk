@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TaxTypeType;
 use App\Models\TaxType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,7 @@ class TaxTypeRequest extends FormRequest
             'name' => [
                 'required',
                 Rule::unique('tax_types')
-                    ->where('type', TaxType::TYPE_GENERAL)
+                    ->where('type', TaxTypeType::General)
                     ->where('company_id', $this->header('company')),
             ],
             'calculation_type' => [
@@ -56,7 +57,7 @@ class TaxTypeRequest extends FormRequest
                 'required',
                 Rule::unique('tax_types')
                     ->ignore($this->route('tax_type')->id)
-                    ->where('type', TaxType::TYPE_GENERAL)
+                    ->where('type', TaxTypeType::General)
                     ->where('company_id', $this->header('company')),
             ];
         }
@@ -69,7 +70,7 @@ class TaxTypeRequest extends FormRequest
         return collect($this->validated())
             ->merge([
                 'company_id' => $this->header('company'),
-                'type' => TaxType::TYPE_GENERAL,
+                'type' => TaxTypeType::General,
             ])
             ->toArray();
     }

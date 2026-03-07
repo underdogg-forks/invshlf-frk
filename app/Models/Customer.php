@@ -80,7 +80,7 @@ class Customer extends Authenticatable implements HasMedia
 
     public function billingAddress(): HasOne
     {
-        return $this->hasOne(Address::class)->where('type', AddressType::Billing->value);
+        return $this->hasOne(Address::class)->where('type', AddressType::Billing);
     }
 
     public function company(): BelongsTo
@@ -125,7 +125,7 @@ class Customer extends Authenticatable implements HasMedia
 
     public function shippingAddress(): HasOne
     {
-        return $this->hasOne(Address::class)->where('type', AddressType::Shipping->value);
+        return $this->hasOne(Address::class)->where('type', AddressType::Shipping);
     }
 
     #endregion

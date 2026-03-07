@@ -14,12 +14,6 @@ class Transaction extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const PENDING = TransactionStatus::Pending->value;
-
-    public const FAILED = TransactionStatus::Failed->value;
-
-    public const SUCCESS = TransactionStatus::Success->value;
-
     protected $guarded = [
         'id',
     ];
@@ -27,6 +21,13 @@ class Transaction extends BaseModel
     protected $dates = [
         'transaction_date',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'status' => TransactionStatus::class,
+        ];
+    }
 
     #region Static Methods
     /*
@@ -37,13 +38,13 @@ class Transaction extends BaseModel
 
     public function completeTransaction()
     {
-        $this->status = self::SUCCESS;
+        $this->status = TransactionStatus::Success;
         $this->save();
     }
 
     public function failedTransaction()
     {
-        $this->status = self::FAILED;
+        $this->status = TransactionStatus::Failed;
         $this->save();
     }
 
@@ -54,7 +55,7 @@ class Transaction extends BaseModel
 
         $expiryDate = $this->updated_at->addDays($linkExpiryDays);
 
-        if ($checkExpiryLinks == 'YES' && $this->status == self::SUCCESS && Carbon::now()->format('Y-m-d') > $expiryDate->format('Y-m-d')) {
+        if ($checkExpiryLinks == 'YES' && $this->status === TransactionStatus::Success && Carbon::now()->format('Y-m-d') > $expiryDate->format('Y-m-d')) {
             return true;
         }
 

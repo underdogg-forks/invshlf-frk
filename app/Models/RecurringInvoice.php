@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\RecurringInvoiceLimitBy;
 use App\Enums\RecurringInvoiceStatus;
 use App\Http\Requests\RecurringInvoiceRequest;
@@ -19,18 +20,6 @@ class RecurringInvoice extends BaseModel
 {
     use BelongsToFranchise;
     use HasCustomFieldsTrait;
-
-    public const NONE = RecurringInvoiceLimitBy::None->value;
-
-    public const COUNT = RecurringInvoiceLimitBy::Count->value;
-
-    public const DATE = RecurringInvoiceLimitBy::Date->value;
-
-    public const COMPLETED = RecurringInvoiceStatus::Completed->value;
-
-    public const ON_HOLD = RecurringInvoiceStatus::OnHold->value;
-
-    public const ACTIVE = RecurringInvoiceStatus::Active->value;
 
     protected $guarded = [
         'id',
@@ -50,6 +39,8 @@ class RecurringInvoice extends BaseModel
     protected function casts(): array
     {
         return [
+            'status' => RecurringInvoiceStatus::class,
+            'limit_by' => RecurringInvoiceLimitBy::class,
             'exchange_rate' => 'float',
             'send_automatically' => 'boolean',
         ];
@@ -68,7 +59,7 @@ class RecurringInvoice extends BaseModel
             return;
         }
 
-        if ($this->limit_by == 'DATE') {
+        if ($this->limit_by === RecurringInvoiceLimitBy::Date) {
             $startDate = Carbon::today()->format('Y-m-d');
 
             $endDate = $this->limit_date;
@@ -80,7 +71,7 @@ class RecurringInvoice extends BaseModel
             } else {
                 $this->markStatusAsCompleted();
             }
-        } elseif ($this->limit_by == 'COUNT') {
+        } elseif ($this->limit_by === RecurringInvoiceLimitBy::Count) {
             $invoiceCount = Invoice::where('recurring_invoice_id', $this->id)->count();
 
             if ($invoiceCount < $this->limit_count) {
@@ -115,9 +106,9 @@ class RecurringInvoice extends BaseModel
         $newInvoice['creator_id'] = $this->creator_id;
         $newInvoice['invoice_date'] = Carbon::today()->format('Y-m-d');
         $newInvoice['due_date'] = Carbon::today()->addDays($days)->format('Y-m-d');
-        $newInvoice['status'] = Invoice::STATUS_DRAFT;
+        $newInvoice['status'] = InvoiceStatus::Draft;
         $newInvoice['company_id'] = $this->company_id;
-        $newInvoice['paid_status'] = Invoice::STATUS_UNPAID;
+        $newInvoice['paid_status'] = InvoiceStatus::Unpaid;
         $newInvoice['sub_total'] = $this->sub_total;
         $newInvoice['tax_per_item'] = $this->tax_per_item;
         $newInvoice['discount_per_item'] = $this->discount_per_item;
@@ -186,7 +177,7 @@ class RecurringInvoice extends BaseModel
     public function markStatusAsCompleted()
     {
         if ($this->status == $this->status) {
-            $this->status = self::COMPLETED;
+            $this->status = RecurringInvoiceStatus::Completed;
             $this->save();
         }
     }

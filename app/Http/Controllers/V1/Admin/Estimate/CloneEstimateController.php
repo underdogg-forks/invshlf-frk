@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Estimate;
 
+use App\Enums\EstimateStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EstimateResource;
 use App\Models\CompanySetting;
@@ -56,7 +57,7 @@ class CloneEstimateController extends Controller
             'customer_id' => $estimate->customer_id,
             'company_id' => $request->header('company'),
             'template_name' => $estimate->template_name,
-            'status' => Estimate::STATUS_DRAFT,
+            'status' => EstimateStatus::Draft,
             'sub_total' => $estimate->sub_total,
             'discount' => $estimate->discount,
             'discount_type' => $estimate->discount_type,

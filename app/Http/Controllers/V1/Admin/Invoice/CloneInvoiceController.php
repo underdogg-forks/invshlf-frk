@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Invoice;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use App\Models\CompanySetting;
@@ -66,8 +67,8 @@ class CloneInvoiceController extends Controller
             'customer_id' => $invoice->customer_id,
             'company_id' => $request->header('company'),
             'template_name' => $invoice->template_name,
-            'status' => Invoice::STATUS_DRAFT,
-            'paid_status' => Invoice::STATUS_UNPAID,
+            'status' => InvoiceStatus::Draft,
+            'paid_status' => InvoiceStatus::Unpaid,
             'sub_total' => $invoice->sub_total,
             'discount' => $invoice->discount,
             'discount_type' => $invoice->discount_type,

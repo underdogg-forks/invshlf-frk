@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\EstimateStatus;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Estimate;
@@ -22,7 +23,7 @@ class EstimateFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Estimate::STATUS_SENT,
+                'status' => EstimateStatus::Sent,
             ];
         });
     }
@@ -31,7 +32,7 @@ class EstimateFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Estimate::STATUS_VIEWED,
+                'status' => EstimateStatus::Viewed,
             ];
         });
     }
@@ -40,7 +41,7 @@ class EstimateFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Estimate::STATUS_EXPIRED,
+                'status' => EstimateStatus::Expired,
             ];
         });
     }
@@ -49,7 +50,7 @@ class EstimateFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Estimate::STATUS_ACCEPTED,
+                'status' => EstimateStatus::Accepted,
             ];
         });
     }
@@ -58,7 +59,7 @@ class EstimateFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Estimate::STATUS_REJECTED,
+                'status' => EstimateStatus::Rejected,
             ];
         });
     }
@@ -81,7 +82,7 @@ class EstimateFactory extends Factory
             'customer_sequence_number' => $sequenceNumber->nextCustomerSequenceNumber,
             'reference_number' => $sequenceNumber->getNextNumber(),
             'company_id' => User::find(1)->companies()->first()->id,
-            'status' => Estimate::STATUS_DRAFT,
+            'status' => EstimateStatus::Draft,
             'template_name' => 'estimate1',
             'sub_total' => $this->faker->randomDigitNotNull(),
             'total' => $this->faker->randomDigitNotNull(),

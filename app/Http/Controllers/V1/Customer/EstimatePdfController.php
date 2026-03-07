@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Customer;
 
+use App\Enums\EstimateStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EstimateResource;
 use App\Mail\EstimateViewedMail;
@@ -18,8 +19,8 @@ class EstimatePdfController extends Controller
         $estimate = Estimate::find($emailLog->mailable_id);
 
         if (! $emailLog->isExpired()) {
-            if ($estimate && ($estimate->status == Estimate::STATUS_SENT || $estimate->status == Estimate::STATUS_DRAFT)) {
-                $estimate->status = Estimate::STATUS_VIEWED;
+            if ($estimate && ($estimate->status === EstimateStatus::Sent || $estimate->status === EstimateStatus::Draft)) {
+                $estimate->status = EstimateStatus::Viewed;
                 $estimate->save();
                 $notifyEstimateViewed = CompanySetting::getSetting(
                     'notify_estimate_viewed',

@@ -12,10 +12,6 @@ class TaxType extends BaseModel
 {
     use BelongsToFranchise;
 
-    public const TYPE_GENERAL = TaxTypeType::General->value;
-
-    public const TYPE_MODULE = TaxTypeType::Module->value;
-
     protected $guarded = [
         'id',
     ];
@@ -23,6 +19,7 @@ class TaxType extends BaseModel
     protected function casts(): array
     {
         return [
+            'type' => TaxTypeType::class,
             'percent' => 'float',
             'fixed_amount' => 'integer',
             'compound_tax' => 'boolean',

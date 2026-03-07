@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\PaymentMode;
+use App\Enums\InvoiceStatus;
 use App\Jobs\GeneratePaymentPdfJob;
 use App\Mail\SendPaymentMail;
 use App\Models\BaseModel;
@@ -24,16 +24,6 @@ class Payment extends BaseModel implements HasMedia
     use GeneratesPdfTrait;
     use HasCustomFieldsTrait;
     use InteractsWithMedia;
-
-    public const PAYMENT_MODE_CHECK = PaymentMode::Check->value;
-
-    public const PAYMENT_MODE_OTHER = PaymentMode::Other->value;
-
-    public const PAYMENT_MODE_CASH = PaymentMode::Cash->value;
-
-    public const PAYMENT_MODE_CREDIT_CARD = PaymentMode::CreditCard->value;
-
-    public const PAYMENT_MODE_BANK_TRANSFER = PaymentMode::BankTransfer->value;
 
     protected $dates = ['created_at', 'updated_at', 'payment_date'];
 
@@ -436,9 +426,9 @@ class Payment extends BaseModel implements HasMedia
                 $invoice->due_amount = ((int) $invoice->due_amount + (int) $payment->amount);
 
                 if ($invoice->due_amount == $invoice->total) {
-                    $invoice->paid_status = Invoice::STATUS_UNPAID;
+                    $invoice->paid_status = InvoiceStatus::Unpaid;
                 } else {
-                    $invoice->paid_status = Invoice::STATUS_PARTIALLY_PAID;
+                    $invoice->paid_status = InvoiceStatus::PartiallyPaid;
                 }
 
                 $invoice->status = $invoice->getPreviousStatus();

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\EstimateStatus;
 use App\Models\Estimate;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -40,11 +41,11 @@ class CheckEstimateStatus extends Command
     public function handle(): void
     {
         $date = Carbon::now();
-        $status = [Estimate::STATUS_ACCEPTED, Estimate::STATUS_REJECTED, Estimate::STATUS_EXPIRED];
+        $status = [EstimateStatus::Accepted, EstimateStatus::Rejected, EstimateStatus::Expired];
         $estimates = Estimate::whereNotIn('status', $status)->whereDate('expiry_date', '<', $date)->get();
 
         foreach ($estimates as $estimate) {
-            $estimate->status = Estimate::STATUS_EXPIRED;
+            $estimate->status = EstimateStatus::Expired;
             printf("Estimate %s is EXPIRED \n", $estimate->estimate_number);
             $estimate->save();
         }
