@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Requests\InvoicesRequest;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
@@ -89,7 +90,7 @@ class InvoiceTest extends TestCase
         $status = $invoice->getPreviousStatus();
 
         /* Assert */
-        $this->assertEquals('DRAFT', $status);
+        $this->assertEquals(InvoiceStatus::Draft, $status);
     }
 
     #[Test]

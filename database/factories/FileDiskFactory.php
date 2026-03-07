@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\FileDiskType;
 use App\Models\FileDisk;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,6 +22,7 @@ class FileDiskFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
+            'type' => FileDiskType::Remote,
             'driver' => 'local',
             'set_as_default' => false,
             'credentials' => [
