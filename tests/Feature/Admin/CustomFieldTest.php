@@ -31,25 +31,25 @@ class CustomFieldTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_custom_fields(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/custom-fields?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_a_custom_field(): void
     {
-        // Arrange
+        /* Arrange */
         $data = CustomField::factory()->raw();
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/custom-fields', $data)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('custom_fields', [
             'name' => $data['name'],
             'label' => $data['label'],
@@ -62,9 +62,9 @@ class CustomFieldTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             CustomFieldsController::class,
             'store',
@@ -75,14 +75,14 @@ class CustomFieldTest extends TestCase
     #[Test]
     public function it_updates_a_custom_field(): void
     {
-        // Arrange
+        /* Arrange */
         $customField = CustomField::factory()->create();
         $updatedData = CustomField::factory()->raw(['is_required' => false]);
 
-        // Act
+        /* Act */
         $this->putJson('api/v1/custom-fields/'.$customField->id, $updatedData)->assertStatus(200);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('custom_fields', [
             'id' => $customField->id,
             'name' => $updatedData['name'],
@@ -95,9 +95,9 @@ class CustomFieldTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             CustomFieldsController::class,
             'update',
@@ -108,13 +108,13 @@ class CustomFieldTest extends TestCase
     #[Test]
     public function it_deletes_a_custom_field(): void
     {
-        // Arrange
+        /* Arrange */
         $customField = CustomField::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->deleteJson('api/v1/custom-fields/'.$customField->id);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertModelMissing($customField);
     }

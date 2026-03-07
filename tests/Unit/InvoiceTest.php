@@ -27,13 +27,13 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_has_many_invoice_items(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->hasItems(5)->create();
 
-        // Act
+        /* Act */
         $itemCount = $invoice->items()->count();
 
-        // Assert
+        /* Assert */
         $this->assertCount(5, $invoice->items);
         $this->assertEquals(5, $itemCount);
         $this->assertTrue($invoice->items()->exists());
@@ -42,13 +42,13 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_has_many_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->hasTaxes(5)->create();
 
-        // Act
+        /* Act */
         $taxCount = $invoice->taxes()->count();
 
-        // Assert
+        /* Assert */
         $this->assertCount(5, $invoice->taxes);
         $this->assertEquals(5, $taxCount);
         $this->assertTrue($invoice->taxes()->exists());
@@ -57,13 +57,13 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_has_many_payments(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->hasPayments(5)->create();
 
-        // Act
+        /* Act */
         $paymentCount = $invoice->payments()->count();
 
-        // Assert
+        /* Assert */
         $this->assertCount(5, $invoice->payments);
         $this->assertEquals(5, $paymentCount);
         $this->assertTrue($invoice->payments()->exists());
@@ -72,30 +72,30 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_belongs_to_a_customer(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->forCustomer()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($invoice->customer()->exists());
     }
 
     #[Test]
     public function it_returns_the_previous_status_as_draft_for_a_new_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create();
 
-        // Act
+        /* Act */
         $status = $invoice->getPreviousStatus();
 
-        // Assert
+        /* Assert */
         $this->assertEquals('DRAFT', $status);
     }
 
     #[Test]
     public function it_creates_an_invoice_with_items_and_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $invoiceData = Invoice::factory()->raw();
         $item = InvoiceItem::factory()->raw();
 
@@ -105,10 +105,10 @@ class InvoiceTest extends TestCase
         $request = new InvoicesRequest;
         $request->replace($invoiceData);
 
-        // Act
+        /* Act */
         $response = Invoice::createInvoice($request);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoice_items', [
             'invoice_id' => $response->id,
             'name' => $item['name'],
@@ -133,7 +133,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_updates_an_invoice_with_new_items_and_taxes(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create();
         $newInvoiceData = Invoice::factory()->raw();
         $item = InvoiceItem::factory()->raw(['invoice_id' => $invoice->id]);
@@ -145,10 +145,10 @@ class InvoiceTest extends TestCase
         $request = new InvoicesRequest;
         $request->replace($newInvoiceData);
 
-        // Act
+        /* Act */
         $response = $invoice->updateInvoice($request);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoice_items', [
             'invoice_id' => $response->id,
             'name' => $item['name'],
@@ -173,16 +173,16 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_items_for_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create();
         $item = InvoiceItem::factory()->raw(['invoice_id' => $invoice->id]);
         $request = new InvoicesRequest;
         $request->replace(['items' => [$item]]);
 
-        // Act
+        /* Act */
         Invoice::createItems($invoice, $request->items);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoice_items', [
             'invoice_id' => $invoice->id,
             'description' => $item['description'],
@@ -196,16 +196,16 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_taxes_for_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create();
         $tax = Tax::factory()->raw(['invoice_id' => $invoice->id]);
         $request = new Request;
         $request->replace(['taxes' => [$tax]]);
 
-        // Act
+        /* Act */
         Invoice::createTaxes($invoice, $request->taxes);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('taxes', [
             'invoice_id' => $invoice->id,
             'name' => $tax['name'],

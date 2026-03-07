@@ -23,15 +23,15 @@ class SettingTest extends TestCase
     #[Test]
     public function it_sets_and_retrieves_a_global_setting(): void
     {
-        // Arrange
+        /* Arrange */
         $key = fake()->name();
         $value = fake()->word();
 
-        // Act
+        /* Act */
         Setting::setSetting($key, $value);
         $result = Setting::getSetting($key);
 
-        // Assert
+        /* Assert */
         $this->assertEquals($value, $result);
     }
 }

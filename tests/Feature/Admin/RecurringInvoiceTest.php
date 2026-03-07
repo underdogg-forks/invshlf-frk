@@ -33,22 +33,22 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_recurring_invoices(): void
     {
-        // Arrange
+        /* Arrange */
         RecurringInvoice::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/recurring-invoices?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             RecurringInvoiceController::class,
             'store',
@@ -59,33 +59,33 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_creates_a_recurring_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->raw();
         $recurringInvoice['items'] = [InvoiceItem::factory()->raw()];
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/recurring-invoices', $recurringInvoice)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('recurring_invoices', collect($recurringInvoice)->only(['frequency'])->toArray());
     }
 
     #[Test]
     public function it_retrieves_a_single_recurring_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->getJson("api/v1/recurring-invoices/{$recurringInvoice->id}")->assertOk();
     }
 
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             RecurringInvoiceController::class,
             'update',
@@ -96,33 +96,33 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_updates_a_recurring_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoice = RecurringInvoice::factory()->create();
         $recurringInvoice['items'] = [InvoiceItem::factory()->raw()];
 
         $updatedData = RecurringInvoice::factory()->raw();
         $updatedData['items'] = [InvoiceItem::factory()->raw()];
 
-        // Act
+        /* Act */
         $this->putJson("api/v1/recurring-invoices/{$recurringInvoice->id}", $updatedData)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('recurring_invoices', collect($updatedData)->only(['frequency'])->toArray());
     }
 
     #[Test]
     public function it_deletes_multiple_recurring_invoices(): void
     {
-        // Arrange
+        /* Arrange */
         $recurringInvoices = RecurringInvoice::factory()->count(3)->create();
         $data = ['ids' => $recurringInvoices->pluck('id')];
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/recurring-invoices/delete', $data)
             ->assertOk()
             ->assertJson(['success' => true]);
 
-        // Assert
+        /* Assert */
         foreach ($recurringInvoices as $recurringInvoice) {
             $this->assertModelMissing($recurringInvoice);
         }
@@ -131,13 +131,13 @@ class RecurringInvoiceTest extends TestCase
     #[Test]
     public function it_calculates_the_frequency_for_a_recurring_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $data = [
             'frequency' => '* * 2 * *',
             'starts_at' => Carbon::now()->format('Y-m-d'),
         ];
 
-        // Act & Assert
+        /* Act & Assert */
         $this->getJson('api/v1/recurring-invoice-frequency?'.http_build_query($data, '', '&'))->assertOk();
     }
 }

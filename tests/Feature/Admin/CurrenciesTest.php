@@ -28,12 +28,12 @@ class CurrenciesTest extends TestCase
     #[Test]
     public function it_retrieves_all_currencies_used_by_the_company(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('/api/v1/currencies/used');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 }

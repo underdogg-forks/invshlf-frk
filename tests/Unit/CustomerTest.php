@@ -24,10 +24,10 @@ class CustomerTest extends TestCase
     #[Test]
     public function it_has_many_estimates(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->hasEstimates(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $customer->estimates);
         $this->assertTrue($customer->estimates()->exists());
     }
@@ -35,10 +35,10 @@ class CustomerTest extends TestCase
     #[Test]
     public function it_has_many_expenses(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->hasExpenses(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $customer->expenses);
         $this->assertTrue($customer->expenses()->exists());
     }
@@ -46,10 +46,10 @@ class CustomerTest extends TestCase
     #[Test]
     public function it_has_many_invoices(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->hasInvoices(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $customer->invoices);
         $this->assertTrue($customer->invoices()->exists());
     }
@@ -57,10 +57,10 @@ class CustomerTest extends TestCase
     #[Test]
     public function it_has_many_payments(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->hasPayments(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $customer->payments);
         $this->assertTrue($customer->payments()->exists());
     }
@@ -68,10 +68,10 @@ class CustomerTest extends TestCase
     #[Test]
     public function it_has_many_addresses(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->hasAddresses(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $customer->addresses);
         $this->assertTrue($customer->addresses()->exists());
     }
@@ -79,44 +79,44 @@ class CustomerTest extends TestCase
     #[Test]
     public function it_belongs_to_a_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($customer->currency()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->forCompany()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($customer->company()->exists());
     }
 
     #[Test]
     public function it_has_one_billing_address(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->has(Address::factory()->state([
             'type' => Address::BILLING_TYPE,
         ]))->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($customer->billingAddress()->exists());
     }
 
     #[Test]
     public function it_has_one_shipping_address(): void
     {
-        // Arrange
+        /* Arrange */
         $customer = Customer::factory()->has(Address::factory()->state([
             'type' => Address::SHIPPING_TYPE,
         ]))->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($customer->shippingAddress()->exists());
     }
 }

@@ -31,29 +31,29 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_expenses(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/expenses?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_an_expense(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->raw([
             'amount' => 150,
             'exchange_rate' => 76.217498,
             'base_amount' => 11432.6247,
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/expenses', $expense)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('expenses', [
             'notes' => $expense['notes'],
             'expense_category_id' => $expense['expense_category_id'],
@@ -66,9 +66,9 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             ExpensesController::class,
             'store',
@@ -79,16 +79,16 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_retrieves_a_single_expense(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->create([
             'expense_number' => 'EXP-000001',
             'expense_date' => '2019-02-05',
         ]);
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/expenses/{$expense->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('expenses', [
             'id' => $expense->id,
@@ -102,14 +102,14 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_updates_an_expense(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->create(['expense_date' => '2019-02-05']);
         $updatedExpense = Expense::factory()->raw();
 
-        // Act
+        /* Act */
         $this->putJson('api/v1/expenses/'.$expense->id, $updatedExpense)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('expenses', [
             'id' => $expense->id,
             'notes' => $updatedExpense['notes'],
@@ -121,9 +121,9 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             ExpensesController::class,
             'update',
@@ -134,7 +134,7 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_searches_expenses_by_filters(): void
     {
-        // Arrange
+        /* Arrange */
         $filters = [
             'page' => 1,
             'limit' => 15,
@@ -144,24 +144,24 @@ class ExpenseTest extends TestCase
             'to_date' => '2020-07-20',
         ];
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/expenses?'.http_build_query($filters, '', '&'));
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_deletes_multiple_expenses(): void
     {
-        // Arrange
+        /* Arrange */
         $expenses = Expense::factory()->count(3)->create(['expense_date' => '2019-02-05']);
         $data = ['ids' => $expenses->pluck('id')];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/expenses/delete', $data);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         foreach ($expenses as $expense) {
             $this->assertModelMissing($expense);
@@ -171,7 +171,7 @@ class ExpenseTest extends TestCase
     #[Test]
     public function it_updates_an_expense_with_foreign_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->create(['expense_date' => '2019-02-05']);
         $updatedExpense = Expense::factory()->raw([
             'amount' => 150,
@@ -179,10 +179,10 @@ class ExpenseTest extends TestCase
             'base_amount' => 11432.6247,
         ]);
 
-        // Act
+        /* Act */
         $this->putJson('api/v1/expenses/'.$expense->id, $updatedExpense)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('expenses', [
             'id' => $expense->id,
             'expense_category_id' => $updatedExpense['expense_category_id'],

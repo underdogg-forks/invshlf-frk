@@ -23,20 +23,20 @@ class CompanyTest extends TestCase
     #[Test]
     public function it_has_many_customers(): void
     {
-        // Arrange
+        /* Arrange */
         $company = Company::factory()->hasCustomers()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($company->customers()->exists());
     }
 
     #[Test]
     public function it_has_many_company_settings(): void
     {
-        // Arrange
+        /* Arrange */
         $company = Company::factory()->hasSettings(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertCount(5, $company->settings);
         $this->assertTrue($company->settings()->exists());
     }
@@ -44,10 +44,10 @@ class CompanyTest extends TestCase
     #[Test]
     public function it_belongs_to_many_users(): void
     {
-        // Arrange
+        /* Arrange */
         $company = Company::factory()->hasUsers(5)->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertInstanceOf('Illuminate\Database\Eloquent\Collection', $company->users);
     }
 }

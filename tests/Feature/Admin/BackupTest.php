@@ -31,20 +31,20 @@ class BackupTest extends TestCase
     #[Test]
     public function it_retrieves_backups_for_a_given_disk(): void
     {
-        // Arrange
+        /* Arrange */
         $disk = FileDisk::factory()->create(['set_as_default' => true]);
 
-        // Act
+        /* Act */
         $response = $this->getJson("/api/v1/backups?disk={$disk->driver}&&file_disk_id={$disk->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_a_backup_and_dispatches_a_job(): void
     {
-        // Arrange
+        /* Arrange */
         Queue::fake();
         $disk = FileDisk::factory()->create();
         $data = [
@@ -52,10 +52,10 @@ class BackupTest extends TestCase
             'file_disk_id' => $disk->id,
         ];
 
-        // Act
+        /* Act */
         $this->postJson('/api/v1/backups', $data);
 
-        // Assert
+        /* Assert */
         Queue::assertPushed(CreateBackupJob::class);
 
         $this->getJson("/api/v1/backups?disk={$disk->driver}&&file_disk_id={$disk->id}")

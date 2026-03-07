@@ -29,56 +29,56 @@ class NotesTest extends TestCase
     #[Test]
     public function it_retrieves_all_notes(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->getJson('/api/v1/notes')->assertStatus(200);
     }
 
     #[Test]
     public function it_creates_a_note(): void
     {
-        // Arrange
+        /* Arrange */
         $note = Note::factory()->raw();
 
-        // Act
+        /* Act */
         $this->postJson('/api/v1/notes', $note)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('notes', $note);
     }
 
     #[Test]
     public function it_retrieves_a_single_note(): void
     {
-        // Arrange
+        /* Arrange */
         $note = Note::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->getJson("/api/v1/notes/{$note->id}")->assertStatus(200);
     }
 
     #[Test]
     public function it_updates_a_note(): void
     {
-        // Arrange
+        /* Arrange */
         $note = Note::factory()->create();
         $updatedData = Note::factory()->raw();
 
-        // Act
+        /* Act */
         $this->putJson("/api/v1/notes/{$note->id}", $updatedData)->assertStatus(200);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('notes', $updatedData);
     }
 
     #[Test]
     public function it_deletes_a_note(): void
     {
-        // Arrange
+        /* Arrange */
         $note = Note::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->deleteJson("/api/v1/notes/{$note->id}")
             ->assertStatus(200)
             ->assertJson(['success' => true]);

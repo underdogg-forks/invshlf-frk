@@ -34,32 +34,32 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_payments(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/payments?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_retrieves_a_single_payment(): void
     {
-        // Arrange
+        /* Arrange */
         $payment = Payment::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/payments/{$payment->id}");
 
-        // Assert
+        /* Assert */
         $response->assertStatus(200);
     }
 
     #[Test]
     public function it_creates_a_payment_for_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create(['due_amount' => 100, 'exchange_rate' => 1]);
         $payment = Payment::factory()->raw([
             'invoice_id' => $invoice->id,
@@ -68,10 +68,10 @@ class PaymentTest extends TestCase
             'exchange_rate' => 1,
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/payments', $payment);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('payments', [
             'payment_number' => $payment['payment_number'],
@@ -84,9 +84,9 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             PaymentsController::class,
             'store',
@@ -97,7 +97,7 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_updates_a_payment(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create();
         $payment = Payment::factory()->create([
             'payment_date' => '1988-08-18',
@@ -109,10 +109,10 @@ class PaymentTest extends TestCase
             'exchange_rate' => 1,
         ]);
 
-        // Act
+        /* Act */
         $this->putJson("api/v1/payments/{$payment->id}", $updatedPayment)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('payments', [
             'id' => $payment->id,
             'payment_number' => $updatedPayment['payment_number'],
@@ -124,9 +124,9 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             PaymentsController::class,
             'update',
@@ -137,7 +137,7 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_searches_payments_by_filters(): void
     {
-        // Arrange
+        /* Arrange */
         $filters = [
             'page' => 1,
             'limit' => 15,
@@ -146,17 +146,17 @@ class PaymentTest extends TestCase
             'payment_mode' => 'OTHER',
         ];
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/payments?'.http_build_query($filters, '', '&'));
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_sends_a_payment_receipt_to_a_customer_via_email(): void
     {
-        // Arrange
+        /* Arrange */
         Mail::fake();
         $payment = Payment::factory()->create();
         $data = [
@@ -166,10 +166,10 @@ class PaymentTest extends TestCase
             'to' => 'doe@example.com',
         ];
 
-        // Act
+        /* Act */
         $response = $this->postJson("api/v1/payments/{$payment->id}/send", $data);
 
-        // Assert
+        /* Assert */
         $response->assertJson(['success' => true]);
         Mail::assertSent(SendPaymentMail::class);
     }
@@ -177,30 +177,30 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_deletes_multiple_payments(): void
     {
-        // Arrange
+        /* Arrange */
         $payments = Payment::factory()->count(5)->create();
         $data = ['ids' => $payments->pluck('id')];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/payments/delete', $data);
 
-        // Assert
+        /* Assert */
         $response->assertJson(['success' => true]);
     }
 
     #[Test]
     public function it_creates_a_payment_without_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $payment = Payment::factory()->raw([
             'payment_number' => 'PAY-000001',
             'exchange_rate' => 1,
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/payments', $payment)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('payments', [
             'payment_number' => $payment['payment_number'],
             'customer_id' => $payment['customer_id'],
@@ -212,7 +212,7 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_creates_a_payment_linked_to_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create();
         $payment = Payment::factory()->raw([
             'invoice_id' => $invoice->id,
@@ -220,10 +220,10 @@ class PaymentTest extends TestCase
             'exchange_rate' => 1,
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/payments', $payment)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('payments', [
             'payment_number' => $payment['payment_number'],
             'customer_id' => $payment['customer_id'],
@@ -236,7 +236,7 @@ class PaymentTest extends TestCase
     #[Test]
     public function it_creates_a_partial_payment_and_updates_the_invoice_paid_status(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create([
             'sub_total' => 100,
             'total' => 100,
@@ -256,10 +256,10 @@ class PaymentTest extends TestCase
             'currency_id' => $invoice->currency_id,
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/payments', $payment)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('payments', [
             'payment_number' => $payment['payment_number'],
             'customer_id' => (string) $payment['customer_id'],

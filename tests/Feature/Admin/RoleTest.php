@@ -28,7 +28,7 @@ class RoleTest extends TestCase
     #[Test]
     public function it_creates_a_user_with_a_super_admin_role(): void
     {
-        // Arrange
+        /* Arrange */
         $data = [
             'email' => 'loremipsum@gmail.com',
             'name' => 'lorem',
@@ -36,10 +36,10 @@ class RoleTest extends TestCase
             'companies' => [['role' => 'super admin', 'id' => 1]],
         ];
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/users', $data)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('users', collect($data)->only(['email', 'name'])->toArray());
     }
 }

@@ -35,28 +35,28 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_invoices(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/invoices?page=1&type=OVERDUE&limit=20');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'taxes' => [Tax::factory()->raw()],
             'items' => [InvoiceItem::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices', $invoice);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('invoices', [
             'template_name' => $invoice['template_name'],
@@ -76,7 +76,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_an_invoice_with_negative_and_zero_item_quantities(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'items' => [
                 InvoiceItem::factory()->raw(['quantity' => -2, 'price' => 100]),
@@ -87,10 +87,10 @@ class InvoiceTest extends TestCase
             'total' => -150,
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices', $invoice);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('invoices', ['total' => -150, 'sub_total' => -150]);
 
@@ -114,16 +114,16 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_an_invoice_with_sent_status(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'taxes' => [Tax::factory()->raw()],
             'items' => [InvoiceItem::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices', $invoice);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('invoices', [
             'invoice_number' => $invoice['invoice_number'],
@@ -143,9 +143,9 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             InvoicesController::class,
             'store',
@@ -156,7 +156,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_updates_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create([
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
@@ -166,10 +166,10 @@ class InvoiceTest extends TestCase
             'items' => [InvoiceItem::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $this->putJson('api/v1/invoices/'.$invoice->id, $updatedInvoice)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoices', [
             'invoice_number' => $updatedInvoice['invoice_number'],
             'sub_total' => $updatedInvoice['sub_total'],
@@ -188,9 +188,9 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             InvoicesController::class,
             'update',
@@ -201,7 +201,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_sends_an_invoice_to_a_customer_via_email(): void
     {
-        // Arrange
+        /* Arrange */
         Mail::fake();
         $invoice = Invoice::factory()->create([
             'invoice_date' => '1988-07-18',
@@ -214,10 +214,10 @@ class InvoiceTest extends TestCase
             'body' => 'email body',
         ];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices/'.$invoice->id.'/send', $data);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertEquals(Invoice::STATUS_SENT, Invoice::find($invoice->id)->status);
         Mail::assertSent(SendInvoiceMail::class);
@@ -226,17 +226,17 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_marks_an_invoice_as_paid(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create([
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
         ]);
         $data = ['status' => Invoice::STATUS_COMPLETED];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices/'.$invoice->id.'/status', $data);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertEquals(Invoice::STATUS_PAID, Invoice::find($invoice->id)->paid_status);
     }
@@ -244,17 +244,17 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_marks_an_invoice_as_sent(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create([
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
         ]);
         $data = ['status' => Invoice::STATUS_SENT];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices/'.$invoice->id.'/status', $data);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertEquals(Invoice::STATUS_SENT, Invoice::find($invoice->id)->status);
     }
@@ -262,7 +262,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_searches_invoices_by_filters(): void
     {
-        // Arrange
+        /* Arrange */
         $filters = [
             'page' => 1,
             'limit' => 15,
@@ -273,29 +273,29 @@ class InvoiceTest extends TestCase
             'invoice_number' => '000012',
         ];
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/invoices?'.http_build_query($filters, '', '&'));
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_deletes_multiple_invoices(): void
     {
-        // Arrange
+        /* Arrange */
         $invoices = Invoice::factory()->count(3)->create([
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
         ]);
         $data = ['ids' => $invoices->pluck('id')];
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/invoices/delete', $data)
             ->assertOk()
             ->assertJson(['success' => true]);
 
-        // Assert
+        /* Assert */
         foreach ($invoices as $invoice) {
             $this->assertModelMissing($invoice);
         }
@@ -304,29 +304,29 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_clones_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->create([
             'invoice_date' => '1988-07-18',
             'due_date' => '1988-08-18',
         ]);
 
-        // Act & Assert
+        /* Act & Assert */
         $this->postJson("api/v1/invoices/{$invoice->id}/clone")->assertStatus(201);
     }
 
     #[Test]
     public function it_creates_an_invoice_with_a_negative_tax(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'taxes' => [Tax::factory()->raw(['percent' => -9.99])],
             'items' => [InvoiceItem::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices', $invoice);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('invoices', [
             'invoice_number' => $invoice['invoice_number'],
@@ -343,7 +343,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_an_invoice_with_tax_per_item(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'tax_per_item' => 'YES',
             'items' => [
@@ -352,10 +352,10 @@ class InvoiceTest extends TestCase
             ],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices', $invoice);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('invoices', [
             'invoice_number' => $invoice['invoice_number'],
@@ -374,7 +374,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_an_invoice_with_foreign_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'discount_type' => 'fixed',
             'discount_val' => 20,
@@ -409,10 +409,10 @@ class InvoiceTest extends TestCase
             ])],
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/invoices', $invoice)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoices', [
             'template_name' => $invoice['template_name'],
             'invoice_number' => $invoice['invoice_number'],
@@ -435,7 +435,7 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_updates_an_invoice_with_foreign_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()
             ->hasItems(1)
             ->hasTaxes(1)
@@ -478,10 +478,10 @@ class InvoiceTest extends TestCase
             ])],
         ]);
 
-        // Act
+        /* Act */
         $this->putJson('api/v1/invoices/'.$invoice->id, $updatedInvoice)->assertOk();
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('invoices', [
             'id' => $invoice['id'],
             'invoice_number' => $updatedInvoice['invoice_number'],
@@ -512,17 +512,17 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_an_invoice_with_tax_included(): void
     {
-        // Arrange
+        /* Arrange */
         $invoice = Invoice::factory()->raw([
             'taxes' => [Tax::factory()->raw()],
             'items' => [InvoiceItem::factory()->raw()],
             'tax_included' => true,
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/invoices', $invoice);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('invoices', ['tax_included' => true]);
     }

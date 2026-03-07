@@ -31,28 +31,28 @@ class UnitTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_units(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/units?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_a_unit(): void
     {
-        // Arrange
+        /* Arrange */
         $data = [
             'name' => 'unit name',
             'company_id' => User::find(1)->companies()->first()->id,
         ];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/units', $data);
 
-        // Assert
+        /* Assert */
         $response->assertStatus(201);
         $this->assertDatabaseHas('units', $data);
     }
@@ -60,9 +60,9 @@ class UnitTest extends TestCase
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             UnitsController::class,
             'store',
@@ -73,13 +73,13 @@ class UnitTest extends TestCase
     #[Test]
     public function it_retrieves_a_single_unit(): void
     {
-        // Arrange
+        /* Arrange */
         $unit = Unit::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->getJson("api/v1/units/{$unit->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('units', ['id' => $unit->id, 'name' => $unit['name']]);
     }
@@ -87,14 +87,14 @@ class UnitTest extends TestCase
     #[Test]
     public function it_updates_a_unit(): void
     {
-        // Arrange
+        /* Arrange */
         $unit = Unit::factory()->create();
         $updatedData = ['name' => 'new name'];
 
-        // Act
+        /* Act */
         $response = $this->putJson("api/v1/units/{$unit->id}", $updatedData);
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertDatabaseHas('units', ['id' => $unit->id, 'name' => $updatedData['name']]);
     }
@@ -102,9 +102,9 @@ class UnitTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             UnitsController::class,
             'update',
@@ -115,13 +115,13 @@ class UnitTest extends TestCase
     #[Test]
     public function it_deletes_a_unit(): void
     {
-        // Arrange
+        /* Arrange */
         $unit = Unit::factory()->create();
 
-        // Act
+        /* Act */
         $response = $this->deleteJson("api/v1/units/{$unit->id}");
 
-        // Assert
+        /* Assert */
         $response->assertOk();
         $this->assertModelMissing($unit);
     }

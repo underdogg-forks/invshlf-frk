@@ -27,74 +27,74 @@ class TaxTest extends TestCase
     #[Test]
     public function it_belongs_to_a_tax_type(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->taxType->exists());
     }
 
     #[Test]
     public function it_belongs_to_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->forInvoice()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->invoice()->exists());
     }
 
     #[Test]
     public function it_belongs_to_a_recurring_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->forRecurringInvoice()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->recurringInvoice()->exists());
     }
 
     #[Test]
     public function it_belongs_to_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->forEstimate()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->estimate()->exists());
     }
 
     #[Test]
     public function it_belongs_to_an_invoice_item(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->for(InvoiceItem::factory()->state([
             'invoice_id' => Invoice::factory(),
         ]))->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->invoiceItem()->exists());
     }
 
     #[Test]
     public function it_belongs_to_an_estimate_item(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->for(EstimateItem::factory()->state([
             'estimate_id' => Estimate::factory(),
         ]))->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->estimateItem()->exists());
     }
 
     #[Test]
     public function it_belongs_to_an_item(): void
     {
-        // Arrange
+        /* Arrange */
         $tax = Tax::factory()->forItem()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($tax->item()->exists());
     }
 }

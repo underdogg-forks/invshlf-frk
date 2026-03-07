@@ -24,23 +24,23 @@ class ExchangeRateLogTest extends TestCase
     #[Test]
     public function it_belongs_to_a_company(): void
     {
-        // Arrange
+        /* Arrange */
         $exchangeRateLog = ExchangeRateLog::factory()->forCompany()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertTrue($exchangeRateLog->company->exists());
     }
 
     #[Test]
     public function it_adds_an_exchange_rate_log_from_an_expense(): void
     {
-        // Arrange
+        /* Arrange */
         $expense = Expense::factory()->create();
 
-        // Act
+        /* Act */
         $response = ExchangeRateLog::addExchangeRateLog($expense);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('exchange_Rate_logs', [
             'exchange_rate' => $response->exchange_rate,
             'base_currency_id' => $response->base_currency_id,

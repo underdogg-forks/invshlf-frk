@@ -38,29 +38,29 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_retrieves_a_paginated_list_of_estimates(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/estimates?page=1');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_creates_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->raw([
             'estimate_number' => 'EST-000006',
             'items' => [EstimateItem::factory()->raw()],
             'taxes' => [Tax::factory()->raw()],
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimates', [
             'template_name' => $estimate['template_name'],
             'estimate_number' => $estimate['estimate_number'],
@@ -78,23 +78,23 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_clones_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->create();
         $beforeCount = Estimate::count();
 
-        // Act
+        /* Act */
         $this->post("/api/v1/estimates/{$estimate->id}/clone");
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseCount('estimates', $beforeCount + 1);
     }
 
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             EstimatesController::class,
             'store',
@@ -105,7 +105,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_updates_an_estimate(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()
             ->hasItems(1)
             ->hasTaxes(1)
@@ -116,10 +116,10 @@ class EstimateTest extends TestCase
             'taxes' => [Tax::factory()->raw(['tax_type_id' => $estimate->taxes[0]->tax_type_id])],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->putJson('api/v1/estimates/'.$estimate->id, $updatedEstimate);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimates', [
             'template_name' => $updatedEstimate['template_name'],
             'estimate_number' => $updatedEstimate['estimate_number'],
@@ -141,9 +141,9 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             EstimatesController::class,
             'update',
@@ -154,7 +154,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_searches_estimates_by_filters(): void
     {
-        // Arrange
+        /* Arrange */
         $filters = [
             'page' => 1,
             'limit' => 15,
@@ -164,19 +164,19 @@ class EstimateTest extends TestCase
             'estimate_number' => '000003',
         ];
 
-        // Act
+        /* Act */
         $response = $this->getJson('api/v1/estimates?'.http_build_query($filters, '', '&'));
 
-        // Assert
+        /* Assert */
         $response->assertStatus(200);
     }
 
     #[Test]
     public function it_validates_the_send_estimate_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             SendEstimateController::class,
             '__invoke',
@@ -187,7 +187,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_sends_an_estimate_to_a_customer_via_email(): void
     {
-        // Arrange
+        /* Arrange */
         Mail::fake();
         $estimate = Estimate::factory()->create([
             'estimate_date' => '1988-07-18',
@@ -200,10 +200,10 @@ class EstimateTest extends TestCase
             'to' => 'doe@example.com',
         ];
 
-        // Act
+        /* Act */
         $response = $this->postJson("api/v1/estimates/{$estimate->id}/send", $data);
 
-        // Assert
+        /* Assert */
         $response->assertStatus(200)->assertJson(['success' => true]);
         Mail::assertSent(SendEstimateMail::class);
     }
@@ -211,17 +211,17 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_marks_an_estimate_as_accepted(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->create([
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
         $data = ['status' => Estimate::STATUS_ACCEPTED];
 
-        // Act
+        /* Act */
         $response = $this->postJson("api/v1/estimates/{$estimate->id}/status", $data);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertEquals(Estimate::STATUS_ACCEPTED, Estimate::find($estimate->id)->status);
     }
@@ -229,17 +229,17 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_marks_an_estimate_as_rejected(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->create([
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
         $data = ['status' => Estimate::STATUS_REJECTED];
 
-        // Act
+        /* Act */
         $response = $this->postJson("api/v1/estimates/{$estimate->id}/status", $data);
 
-        // Assert
+        /* Assert */
         $response->assertOk()->assertJson(['success' => true]);
         $this->assertEquals(Estimate::STATUS_REJECTED, Estimate::find($estimate->id)->status);
     }
@@ -247,16 +247,16 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_converts_an_estimate_to_an_invoice(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->create([
             'estimate_date' => now(),
             'expiry_date' => now()->addMonth(),
         ]);
 
-        // Act
+        /* Act */
         $response = $this->postJson("api/v1/estimates/{$estimate->id}/convert-to-invoice");
 
-        // Assert
+        /* Assert */
         if ($response->status() !== 200) {
             $this->fail('Response status is not 200. Response body: '.json_encode($response->json()));
         }
@@ -266,9 +266,9 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_validates_the_delete_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             EstimatesController::class,
             'delete',
@@ -279,17 +279,17 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_deletes_multiple_estimates(): void
     {
-        // Arrange
+        /* Arrange */
         $estimates = Estimate::factory()->count(3)->create([
             'estimate_date' => '1988-07-18',
             'expiry_date' => '1988-08-18',
         ]);
         $data = ['ids' => $estimates->pluck('id')];
 
-        // Act
+        /* Act */
         $response = $this->postJson('api/v1/estimates/delete', $data);
 
-        // Assert
+        /* Assert */
         $response->assertStatus(200)->assertJson(['success' => true]);
         foreach ($estimates as $estimate) {
             $this->assertModelMissing($estimate);
@@ -299,16 +299,16 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_retrieves_available_estimate_templates(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->getJson('api/v1/estimates/templates')->assertStatus(200);
     }
 
     #[Test]
     public function it_creates_an_estimate_with_tax_per_item(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->raw([
             'estimate_number' => 'EST-000006',
             'tax_per_item' => 'YES',
@@ -318,10 +318,10 @@ class EstimateTest extends TestCase
             ],
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimates', [
             'template_name' => $estimate['template_name'],
             'estimate_number' => $estimate['estimate_number'],
@@ -343,7 +343,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_creates_an_estimate_with_foreign_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->raw([
             'discount_type' => 'fixed',
             'discount_val' => 20,
@@ -377,10 +377,10 @@ class EstimateTest extends TestCase
             ])],
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimates', [
             'template_name' => $estimate['template_name'],
             'estimate_number' => $estimate['estimate_number'],
@@ -406,7 +406,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_updates_an_estimate_with_foreign_currency(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()
             ->hasItems(1)
             ->hasTaxes(1)
@@ -448,10 +448,10 @@ class EstimateTest extends TestCase
             ])],
         ]);
 
-        // Act
+        /* Act */
         $response = $this->putJson('api/v1/estimates/'.$estimate->id, $updatedEstimate);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimates', [
             'id' => $estimate['id'],
             'template_name' => $updatedEstimate['template_name'],
@@ -483,7 +483,7 @@ class EstimateTest extends TestCase
     #[Test]
     public function it_creates_an_estimate_with_tax_included(): void
     {
-        // Arrange
+        /* Arrange */
         $estimate = Estimate::factory()->raw([
             'estimate_number' => 'EST-000006',
             'items' => [EstimateItem::factory()->raw()],
@@ -491,10 +491,10 @@ class EstimateTest extends TestCase
             'tax_included' => true,
         ]);
 
-        // Act
+        /* Act */
         $this->postJson('api/v1/estimates', $estimate)->assertStatus(201);
 
-        // Assert
+        /* Assert */
         $this->assertDatabaseHas('estimates', [
             'tax_included' => $estimate['tax_included'],
         ]);

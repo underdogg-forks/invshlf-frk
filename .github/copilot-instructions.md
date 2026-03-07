@@ -10,18 +10,18 @@ These instructions define the coding standards and rules for this repository. Al
   - ❌ `testCreateInvoice`, `create invoice`, `get items`
 
 ### Test Structure: Arrange, Act, Assert (AAA)
-Every test method must be structured with explicit AAA section comments:
+Every test method must be structured with explicit AAA section comments using docblock style:
 ```php
 #[Test]
 public function it_creates_an_invoice(): void
 {
-    // Arrange
+    /* Arrange */
     $invoice = Invoice::factory()->raw([...]);
 
-    // Act
+    /* Act */
     $response = $this->postJson('api/v1/invoices', $invoice);
 
-    // Assert
+    /* Assert */
     $response->assertOk();
     $this->assertDatabaseHas('invoices', [...]);
 }
@@ -56,9 +56,9 @@ class InvoiceTest extends TestCase
     #[Test]
     public function it_creates_an_invoice(): void
     {
-        // Arrange
-        // Act
-        // Assert
+        /* Arrange */
+        /* Act */
+        /* Assert */
     }
 }
 ```
@@ -105,3 +105,8 @@ if ($response->status() !== 200) {
 - The `check.yaml` workflow supports a `fix_pint_errors` boolean input:
   - When `true`: runs `./vendor/bin/pint --fix` to auto-fix style issues
   - When `false` (default): runs `./vendor/bin/pint --test` to validate style
+
+## GitHub Copilot Restrictions
+
+- **Do NOT run CLI commands** such as `php artisan test`, `composer install`, `npm install`, or any other shell/terminal commands
+- Suggest commands for the developer to run instead of executing them directly

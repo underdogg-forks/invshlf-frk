@@ -30,21 +30,21 @@ class UserTest extends TestCase
     #[Test]
     public function it_retrieves_all_users(): void
     {
-        // Arrange - data seeded in setUp
+        /* Arrange */
 
-        // Act
+        /* Act */
         $response = $this->getJson('/api/v1/users');
 
-        // Assert
+        /* Assert */
         $response->assertOk();
     }
 
     #[Test]
     public function it_validates_the_store_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             UsersController::class,
             'store',
@@ -55,19 +55,19 @@ class UserTest extends TestCase
     #[Test]
     public function it_retrieves_a_single_user(): void
     {
-        // Arrange
+        /* Arrange */
         $user = User::factory()->create();
 
-        // Act & Assert
+        /* Act & Assert */
         $this->getJson("/api/v1/users/{$user->id}")->assertOk();
     }
 
     #[Test]
     public function it_validates_the_update_action_uses_a_form_request(): void
     {
-        // Arrange - no setup required
+        /* Arrange */
 
-        // Act & Assert
+        /* Act & Assert */
         $this->assertActionUsesFormRequest(
             UsersController::class,
             'update',
