@@ -5,7 +5,7 @@
     "items": "Artikel",
     "invoices": "Rechnungen",
     "recurring-invoices": "Serienrechnungen",
-    "expenses": "Ausgaben",
+    "expenses": "Kosten",
     "estimates": "Angebote",
     "payments": "Zahlungen",
     "reports": "Berichte",
@@ -29,6 +29,8 @@
     "to_date": "Bis Datum",
     "from": "Von",
     "to": "An",
+    "cc": "CC",
+    "bcc": "BCC",
     "ok": "Okay",
     "yes": "Ja",
     "no": "Nein",
@@ -76,7 +78,7 @@
     "are_you_sure": "Sind Sie sicher?",
     "list_is_empty": "Liste ist leer.",
     "no_tax_found": "Kein Steuersatz gefunden!",
-    "four_zero_four": "Vier hundert vier",
+    "four_zero_four": "Nicht gefunden",
     "you_got_lost": "Hoppla! Du hast dich verirrt!",
     "go_home": "Geh zurück",
     "test_mail_conf": "E-Mail Konfiguration testen",
@@ -100,7 +102,26 @@
     "pay_invoice": "Rechnung bezahlen",
     "login_successfully": "Erfolgreich angemeldet!",
     "logged_out_successfully": "Erfolgreich abgemeldet",
-    "mark_as_default": "Als Standard festlegen"
+    "mark_as_default": "Als Standard festlegen",
+    "no_data_found": "Keine Daten gefunden",
+    "pagination": {
+      "previous": "Zurück",
+      "next": "Weiter",
+      "showing": "Zeigt an",
+      "to": "bis",
+      "of": "von",
+      "results": "Ergebnisse"
+    },
+    "file_upload": {
+      "drag_a_file": "Ziehe eine Datei hierher oder",
+      "browse": "durchsuchen",
+      "to_choose": "um eine Datei auszuwählen"
+    },
+    "multiselect": {
+      "the_list_is_empty": "Die Liste ist leer",
+      "no_results_found": "Keine Ergebnisse gefunden"
+    },
+    "copy_to_clipboard": "In die Zwischenablage kopieren"
   },
   "dashboard": {
     "select_year": "Jahr wählen",
@@ -142,7 +163,10 @@
     "name": "Name",
     "description": "Beschreibung",
     "percent": "Prozent",
-    "compound_tax": "zusammengesetzte Steuer"
+    "compound_tax": "zusammengesetzte Steuer",
+    "percentage": "Prozentsatz",
+    "fixed_amount": "Festbetrag",
+    "tax_type": "Steuerart"
   },
   "global_search": {
     "search": "Suchen...",
@@ -172,15 +196,15 @@
   "customers": {
     "title": "Kunden",
     "prefix": "Präfix",
-    "tax_id": "Tax ID",
+    "tax_id": "USt-ID",
     "add_customer": "Kunde hinzufügen",
     "contacts_list": "Kunden-Liste",
     "name": "Name",
-    "mail": "E-Mail| E-Mails",
+    "mail": "E-Mail | E-Mails",
     "statement": "Stellungnahme",
     "display_name": "Anzeige Name",
     "primary_contact_name": "Ansprechpartner",
-    "contact_name": "Kontakt Name",
+    "contact_name": "Name",
     "amount_due": "Offener Betrag",
     "email": "E-Mail",
     "address": "Adresse",
@@ -284,6 +308,7 @@
     "total": "Gesamt",
     "discount": "Rabatt",
     "sub_total": "Zwischensumme",
+    "net_total": "Netto",
     "estimate_number": "Angebotsnummer",
     "ref_number": "Ref-Nummer",
     "contact": "Kontakt",
@@ -305,6 +330,9 @@
     "record_payment": "Zahlung erfassen",
     "add_estimate": "Angebote hinzufügen",
     "save_estimate": "Angebot speichern",
+    "cloned_successfully": "Angebot erfolgreich kopiert",
+    "clone_estimate": "Angebot kopieren",
+    "confirm_clone": "Dieses Angebot wird als neues Angebot kopiert",
     "confirm_conversion": "Dieses Angebot wird verwendet, um eine neue Rechnung zu erstellen.",
     "conversion_message": "Rechnung erfolgreich erstellt",
     "confirm_send_estimate": "Das Angebot wird per E-Mail an den Kunden gesendet",
@@ -543,13 +571,24 @@
       "type_item_description": "Artikel-Beschreibung (optional)"
     },
     "frequency": {
-      "title": "Intervall",
+      "title": "Frequenz (mit cron-Format)",
       "select_frequency": "Intervall auswählen",
       "minute": "Minute",
       "hour": "Stunde",
       "day_month": "Tag des Monats",
       "month": "Monat",
-      "day_week": "Tag der Woche"
+      "day_week": "Tag der Woche",
+      "every_minute": "Minütlich",
+      "every_30_minute": "Alle 30 Minuten",
+      "every_hour": "Stündlich",
+      "every_2_hour": "Alle 2 Stunden",
+      "every_day_at_midnight": "Jeden Tag um Mitternacht",
+      "every_week": "Wöchentlich",
+      "every_15_days_at_midnight": "Alle 15 Tage um Mitternacht",
+      "on_the_first_day_of_every_month_at_midnight": "Am ersten Tag jeden Monats um 00:00 Uhr",
+      "every_6_month": "Alle 6 Monate",
+      "every_year_on_the_first_day_of_january_at_midnight": "Jedes Jahr am ersten Tag des Januar um 00:00 Uhr",
+      "custom": "Benutzerdefiniert"
     },
     "confirm_delete": "Sie werden diese Rechnung nicht wiederherstellen können | Sie werden nicht in der Lage sein, diese Rechnungen wiederherzustellen",
     "created_message": "Serienrechnung erfolgreich erstellt",
@@ -558,7 +597,12 @@
     "marked_as_sent_message": "Serienrechnung als erfolgreich gesendet markiert",
     "user_email_does_not_exist": "E-Mail des Benutzers existiert nicht",
     "something_went_wrong": "etwas ist schief gelaufen",
-    "invalid_due_amount_message": "Der Gesamtbetrag der Serienrechnung darf nicht kleiner als der bezahlte Gesamtbetrag für diese Serienrechnung sein. Bitte aktualisieren Sie die Rechnung oder löschen Sie die zugehörigen Zahlungen, um fortzufahren."
+    "invalid_due_amount_message": "Der Gesamtbetrag der Serienrechnung darf nicht kleiner als der bezahlte Gesamtbetrag für diese Serienrechnung sein. Bitte aktualisieren Sie die Rechnung oder löschen Sie die zugehörigen Zahlungen, um fortzufahren.",
+    "limit": {
+      "none": "Keine",
+      "date": "Datum",
+      "count": "Anzahl"
+    }
   },
   "payments": {
     "title": "Zahlungen",
@@ -596,7 +640,8 @@
     "created_message": "Zahlung erfolgreich erstellt",
     "updated_message": "Zahlung erfolgreich aktualisiert",
     "deleted_message": "Zahlung erfolgreich gelöscht | Zahlungen erfolgreich gelöscht",
-    "invalid_amount_message": "Zahlungsbetrag ist ungültig"
+    "invalid_amount_message": "Zahlungsbetrag ist ungültig",
+    "amount_due": "Fälliger Betrag"
   },
   "expenses": {
     "title": "Ausgaben",
@@ -610,6 +655,8 @@
     "from_date": "Von Datum",
     "to_date": "bis Datum",
     "expense_date": "Datum",
+    "expense_number": "Kostennummer",
+    "expense_number_placeholder": "AW-001",
     "description": "Beschreibung",
     "receipt": "Rechnung",
     "amount": "Summe",
@@ -701,7 +748,8 @@
     "installed": "Installiert",
     "no_modules_installed": "Noch keine Module installiert!",
     "disable_warning": "Alle Einstellungen für diesen speziellen Wert werden zurückgesetzt.",
-    "what_you_get": "Was Sie erhalten"
+    "what_you_get": "Was Sie erhalten",
+    "sign_up_and_get_token": "Registrieren & Token erhalten"
   },
   "users": {
     "title": "Benutzer",
@@ -753,7 +801,11 @@
       "date_range": "Datumsbereich auswählen",
       "to_date": "bis Datum",
       "from_date": "Ab Datum",
-      "report_type": "Berichtstyp"
+      "report_type": "Berichtstyp",
+      "sort": {
+        "by_customer": "Vom Kunden",
+        "by_item": "Nach Artikel"
+      }
     },
     "taxes": {
       "taxes": "Steuern",
@@ -808,7 +860,8 @@
       "payment_modes": "Zahlungsarten",
       "notes": "Notizen",
       "exchange_rate": "Wechselkurs",
-      "address_information": "Adressinformationen"
+      "address_information": "Adressinformationen",
+      "pdf_generation": "PDF-Erzeugung"
     },
     "address_information": {
       "section_description": "  Sie können Ihre Adressinformationen über das untenstehende Formular aktualisieren."
@@ -820,6 +873,7 @@
     "primary_currency": "Primäre Währung",
     "timezone": "Zeitzone",
     "date_format": "Datum-Format",
+    "time_format": "Zeitformat",
     "currencies": {
       "title": "Währungen",
       "currency": "Währung | Währungen",
@@ -848,6 +902,7 @@
       "mailgun_endpoint": "Mailgun-Endpunkt",
       "ses_secret": "SES Verschlüsselung",
       "ses_key": "SES-Taste",
+      "ses_region": "AWS-Region",
       "password": "E-Mail-Kennwort",
       "username": "E-Mail-Benutzername",
       "mail_config": "E-Mail-Konfiguration",
@@ -859,7 +914,15 @@
     "pdf": {
       "title": "PDF-Einstellung",
       "footer_text": "Fußzeile Text",
-      "pdf_layout": "PDF-Layout"
+      "pdf_layout": "PDF-Layout",
+      "pdf_configuration": "Einstellungen für die PDF-Erzeugung",
+      "section_description": "Ändern der Art und Weise, wie PDFs generiert werden",
+      "driver": "Zu verwendender PDF-Treiber",
+      "papersize": "Papiergröße",
+      "papersize_hint": "Papiergröße in Breite und Höhe (z. B. \"210 mm 297 mm\")",
+      "gotenberg_host": "",
+      "pdf_variables_save_successfully": "PDF-Konfiguration erfolgreich gespeichert",
+      "pdf_variables_save_error": "Die Konfiguration konnte nicht gespeichert werden"
     },
     "company_info": {
       "company_info": "Firmeninfo",
@@ -921,7 +984,14 @@
       "added_message": "Benutzerdefiniertes Feld erfolgreich hinzugefügt",
       "press_enter_to_add": "Eingabetaste drücken, um neue Option hinzuzufügen",
       "model_in_use": "Das Modell kann für bereits verwendete Felder nicht aktualisiert werden.",
-      "type_in_use": "Der Typ von bereits verwendeten Feldern kann nicht aktualisiert werden."
+      "type_in_use": "Der Typ von bereits verwendeten Feldern kann nicht aktualisiert werden.",
+      "model_type": {
+        "customer": "Kunde",
+        "invoice": "Rechnung",
+        "estimate": "Angebot",
+        "expense": "Ausgabe",
+        "payment": "Zahlung"
+      }
     },
     "customization": {
       "customization": "Personalisierung",
@@ -939,6 +1009,7 @@
       "delimiter_description": "Einzelnes Zeichen für die Verwendung zwischen zwei separaten Komponenten. Standardmäßig ist dies -",
       "delimiter_param_label": "Trennzeichen",
       "date_format": "Datumsformat",
+      "time_format": "Zeitformat",
       "date_format_description": "Ein lokales Datums- und Zeitfeld, das einen Format-Parameter akzeptiert. Das Standardformat: 'Y' stellt das aktuelle Jahr dar.",
       "date_format_param_label": "Format",
       "sequence": "Fortlaufende Nummer",
@@ -1034,6 +1105,8 @@
         "description": "Sparen Sie Zeit, indem Sie Notizen erstellen und diese auf Ihren Rechnungen, Angeboten und Zahlungen wiederverwenden.",
         "notes": "Hinweise",
         "type": "Art",
+        "is_default": "Standardmäßig auswählen",
+        "is_default_description": "Diese Notiz wird standardmäßig in neuen Rechnungen ausgewählt.",
         "add_note": "Notiz hinzufügen",
         "add_new_note": "Neue Notiz hinzufügen",
         "name": "Name",
@@ -1042,7 +1115,12 @@
         "note_updated": "Notiz erfolgreich aktualisiert",
         "note_confirm_delete": "Dieser Hinweis wird unwiderruflich gelöscht",
         "already_in_use": "Hinweis bereits in verwendet",
-        "deleted_message": "Notiz erfolgreich gelöscht"
+        "deleted_message": "Notiz erfolgreich gelöscht",
+        "types": {
+          "estimate": "Angebot",
+          "invoice": "Rechnung",
+          "payment": "Zahlung"
+        }
       }
     },
     "account_settings": {
@@ -1067,9 +1145,9 @@
       "email": "Benachrichtigungen senden an",
       "description": "Welche E-Mail-Benachrichtigungen möchten Sie erhalten wenn sich etwas ändert?",
       "invoice_viewed": "Rechnung angezeigt",
-      "invoice_viewed_desc": "Wenn Ihr Kunde die gesendete Rechnung anzeigt bekommt.",
+      "invoice_viewed_desc": "Wenn Ihr Kunde die gesendete Rechnung angezeigt bekommt.",
       "estimate_viewed": "Angebot angesehen",
-      "estimate_viewed_desc": "Wenn Ihr Kunde das gesendete Angebot anzeigt bekommt.",
+      "estimate_viewed_desc": "Wenn Ihr Kunde das gesendete Angebot angezeigt bekommt.",
       "save": "Speichern",
       "email_save_message": "Email erfolgreich gespeichert",
       "please_enter_email": "Bitte E-Mail eingeben"
@@ -1117,7 +1195,7 @@
       "exchange_help_text": "Wechselkurs eingeben um von {currency} nach {baseCurrency} zu konvertieren",
       "currency_freak": "CurrencyFreaks",
       "currency_layer": "Währungsebene",
-      "open_exchange_rate": "Open Exchange Rate",
+      "open_exchange_rate": "Öffne Wechselkurs",
       "currency_converter": "Währungsumrechner",
       "server": "Server",
       "url": "URL",
@@ -1135,14 +1213,23 @@
       "tax_per_item": "Steuersatz pro Artikel",
       "tax_name": "Name des Steuersatzes",
       "compound_tax": "zusammengesetzte Steuer",
+      "amount": "Summe",
       "percent": "Prozent",
+      "fixed_amount": "Festbetrag",
+      "calculation_type": "Berechnungstyp",
+      "percentage": "Prozentsatz",
+      "fixed": "Fixiert",
       "action": "Aktion",
       "tax_setting_description": "Aktivieren Sie diese Option, wenn Sie den Steuersatz zu einzelnen Rechnungspositionen hinzufügen möchten. Standardmäßig wird der Steuersatz direkt zur Rechnung hinzugefügt.",
       "created_message": "Steuersatz erfolgreich erstellt",
       "updated_message": "Steuersatz erfolgreich aktualisiert",
       "deleted_message": "Steuersatz erfolgreich gelöscht",
       "confirm_delete": "Sie können diesen Steuersatz nicht wiederherstellen",
-      "already_in_use": "Steuersatz wird bereits verwendet"
+      "already_in_use": "Steuersatz wird bereits verwendet",
+      "tax_included": "Inklusive Steuern",
+      "tax_included_description": "Aktivieren Sie dies, wenn Sie angeben möchten, dass Steuern bereits in den Rechnungsposten oder Rechnungssummen enthalten sind.",
+      "tax_included_by_default": "",
+      "tax_included_by_default_description": "Aktivieren Sie dies, wenn Steuern standardmäßig inbegriffen sein sollen"
     },
     "payment_modes": {
       "title": "Zahlungsarten",
@@ -1154,7 +1241,7 @@
       "payment_mode_updated": "Zahlungsart aktualisiert",
       "payment_mode_confirm_delete": "Sie werden diese Zahlungsart nicht wiederherstellen können",
       "payments_attached": "Diese Zahlungsmethode ist bereits mit anderen Beträgen verknüpft. Bitte löschen Sie die damit verbundenen Beträge, um mit der Löschung fortzufahren.",
-      "expenses_attached": "This payment method is already attached to expenses. Please delete the attached expenses to proceed with deletion.",
+      "expenses_attached": "Diese Zahlungsmethode ist bereits mit Ausgaben verknüpft. Bitte löschen Sie die angehängten Ausgaben, um mit der Löschung fortzufahren.",
       "deleted_message": "Zahlungsart erfolgreich gelöscht"
     },
     "expense_category": {
@@ -1178,6 +1265,7 @@
       "time_zone": "Zeitzone",
       "fiscal_year": "Geschäftsjahr",
       "date_format": "Datum-Format",
+      "time_format": "Zeitformat",
       "discount_setting": "Einstellung Rabatt",
       "discount_per_item": "Rabatt pro Artikel ",
       "discount_setting_description": "Aktivieren Sie diese Option, wenn Sie einzelnen Rechnungspositionen einen Rabatt hinzufügen möchten. Standardmäßig wird der Rabatt direkt zur Rechnung hinzugefügt.",
@@ -1190,6 +1278,7 @@
       "select_language": "Sprache auswählen",
       "select_time_zone": "Zeitzone auswählen",
       "select_date_format": "Wähle das Datumsformat",
+      "select_time_format": "Zeitformat auswählen",
       "select_financial_year": "Geschäftsjahr auswählen",
       "recurring_invoice_status": "Status der Serienrechnung",
       "create_status": "Status erstellen",
@@ -1197,12 +1286,29 @@
       "on_hold": "Pausiert",
       "update_status": "Status aktualisieren",
       "completed": "Abgeschlossen",
-      "company_currency_unchangeable": "Die Währung des Unternehmens kann nicht geändert werden"
+      "company_currency_unchangeable": "Die Währung des Unternehmens kann nicht geändert werden",
+      "invoice_use_time": "Verwende Uhrzeit in Rechnungen",
+      "invoice_use_time_description": "Aktivieren Sie diese Option, wenn Sie die genaue Rechnungszeit auswählen möchten.",
+      "fiscal_years": {
+        "january_december": "Januar - Dezember",
+        "february_january": "Februar - Januar",
+        "march_february": "März - Februar",
+        "april_march": "April - März",
+        "may_april": "Mai - April",
+        "june_may": "Juni - Mai",
+        "july_june": "Juli - Juni",
+        "august_july": "August - Juli",
+        "september_august": "September - August",
+        "october_september": "Oktober - September",
+        "november_october": "November - Oktober",
+        "december_november": "Dezember - November"
+      }
     },
     "update_app": {
       "title": "Applikation aktualisieren",
       "description": "Sie können InvoiceShelf ganz einfach aktualisieren, indem Sie auf die Schaltfläche unten klicken, um nach einem neuen Update zu suchen.",
       "check_update": "Nach Updates suchen",
+      "insider_consent": "Opt-in für Insider-Releases. Nur für Testzwecke empfohlen.",
       "avail_update": "Neues Update verfügbar",
       "next_version": "Nächste Version",
       "requirements": "Voraussetzungen",
@@ -1351,11 +1457,16 @@
     "time_zone": "Zeitzone",
     "fiscal_year": "Geschäftsjahr",
     "date_format": "Datumsformat",
+    "time_format": "Zeitformat",
     "from_address": "Absender",
     "username": "Benutzername",
     "next": "Weiter",
     "continue": "Weiter",
     "skip": "Überspringen",
+    "install_language": {
+      "title": "Wähle deine Sprache",
+      "description": "Wähle eine Sprache aus in der InvoiceShelf installiert wird"
+    },
     "database": {
       "database": "URL der Seite & Datenbank",
       "connection": "Datenbank Verbindung",
@@ -1367,6 +1478,7 @@
       "username": "Datenbank Benutzername",
       "db_name": "Datenbank Name",
       "db_path": "Datenbankpfad",
+      "overwrite": "Bestehende Datenbank überschreiben und fortfahren",
       "desc": "Erstellen Sie eine Datenbank auf Ihrem Server und legen Sie die Anmeldeinformationen mithilfe des folgenden Formulars fest."
     },
     "permissions": {
@@ -1382,7 +1494,14 @@
       "verify_now": "Jetzt verifizieren",
       "success": "Domain erfolgreich verifiziert.",
       "failed": "Domainüberprüfung fehlgeschlagen. Bitte geben Sie einen gültigen Domainnamen ein.",
-      "verify_and_continue": "Verifizieren und fortfahren"
+      "verify_and_continue": "Verifizieren und fortfahren",
+      "notes": {
+        "notes": "Notizen:",
+        "not_contain": "App-Domain sollte nicht enthalten",
+        "or": "oder",
+        "in_front": "vor der Domain.",
+        "if_you": "Wenn Sie auf die Website über einen anderen Port zugreifen, geben Sie bitte den Port an. Zum Beispiel:"
+      }
     },
     "mail": {
       "host": "E-Mail-Host",
@@ -1506,6 +1625,7 @@
   "pdf_discount_label": "Rabatt",
   "pdf_amount_label": "Summe",
   "pdf_subtotal": "Zwischensumme",
+  "pdf_net_total": "Netto",
   "pdf_total": "Gesamt",
   "pdf_payment_label": "Zahlung",
   "pdf_payment_receipt_label": "Zahlungsbeleg",
@@ -1534,13 +1654,15 @@
   "pdf_tax_label": "Steuer",
   "pdf_tax_id": "Steuer-Nr.",
   "pdf_vat_id": "USt.-ID",
-  "mail_thanks": "Thanks",
-  "mail_view_estimate": "View Estimate",
-  "mail_viewed_estimate": ":name viewed this Estimate.",
-  "mail_view_invoice": "View Invoice",
-  "mail_viewed_invoice": ":name viewed this Invoice.",
-  "mail_view_payment": "View Payment",
-  "notification_view_estimate": "[Notification] Estimate viewed",
-  "notification_view_invoice": "[Notification] Invoice viewed",
-  "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:": "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:"
+  "pdf_amount_paid": "Bezahlter Betrag",
+  "pdf_amount_due": "Offener Betrag",
+  "mail_thanks": "Danke",
+  "mail_view_estimate": "Angebot ansehen",
+  "mail_viewed_estimate": ":name hat dieses Angebot angesehen.",
+  "mail_view_invoice": "Rechnung anzeigen",
+  "mail_viewed_invoice": ":name hat diese Rechnung angesehen.",
+  "mail_view_payment": "Zahlung anzeigen",
+  "notification_view_estimate": "[Benachrichtigung] Angebot angesehen",
+  "notification_view_invoice": "[Benachrichtigung] Rechnung angesehen",
+  "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:": "Sie haben eine neue Rechnung von <b>{COMPANY_NAME}</b>erhalten.</br> Bitte laden Sie sich über den folgenden Button herunter:"
 }

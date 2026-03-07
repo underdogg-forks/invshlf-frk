@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Invoice;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
 use Illuminate\Http\Request;
@@ -17,13 +18,13 @@ class ChangeInvoiceStatusController extends Controller
     {
         $this->authorize('send invoice', $invoice);
 
-        if ($request->status == Invoice::STATUS_SENT) {
-            $invoice->status = Invoice::STATUS_SENT;
+        if ($request->status === InvoiceStatus::Sent->value) {
+            $invoice->status = InvoiceStatus::Sent;
             $invoice->sent = true;
             $invoice->save();
-        } elseif ($request->status == Invoice::STATUS_COMPLETED) {
-            $invoice->status = Invoice::STATUS_COMPLETED;
-            $invoice->paid_status = Invoice::STATUS_PAID;
+        } elseif ($request->status === InvoiceStatus::Completed->value) {
+            $invoice->status = InvoiceStatus::Completed;
+            $invoice->paid_status = InvoiceStatus::Paid;
             $invoice->due_amount = 0;
             $invoice->save();
         }

@@ -1,159 +1,164 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Customer\CustomersController;
 use App\Http\Requests\CustomerRequest;
 use App\Models\Customer;
 use App\Models\Invoice;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class CustomerTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get customers', function () {
-    $response = getJson('api/v1/customers?page=1');
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response->assertOk();
-});
+    #[Test]
+    public function it_retrieves_a_paginated_list_of_customers(): void
+    {
+        /* Arrange */
 
-test('customer stats', function () {
-    $customer = Customer::factory()->create();
+        /* Act */
+        $response = $this->getJson('api/v1/customers?page=1');
 
-    $invoice = Invoice::factory()->create([
-        'customer_id' => $customer->id,
-    ]);
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
+    {
+        /* Arrange */
+        $customer = Customer::factory()->create();
+        Invoice::factory()->create(['customer_id' => $customer->id]);
 
-    $response = getJson("api/v1/customers/{$customer->id}/stats");
+        /* Act */
+        $response = $this->getJson("api/v1/customers/{$customer->id}/stats");
 
-    $response->assertStatus(200);
-});
+        /* Assert */
+        $response->assertStatus(200)
+            ->assertJsonStructure(['data' => ['id', 'name'], 'meta' => ['chartData' => ['months', 'invoiceTotals', 'salesTotal', 'totalReceipts', 'totalExpenses']]]);
+    }
 
-test('create customer', function () {
-    $customer = Customer::factory()->raw([
-        'shipping' => [
-            'name' => 'newName',
-            'address_street_1' => 'address',
-        ],
-        'billing' => [
-            'name' => 'newName',
-            'address_street_1' => 'address',
-        ],
-    ]);
-
-    postJson('api/v1/customers', $customer)
-        ->assertOk();
-
-    $this->assertDatabaseHas('customers', [
-        'name' => $customer['name'],
-        'email' => $customer['email'],
-    ]);
-});
-
-test('store validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        CustomersController::class,
-        'store',
-        CustomerRequest::class
-    );
-});
-
-test('get customer', function () {
-    $customer = Customer::factory()->create();
-
-    $response = getJson("api/v1/customers/{$customer->id}");
-
-    $this->assertDatabaseHas('customers', [
-        'id' => $customer->id,
-        'name' => $customer['name'],
-        'email' => $customer['email'],
-    ]);
-
-    $response->assertOk();
-});
-
-test('update customer', function () {
-    $customer = Customer::factory()->create();
-
-    $customer1 = Customer::factory()->raw([
-        'shipping' => [
-            'name' => 'newName',
-            'address_street_1' => 'address',
-        ],
-        'billing' => [
-            'name' => 'newName',
-            'address_street_1' => 'address',
-        ],
-    ]);
-
-    $response = putJson('api/v1/customers/'.$customer->id, $customer1);
-
-    $customer1 = collect($customer1)
-        ->only([
-            'email',
-        ])
-        ->merge([
-            'creator_id' => Auth::id(),
-        ])
-        ->toArray();
-
-    $response->assertOk();
-
-    $this->assertDatabaseHas('customers', $customer1);
-});
-
-test('update validates using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        CustomersController::class,
-        'update',
-        CustomerRequest::class
-    );
-});
-
-test('search customers', function () {
-    $filters = [
-        'page' => 1,
-        'limit' => 15,
-        'search' => 'doe',
-        'email' => '.com',
-    ];
-
-    $queryString = http_build_query($filters, '', '&');
-
-    $response = getJson('api/v1/customers?'.$queryString);
-
-    $response->assertOk();
-});
-
-test('delete multiple customer', function () {
-    $customers = Customer::factory()->count(4)->create();
-
-    $ids = $customers->pluck('id');
-
-    $data = [
-        'ids' => $ids,
-    ];
-
-    $response = postJson('api/v1/customers/delete', $data);
-
-    $response
-        ->assertOk()
-        ->assertJson([
-            'success' => true,
+    #[Test]
+    public function it_creates_a_customer_with_billing_and_shipping_addresses(): void
+    {
+        /* Arrange */
+        $customer = Customer::factory()->raw([
+            'shipping' => ['name' => 'newName', 'address_street_1' => 'address'],
+            'billing' => ['name' => 'newName', 'address_street_1' => 'address'],
         ]);
-});
+
+        /* Act */
+        $this->postJson('api/v1/customers', $customer)->assertOk();
+
+        /* Assert */
+        $this->assertDatabaseHas('customers', [
+            'name' => $customer['name'],
+            'email' => $customer['email'],
+        ]);
+    }
+
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
+    {
+        /* Arrange */
+
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            CustomersController::class,
+            'store',
+            CustomerRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_retrieves_a_single_customer(): void
+    {
+        /* Arrange */
+        $customer = Customer::factory()->create();
+
+        /* Act */
+        $response = $this->getJson("api/v1/customers/{$customer->id}");
+
+        /* Assert */
+        $response->assertOk();
+        $this->assertDatabaseHas('customers', [
+            'id' => $customer->id,
+            'name' => $customer['name'],
+            'email' => $customer['email'],
+        ]);
+    }
+
+    #[Test]
+    public function it_updates_a_customer(): void
+    {
+        /* Arrange */
+        $customer = Customer::factory()->create();
+        $updatedCustomer = Customer::factory()->raw([
+            'shipping' => ['name' => 'newName', 'address_street_1' => 'address'],
+            'billing' => ['name' => 'newName', 'address_street_1' => 'address'],
+        ]);
+
+        /* Act */
+        $response = $this->putJson('api/v1/customers/'.$customer->id, $updatedCustomer);
+
+        /* Assert */
+        $response->assertOk();
+        $this->assertDatabaseHas('customers', collect($updatedCustomer)
+            ->only(['email'])
+            ->merge(['creator_id' => Auth::id()])
+            ->toArray());
+    }
+
+    #[Test]
+    public function it_validates_the_update_action_uses_a_form_request(): void
+    {
+        /* Arrange */
+
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            CustomersController::class,
+            'update',
+            CustomerRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_searches_customers_by_filters(): void
+    {
+        /* Arrange */
+        $filters = ['page' => 1, 'limit' => 15, 'search' => 'doe', 'email' => '.com'];
+
+        /* Act */
+        $response = $this->getJson('api/v1/customers?'.http_build_query($filters, '', '&'));
+
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
+    {
+        /* Arrange */
+        $customers = Customer::factory()->count(4)->create();
+        $data = ['ids' => $customers->pluck('id')];
+
+        /* Act */
+        $response = $this->postJson('api/v1/customers/delete', $data);
+
+        /* Assert */
+        $response->assertOk()->assertJson(['success' => true]);
+    }
+}

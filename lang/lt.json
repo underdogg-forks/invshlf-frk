@@ -29,6 +29,8 @@
     "to_date": "Data iki",
     "from": "Nuo",
     "to": "Kam",
+    "cc": "CC",
+    "bcc": "BCC",
     "ok": "Gerai",
     "yes": "Taip",
     "no": "Ne",
@@ -100,7 +102,26 @@
     "pay_invoice": "Apmokėti",
     "login_successfully": "Prisijungta sėkmingai!",
     "logged_out_successfully": "Atsijungta sėkmingai",
-    "mark_as_default": "Pažymėti kaip numatytąjį"
+    "mark_as_default": "Pažymėti kaip numatytąjį",
+    "no_data_found": "Duomenų nerasta",
+    "pagination": {
+      "previous": "Ankstesnis",
+      "next": "Kitas",
+      "showing": "Rodoma",
+      "to": "to",
+      "of": "of",
+      "results": "results"
+    },
+    "file_upload": {
+      "drag_a_file": "Drag a file here or",
+      "browse": "browse",
+      "to_choose": "to choose a file"
+    },
+    "multiselect": {
+      "the_list_is_empty": "The list is empty",
+      "no_results_found": "No results found"
+    },
+    "copy_to_clipboard": "Copy to Clipboard"
   },
   "dashboard": {
     "select_year": "Pasirinkite metus",
@@ -142,7 +163,10 @@
     "name": "Pavadinimas",
     "description": "Aprašymas",
     "percent": "Procentai",
-    "compound_tax": "Sudėtinis mokestis"
+    "compound_tax": "Sudėtinis mokestis",
+    "percentage": "Percentage",
+    "fixed_amount": "Fixed Amount",
+    "tax_type": "Tax Type"
   },
   "global_search": {
     "search": "Paieška...",
@@ -284,6 +308,7 @@
     "total": "Iš viso",
     "discount": "Nuolaida",
     "sub_total": "Tarpinė suma",
+    "net_total": "Net",
     "estimate_number": "Pasiūlymo numeris",
     "ref_number": "Ref Number",
     "contact": "Contact",
@@ -305,6 +330,9 @@
     "record_payment": "Record Payment",
     "add_estimate": "Pridėti naują Pasiūlymą",
     "save_estimate": "Išsaugoti Pasiūlymą",
+    "cloned_successfully": "Estimate cloned successfully",
+    "clone_estimate": "Clone Estimate",
+    "confirm_clone": "This Estimate will be cloned into a new Estimate",
     "confirm_conversion": "This estimate will be used to create a new Invoice.",
     "conversion_message": "Sąskaita sukurta sėkmingai",
     "confirm_send_estimate": "Šitas pasiūlymas bus išsiųstas Klientui el. paštu",
@@ -543,13 +571,24 @@
       "type_item_description": "Type Item Description (optional)"
     },
     "frequency": {
-      "title": "Frequency",
+      "title": "Frequency (using cron format)",
       "select_frequency": "Select Frequency",
       "minute": "Minute",
       "hour": "Hour",
       "day_month": "Day of month",
       "month": "Month",
-      "day_week": "Day of week"
+      "day_week": "Day of week",
+      "every_minute": "Every Minute",
+      "every_30_minute": "Every 30 Minute",
+      "every_hour": "Every Hour",
+      "every_2_hour": "Every 2 Hour",
+      "every_day_at_midnight": "Every day at midnight",
+      "every_week": "Every Week",
+      "every_15_days_at_midnight": "Every 15 days at midnight",
+      "on_the_first_day_of_every_month_at_midnight": "On the first day of every month at 00:00",
+      "every_6_month": "Every 6 Month",
+      "every_year_on_the_first_day_of_january_at_midnight": "Every year on the first day of january at 00:00",
+      "custom": "Custom"
     },
     "confirm_delete": "You will not be able to recover this Invoice | You will not be able to recover these Invoices",
     "created_message": "Recurring Invoice created successfully",
@@ -558,7 +597,12 @@
     "marked_as_sent_message": "Recurring Invoice marked as sent successfully",
     "user_email_does_not_exist": "User email does not exist",
     "something_went_wrong": "something went wrong",
-    "invalid_due_amount_message": "Total Recurring Invoice amount cannot be less than total paid amount for this Recurring Invoice. Please update the invoice or delete the associated payments to continue."
+    "invalid_due_amount_message": "Total Recurring Invoice amount cannot be less than total paid amount for this Recurring Invoice. Please update the invoice or delete the associated payments to continue.",
+    "limit": {
+      "none": "None",
+      "date": "Date",
+      "count": "Count"
+    }
   },
   "payments": {
     "title": "Payments",
@@ -596,7 +640,8 @@
     "created_message": "Payment created successfully",
     "updated_message": "Payment updated successfully",
     "deleted_message": "Payment deleted successfully | Payments deleted successfully",
-    "invalid_amount_message": "Payment amount is invalid"
+    "invalid_amount_message": "Payment amount is invalid",
+    "amount_due": "Due Amount"
   },
   "expenses": {
     "title": "Išlaidos",
@@ -610,6 +655,8 @@
     "from_date": "From Date",
     "to_date": "To Date",
     "expense_date": "Data",
+    "expense_number": "Išlaidų numeris",
+    "expense_number_placeholder": "EXP-001",
     "description": "Aprašymas",
     "receipt": "Čekis",
     "amount": "Amount",
@@ -701,7 +748,8 @@
     "installed": "Installed",
     "no_modules_installed": "No Modules Installed Yet!",
     "disable_warning": "All the settings for this particular will be reverted.",
-    "what_you_get": "What you get"
+    "what_you_get": "What you get",
+    "sign_up_and_get_token": "Sign up & Get Token"
   },
   "users": {
     "title": "Vartotojai",
@@ -753,7 +801,11 @@
       "date_range": "Select Date Range",
       "to_date": "To Date",
       "from_date": "From Date",
-      "report_type": "Report Type"
+      "report_type": "Report Type",
+      "sort": {
+        "by_customer": "By Customer",
+        "by_item": "By Item"
+      }
     },
     "taxes": {
       "taxes": "Taxes",
@@ -808,7 +860,8 @@
       "payment_modes": "Mokėjimo būdai",
       "notes": "Pastabos",
       "exchange_rate": "Valiutų kursas",
-      "address_information": "Address Information"
+      "address_information": "Address Information",
+      "pdf_generation": "PDF Generation"
     },
     "address_information": {
       "section_description": "  You can update Your Address information using form below."
@@ -820,6 +873,7 @@
     "primary_currency": "Pagrindinė valiuta",
     "timezone": "Laiko zona",
     "date_format": "Datos formatas",
+    "time_format": "Time Format",
     "currencies": {
       "title": "Valiutos",
       "currency": "Valiuta | Valiutos",
@@ -848,6 +902,7 @@
       "mailgun_endpoint": "Mailgun Endpoint",
       "ses_secret": "SES Secret",
       "ses_key": "SES Key",
+      "ses_region": "AWS Region",
       "password": "Mail Password",
       "username": "Mail Username",
       "mail_config": "Mail Configuration",
@@ -859,7 +914,15 @@
     "pdf": {
       "title": "PDF nustatymai",
       "footer_text": "Poraštės tekstas",
-      "pdf_layout": "PDF Išdėstymas"
+      "pdf_layout": "PDF Išdėstymas",
+      "pdf_configuration": "PDF Generation Settings",
+      "section_description": "Change the way PDFs are generated",
+      "driver": "PDF Driver to use",
+      "papersize": "Papersize",
+      "papersize_hint": "Papersize in width and height (ex. \"210mm 297mm\")",
+      "gotenberg_host": "Gotenberg service host",
+      "pdf_variables_save_successfully": "PDF configuration saved successfully",
+      "pdf_variables_save_error": "PDF configuration could not be saved"
     },
     "company_info": {
       "company_info": "Company info",
@@ -921,7 +984,14 @@
       "added_message": "Custom Field added successfully",
       "press_enter_to_add": "Press enter to add new option",
       "model_in_use": "Cannot update model for fields which are already in use.",
-      "type_in_use": "Cannot update type for fields which are already in use."
+      "type_in_use": "Cannot update type for fields which are already in use.",
+      "model_type": {
+        "customer": "Customer",
+        "invoice": "Invoice",
+        "estimate": "Estimate",
+        "expense": "Expense",
+        "payment": "Payment"
+      }
     },
     "customization": {
       "customization": "customization",
@@ -939,6 +1009,7 @@
       "delimiter_description": "Single character for specifying the boundary between 2 separate components. By default its set to -",
       "delimiter_param_label": "Delimiter Value",
       "date_format": "Datos formatas",
+      "time_format": "Time Format",
       "date_format_description": "A local date and time field which accepts a format parameter. The default format: 'Y' renders the current year.",
       "date_format_param_label": "Formatas",
       "sequence": "Seka",
@@ -1034,6 +1105,8 @@
         "description": "Save time by creating notes and reusing them on your invoices, estimates & payments.",
         "notes": "Pastabos",
         "type": "Tipas",
+        "is_default": "Select by default",
+        "is_default_description": "This note will be selected by default in new invoices.",
         "add_note": "Pridėti pastabą",
         "add_new_note": "Pridėti Naują Pastabą",
         "name": "Pavadinimas",
@@ -1042,7 +1115,12 @@
         "note_updated": "Pastaba atnaujinta sėkmingai",
         "note_confirm_delete": "Jūs nebegalėsite atkurti šitos Pastabos",
         "already_in_use": "Pastaba jau naudojama",
-        "deleted_message": "Pastaba pašalinta sėkmingai"
+        "deleted_message": "Pastaba pašalinta sėkmingai",
+        "types": {
+          "estimate": "Estimate",
+          "invoice": "Invoice",
+          "payment": "Payment"
+        }
       }
     },
     "account_settings": {
@@ -1135,14 +1213,23 @@
       "tax_per_item": "Tax Per Item",
       "tax_name": "Mokesčio pavadinimas",
       "compound_tax": "Sudėtinis mokestis",
+      "amount": "Amount",
       "percent": "Procentai",
+      "fixed_amount": "Fixed Amount",
+      "calculation_type": "Calculation Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed",
       "action": "Veiksmas",
       "tax_setting_description": "Enable this if you want to add taxes to individual invoice items. By default, taxes are added directly to the invoice.",
       "created_message": "Tax type created successfully",
       "updated_message": "Tax type updated successfully",
       "deleted_message": "Tax type deleted successfully",
       "confirm_delete": "You will not be able to recover this Tax Type",
-      "already_in_use": "Tax is already in use"
+      "already_in_use": "Tax is already in use",
+      "tax_included": "Inclusive taxes",
+      "tax_included_description": "Enable this if you want to report that taxes are already included in the invoice items or invoice total.",
+      "tax_included_by_default": "Enable inclusive taxes by default",
+      "tax_included_by_default_description": "Enable this if you want to set inclusive taxes by default"
     },
     "payment_modes": {
       "title": "Mokėjimo būdai",
@@ -1178,6 +1265,7 @@
       "time_zone": "Laiko zona",
       "fiscal_year": "Finansiniai metai",
       "date_format": "Datos formatas",
+      "time_format": "Time Format",
       "discount_setting": "Discount Setting",
       "discount_per_item": "Discount Per Item ",
       "discount_setting_description": "Enable this if you want to add Discount to individual invoice items. By default, Discount is added directly to the invoice.",
@@ -1190,6 +1278,7 @@
       "select_language": "Pasirinkite Kalbą",
       "select_time_zone": "Pasirinkite Laiko Zoną",
       "select_date_format": "Pasirinkite Datos Formatą",
+      "select_time_format": "Select Time Format",
       "select_financial_year": "Select Financial Year",
       "recurring_invoice_status": "Recurring Invoice Status",
       "create_status": "Sukurti būseną",
@@ -1197,12 +1286,29 @@
       "on_hold": "Užlaikytas",
       "update_status": "Atnaujinti būseną",
       "completed": "Užbaigtas",
-      "company_currency_unchangeable": "Įmonės valiuta negali būti pakeista"
+      "company_currency_unchangeable": "Įmonės valiuta negali būti pakeista",
+      "invoice_use_time": "Use time in invoices",
+      "invoice_use_time_description": "Enable this if you want to select exact invoice time.",
+      "fiscal_years": {
+        "january_december": "January - December",
+        "february_january": "February - January",
+        "march_february": "March - February",
+        "april_march": "April - March",
+        "may_april": "May - April",
+        "june_may": "June - May",
+        "july_june": "July - June",
+        "august_july": "August - July",
+        "september_august": "September - August",
+        "october_september": "October - September",
+        "november_october": "November - October",
+        "december_november": "December - November"
+      }
     },
     "update_app": {
       "title": "Update App",
       "description": "You can easily update InvoiceShelf by checking for a new update by clicking the button below",
       "check_update": "Tikrinti, ar yra atnaujinimų",
+      "insider_consent": "Opt-in for Insider releases. Recommended for testing purposes only.",
       "avail_update": "Galimas naujas atnaujinimas",
       "next_version": "Naujesnė versija",
       "requirements": "Reikalavimai",
@@ -1351,11 +1457,16 @@
     "time_zone": "Time Zone",
     "fiscal_year": "Financial Year",
     "date_format": "Date Format",
+    "time_format": "Time Format",
     "from_address": "Iš adreso",
     "username": "Vartotojo vardas",
     "next": "Kitas",
     "continue": "Tęsti",
     "skip": "Praleisti",
+    "install_language": {
+      "title": "Choose your language",
+      "description": "Select language wizard to install InvoiceShelf"
+    },
     "database": {
       "database": "Site URL & Database",
       "connection": "Database Connection",
@@ -1367,6 +1478,7 @@
       "username": "Database Username",
       "db_name": "Duomenų bazės pavadinimas",
       "db_path": "Database Path",
+      "overwrite": "Overwrite existing database and proceed",
       "desc": "Create a database on your server and set the credentials using the form below."
     },
     "permissions": {
@@ -1382,7 +1494,14 @@
       "verify_now": "Patvirtinti dabar",
       "success": "Domain Verify Successfully.",
       "failed": "Domain verification failed. Please enter valid domain name.",
-      "verify_and_continue": "Verify And Continue"
+      "verify_and_continue": "Verify And Continue",
+      "notes": {
+        "notes": "Notes:",
+        "not_contain": "App domain should not contain",
+        "or": "or",
+        "in_front": "in front of the domain.",
+        "if_you": "If you're accessing the website on a different port, please mention the port. For example:"
+      }
     },
     "mail": {
       "host": "Mail Host",
@@ -1498,7 +1617,7 @@
   "pdf_invoice_label": "Sąskaita",
   "pdf_invoice_number": "Invoice Number",
   "pdf_invoice_date": "Invoice Date",
-  "pdf_invoice_due_date": "Due date",
+  "pdf_invoice_due_date": "Due Date",
   "pdf_notes": "Pastabos",
   "pdf_items_label": "Items",
   "pdf_quantity_label": "Kiekis",
@@ -1506,6 +1625,7 @@
   "pdf_discount_label": "Nuolaida",
   "pdf_amount_label": "Amount",
   "pdf_subtotal": "Subtotal",
+  "pdf_net_total": "Net",
   "pdf_total": "Iš viso",
   "pdf_payment_label": "Mokėjimas",
   "pdf_payment_receipt_label": "PAYMENT RECEIPT",
@@ -1534,6 +1654,8 @@
   "pdf_tax_label": "Tax",
   "pdf_tax_id": "Tax-ID",
   "pdf_vat_id": "VAT-ID",
+  "pdf_amount_paid": "Amount Paid",
+  "pdf_amount_due": "Amount Due",
   "mail_thanks": "Thanks",
   "mail_view_estimate": "View Estimate",
   "mail_viewed_estimate": ":name viewed this Estimate.",

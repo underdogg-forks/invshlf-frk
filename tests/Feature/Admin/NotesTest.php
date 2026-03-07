@@ -1,67 +1,95 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Models\Note;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\deleteJson;
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class NotesTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('retrieve notes', function () {
-    getJson('/api/v1/notes')->assertStatus(200);
-});
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-test('create note', function () {
-    $note = Note::factory()->raw();
+    #[Test]
+    public function it_retrieves_all_notes(): void
+    {
+        /* Arrange */
 
-    postJson('/api/v1/notes', $note)->assertStatus(201);
+        /* Act & Assert */
+        $this->getJson('/api/v1/notes')
+            ->assertStatus(200)
+            ->assertJsonStructure(['data']);
+    }
 
-    $this->assertDatabaseHas('notes', $note);
-});
+    #[Test]
+    public function it_creates_a_note(): void
+    {
+        /* Arrange */
+        $note = Note::factory()->raw();
 
-test('retrieve note', function () {
-    $note = Note::factory()->create();
+        /* Act */
+        $this->postJson('/api/v1/notes', $note)->assertStatus(201);
 
-    getJson("/api/v1/notes/{$note->id}")
-        ->assertStatus(200);
-});
+        /* Assert */
+        $this->assertDatabaseHas('notes', $note);
+    }
 
-test('update note', function () {
-    $note = Note::factory()->create();
+    #[Test]
+    public function it_retrieves_a_single_note(): void
+    {
+        /* Arrange */
+        $note = Note::factory()->create();
 
-    $data = Note::factory()->raw();
+        /* Act & Assert */
+        $this->getJson("/api/v1/notes/{$note->id}")
+            ->assertStatus(200)
+            ->assertJson(['data' => ['id' => $note->id, 'name' => $note->name]]);
+    }
 
-    putJson("/api/v1/notes/{$note->id}", $data)
-        ->assertStatus(200);
+    #[Test]
+    public function it_updates_a_note(): void
+    {
+        /* Arrange */
+        $note = Note::factory()->create();
+        $updatedData = Note::factory()->raw();
 
-    $this->assertDatabaseHas('notes', $data);
-});
+        /* Act */
+        $this->putJson("/api/v1/notes/{$note->id}", $updatedData)->assertStatus(200);
 
-test('delete note', function () {
-    $note = Note::factory()->create();
+        /* Assert */
+        $this->assertDatabaseHas('notes', array_merge(
+            ['id' => $note->id],
+            $updatedData
+        ));
+    }
 
-    deleteJson("/api/v1/notes/{$note->id}")
-        ->assertStatus(200)
-        ->assertJson([
-            'success' => true,
-        ]);
+    #[Test]
+    public function it_deletes_a_note(): void
+    {
+        /* Arrange */
+        $note = Note::factory()->create();
 
-    $this->assertModelMissing($note);
-});
+        /* Act & Assert */
+        $this->deleteJson("/api/v1/notes/{$note->id}")
+            ->assertStatus(200)
+            ->assertJson(['success' => true]);
+
+        $this->assertModelMissing($note);
+    }
+}

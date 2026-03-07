@@ -17,7 +17,7 @@
           <div class="flex items-center justify-end">
             <BaseButton type="submit" :loading="isSaving" :disabled="isSaving">
               <template #left="slotProps">
-                <BaseIcon name="SaveIcon" :class="slotProps.class" />
+                <BaseIcon name="ArrowDownOnSquareIcon" :class="slotProps.class" />
               </template>
               {{
                 isEdit
@@ -160,10 +160,6 @@
 
             <BaseInputGroup
               :label="$t('customers.tax_id')"
-              :error="
-                v$.currentCustomer.tax_id.$error &&
-                v$.currentCustomer.tax_id.$errors[0].$message
-              "
               :content-loading="isFetchingInitialData"
             >
               <BaseInput
@@ -171,10 +167,9 @@
                 :content-loading="isFetchingInitialData"
                 type="text"
                 name="tax_id"
-                :invalid="v$.currentCustomer.tax_id.$error"
-                @input="v$.currentCustomer.tax_id.$touch()"
               />
             </BaseInputGroup>
+
           </BaseInputGrid>
         </div>
 
@@ -228,18 +223,12 @@
               >
                 <template #right>
                   <BaseIcon
-                    v-if="isShowPassword"
-                    name="EyeOffIcon"
-                    class="w-5 h-5 mr-1 text-gray-500 cursor-pointer"
+                    :name="isShowPassword ? 'EyeIcon' : 'EyeSlashIcon'"
+                    class="mr-1 text-gray-500 cursor-pointer"
                     @click="isShowPassword = !isShowPassword"
                   />
-                  <BaseIcon
-                    v-else
-                    name="EyeIcon"
-                    class="w-5 h-5 mr-1 text-gray-500 cursor-pointer"
-                    @click="isShowPassword = !isShowPassword"
-                  /> </template
-              ></BaseInput>
+                </template>
+              </BaseInput>
             </BaseInputGroup>
 
             <BaseInputGroup
@@ -261,18 +250,12 @@
               >
                 <template #right>
                   <BaseIcon
-                    v-if="isShowConfirmPassword"
-                    name="EyeOffIcon"
-                    class="w-5 h-5 mr-1 text-gray-500 cursor-pointer"
+                    :name="isShowConfirmPassword ? 'EyeIcon' : 'EyeSlashIcon'"
+                    class="mr-1 text-gray-500 cursor-pointer"
                     @click="isShowConfirmPassword = !isShowConfirmPassword"
                   />
-                  <BaseIcon
-                    v-else
-                    name="EyeIcon"
-                    class="w-5 h-5 mr-1 text-gray-500 cursor-pointer"
-                    @click="isShowConfirmPassword = !isShowConfirmPassword"
-                  /> </template
-              ></BaseInput>
+                </template>
+              </BaseInput>
             </BaseInputGroup>
           </BaseInputGrid>
         </div>
@@ -662,9 +645,6 @@ const rules = computed(() => {
           t('validation.name_min_length', { count: 3 }),
           minLength(3)
         ),
-      },
-      tax_id: {
-        required: helpers.withMessage(t('validation.required'), required),
       },
       currency_id: {
         required: helpers.withMessage(t('validation.required'), required),

@@ -1,58 +1,62 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Jobs\CreateBackupJob;
 use App\Models\FileDisk;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
+class BackupTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get backups', function () {
-    $disk = FileDisk::factory()->create([
-        'set_as_default' => true,
-    ]);
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    $response = getJson("/api/v1/backups?disk={$disk->driver}&&file_disk_id={$disk->id}");
+    #[Test]
+    public function it_retrieves_backups_for_a_given_disk(): void
+    {
+        /* Arrange */
+        $disk = FileDisk::factory()->create(['set_as_default' => true]);
 
-    $response->assertOk();
-});
+        /* Act */
+        $response = $this->getJson("/api/v1/backups?disk={$disk->driver}&file_disk_id={$disk->id}");
 
-test('create backup', function () {
-    Queue::fake();
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['backups', 'disks']);
+    {
+        /* Arrange */
+        Queue::fake();
+        $disk = FileDisk::factory()->create();
+        $data = [
+            'option' => 'full',
+            'file_disk_id' => $disk->id,
+        ];
 
-    $disk = FileDisk::factory()->create();
+        /* Act */
+        $this->postJson('/api/v1/backups', $data)->assertOk();
 
-    $data = [
-        'option' => 'full',
-        'file_disk_id' => $disk->id,
-    ];
+        /* Assert */
+        Queue::assertPushed(CreateBackupJob::class);
 
-    $response = postJson('/api/v1/backups', $data);
-
-    Queue::assertPushed(CreateBackupJob::class);
-
-    $response = getJson("/api/v1/backups?disk={$disk->driver}&&file_disk_id={$disk->id}");
-
-    $response->assertStatus(200)->assertJson([
-        'disks' => [
-            'local',
-        ],
-    ]);
-});
+        $this->getJson("/api/v1/backups?disk={$disk->driver}&&file_disk_id={$disk->id}")
+            ->assertStatus(200)
+            ->assertJson(['disks' => ['local']]);
+    }
+}

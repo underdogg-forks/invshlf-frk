@@ -1,20 +1,34 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Address;
 use App\Models\Country;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class CountryTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('country has many addresses', function () {
-    $country = Country::find(1);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $address = Address::factory()->count(5)->create([
-        'country_id' => $country->id,
-    ]);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertTrue($country->address()->exists());
-});
+    #[Test]
+    public function it_has_many_addresses(): void
+    {
+        /* Arrange */
+        $country = Country::find(1);
+        Address::factory()->count(5)->create(['country_id' => $country->id]);
+
+        /* Act & Assert */
+        $this->assertTrue($country->address()->exists());
+    }
+}

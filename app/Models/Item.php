@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Auth;
 
-class Item extends Model
+class Item extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $guarded = ['id'];
 
@@ -26,10 +26,20 @@ class Item extends Model
         ];
     }
 
-    public function unit(): BelongsTo
-    {
-        return $this->belongsTo(Unit::class, 'unit_id');
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company(): BelongsTo
     {
@@ -46,30 +56,58 @@ class Item extends Model
         return $this->belongsTo(Currency::class);
     }
 
-    public function scopeWhereSearch($query, $search)
+    public function estimateItems(): HasMany
     {
-        return $query->where('items.name', 'LIKE', '%'.$search.'%');
+        return $this->hasMany(EstimateItem::class);
     }
 
-    public function scopeWherePrice($query, $price)
+    public function invoiceItems(): HasMany
     {
-        return $query->where('items.price', $price);
+        return $this->hasMany(InvoiceItem::class);
     }
 
-    public function scopeWhereUnit($query, $unit_id)
+    public function taxes(): HasMany
     {
-        return $query->where('items.unit_id', $unit_id);
+        return $this->hasMany(Tax::class)
+            ->where('invoice_item_id', null)
+            ->where('estimate_item_id', null);
     }
 
-    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    public function unit(): BelongsTo
     {
-        $query->orderBy($orderByField, $orderBy);
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 
-    public function scopeWhereItem($query, $item_id)
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getFormattedCreatedAtAttribute($value)
     {
-        $query->orWhere('id', $item_id);
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', request()->header('company'));
+
+        return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -107,34 +145,43 @@ class Item extends Model
         return $query->paginate($limit);
     }
 
-    public function getFormattedCreatedAtAttribute($value)
-    {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', request()->header('company'));
-
-        return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
-    }
-
-    public function taxes(): HasMany
-    {
-        return $this->hasMany(Tax::class)
-            ->where('invoice_item_id', null)
-            ->where('estimate_item_id', null);
-    }
-
     public function scopeWhereCompany($query)
     {
         $query->where('items.company_id', request()->header('company'));
     }
 
-    public function invoiceItems(): HasMany
+    public function scopeWhereItem($query, $item_id)
     {
-        return $this->hasMany(InvoiceItem::class);
+        $query->orWhere('id', $item_id);
     }
 
-    public function estimateItems(): HasMany
+    public function scopeWhereOrder($query, $orderByField, $orderBy)
     {
-        return $this->hasMany(EstimateItem::class);
+        $query->orderBy($orderByField, $orderBy);
     }
+
+    public function scopeWherePrice($query, $price)
+    {
+        return $query->where('items.price', $price);
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        return $query->where('items.name', 'LIKE', '%'.$search.'%');
+    }
+
+    public function scopeWhereUnit($query, $unit_id)
+    {
+        return $query->where('items.unit_id', $unit_id);
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
 
     public static function createItem($request)
     {
@@ -176,4 +223,6 @@ class Item extends Model
 
         return Item::with('taxes')->find($this->id);
     }
+
+    #endregion
 }

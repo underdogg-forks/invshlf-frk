@@ -2,79 +2,96 @@
 
 namespace Tests\Feature\Customer;
 
+use App\Enums\EstimateStatus;
 use App\Models\Customer;
 use App\Models\Estimate;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
+class EstimateTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $customer = Customer::factory()->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    Sanctum::actingAs(
-        $customer,
-        ['*'],
-        'customer'
-    );
-});
+        $this->customer = Customer::factory()->create();
+        Sanctum::actingAs($this->customer, ['*'], 'customer');
+    }
 
-test('get customer estimates', function () {
-    $customer = Auth::guard('customer')->user();
+    #[Test]
+    public function it_retrieves_all_estimates_for_the_customer(): void
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
 
-    getJson("api/v1/{$customer->company->slug}/customer/estimates?page=1")->assertOk();
-});
+        /* Act */
+        $response = $this->getJson("api/v1/{$customer->company->slug}/customer/estimates?page=1");
 
-test('get customer estimate', function () {
-    $customer = Auth::guard('customer')->user();
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
+        $estimate = Estimate::factory()->create(['customer_id' => $customer->id]);
 
-    $estimate = Estimate::factory()->create([
-        'customer_id' => $customer->id,
-    ]);
+        /* Act */
+        $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/estimates/{$estimate->id}");
 
-    getJson("/api/v1/{$customer->company->slug}/customer/estimates/{$estimate->id}")
-        ->assertOk();
-});
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonFragment(['id' => $estimate->id, 'estimate_number' => $estimate->estimate_number]);
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
+        $estimate = Estimate::factory()->create([
+            'estimate_date' => '1988-07-18',
+            'expiry_date' => '1988-08-18',
+            'customer_id' => $customer->id,
+        ]);
+        $status = ['status' => EstimateStatus::Accepted->value];
 
-test('customer estimate mark as accepted', function () {
-    $customer = Auth::guard('customer')->user();
+        /* Act */
+        $response = $this->postJson(
+            "api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status",
+            $status
+        );
 
-    $estimate = Estimate::factory()->create([
-        'estimate_date' => '1988-07-18',
-        'expiry_date' => '1988-08-18',
-        'customer_id' => $customer->id,
-    ]);
+        /* Assert */
+        $response->assertOk();
 
-    $status = [
-        'status' => Estimate::STATUS_ACCEPTED,
-    ];
+        /* Assert */
+        $this->assertEquals(EstimateStatus::Accepted->value, $response->json()['data']['status']);
+    }
 
-    $response = postJson("api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status", $status)
-        ->assertOk();
+    #[Test]
+    public function it_marks_a_customer_estimate_as_rejected(): void
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
+        $estimate = Estimate::factory()->create([
+            'estimate_date' => '1988-07-18',
+            'expiry_date' => '1988-08-18',
+            'customer_id' => $customer->id,
+        ]);
+        $status = ['status' => EstimateStatus::Rejected->value];
 
-    $this->assertEquals($response->json()['data']['status'], Estimate::STATUS_ACCEPTED);
-});
+        /* Act */
+        $response = $this->postJson(
+            "api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status",
+            $status
+        )->assertOk();
 
-test('customer estimate mark as rejected', function () {
-    $customer = Auth::guard('customer')->user();
-
-    $estimate = Estimate::factory()->create([
-        'estimate_date' => '1988-07-18',
-        'expiry_date' => '1988-08-18',
-        'customer_id' => $customer->id,
-    ]);
-
-    $status = [
-        'status' => Estimate::STATUS_REJECTED,
-    ];
-
-    $response = postJson("api/v1/{$customer->company->slug}/customer/estimate/{$estimate->id}/status", $status)
-        ->assertOk();
-
-    $this->assertEquals($response->json()['data']['status'], Estimate::STATUS_REJECTED);
-});
+        /* Assert */
+        $this->assertEquals(EstimateStatus::Rejected->value, $response->json()['data']['status']);
+    }
+}

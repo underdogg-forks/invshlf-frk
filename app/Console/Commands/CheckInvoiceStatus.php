@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -40,7 +41,7 @@ class CheckInvoiceStatus extends Command
     public function handle(): void
     {
         $date = Carbon::now();
-        $invoices = Invoice::whereNotIn('status', [Invoice::STATUS_COMPLETED, Invoice::STATUS_DRAFT])
+        $invoices = Invoice::whereNotIn('status', [InvoiceStatus::Completed, InvoiceStatus::Draft])
             ->where('overdue', false)
             ->whereDate('due_date', '<', $date)
             ->get();

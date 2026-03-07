@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Estimate;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use App\Models\CompanySetting;
@@ -42,7 +43,7 @@ class ConvertEstimateController extends Controller
             $due_date = Carbon::now()->addDays($dueDateDays)->format('Y-m-d');
         }
 
-        $serial = (new SerialNumberFormatter())
+        $serial = (new SerialNumberFormatter)
             ->setModel($invoice)
             ->setCompany($estimate->company_id)
             ->setCustomer($estimate->customer_id)
@@ -63,8 +64,8 @@ class ConvertEstimateController extends Controller
             'customer_id' => $estimate->customer_id,
             'company_id' => $request->header('company'),
             'template_name' => $templateName,
-            'status' => Invoice::STATUS_DRAFT,
-            'paid_status' => Invoice::STATUS_UNPAID,
+            'status' => InvoiceStatus::Draft,
+            'paid_status' => InvoiceStatus::Unpaid,
             'sub_total' => $estimate->sub_total,
             'discount' => $estimate->discount,
             'discount_type' => $estimate->discount_type,

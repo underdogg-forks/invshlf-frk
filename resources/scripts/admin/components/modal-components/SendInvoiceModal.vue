@@ -8,7 +8,7 @@
       <div class="flex justify-between w-full">
         {{ modalTitle }}
         <BaseIcon
-          name="XIcon"
+          name="XMarkIcon"
           class="w-6 h-6 text-gray-500 cursor-pointer"
           @click="closeSendInvoiceModal"
         />
@@ -39,6 +39,30 @@
               type="text"
               :invalid="v$.to.$error"
               @input="v$.to.$touch()"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup
+            :label="$t('general.cc')"
+            :error="v$.cc && v$.cc.$error && v$.cc.$errors[0].$message"
+          >
+            <BaseInput
+              v-model="invoiceMailForm.cc"
+              type="text"
+              :invalid="v$.cc && v$.cc.$error"
+              @input="v$.cc && v$.cc.$touch()"
+              placeholder="Optional: CC recipient"
+            />
+          </BaseInputGroup>
+          <BaseInputGroup
+            :label="$t('general.bcc')"
+            :error="v$.bcc && v$.bcc.$error && v$.bcc.$errors[0].$message"
+          >
+            <BaseInput
+              v-model="invoiceMailForm.bcc"
+              type="text"
+              :invalid="v$.bcc && v$.bcc.$error"
+              @input="v$.bcc && v$.bcc.$touch()"
+              placeholder="Optional: BCC recipient"
             />
           </BaseInputGroup>
           <BaseInputGroup
@@ -88,7 +112,7 @@
             <BaseIcon
               v-if="!isLoading"
               :class="slotProps.class"
-              name="PhotographIcon"
+              name="PhotoIcon"
             />
           </template>
           {{ $t('general.preview') }}
@@ -181,6 +205,8 @@ const invoiceMailForm = reactive({
   id: null,
   from: null,
   to: null,
+  cc: null,
+  bcc: null,
   subject: t('invoices.new_invoice'),
   body: null,
 })
@@ -204,6 +230,12 @@ const rules = {
   },
   to: {
     required: helpers.withMessage(t('validation.required'), required),
+    email: helpers.withMessage(t('validation.email_incorrect'), email),
+  },
+  cc: {
+    email: helpers.withMessage(t('validation.email_incorrect'), email),
+  },
+  bcc: {
     email: helpers.withMessage(t('validation.email_incorrect'), email),
   },
   subject: {

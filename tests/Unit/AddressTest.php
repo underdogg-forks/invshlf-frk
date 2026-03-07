@@ -1,27 +1,52 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Address;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class AddressTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('an address belongs to user', function () {
-    $address = Address::factory()->forUser()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($address->user->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('an address belongs to country', function () {
-    $address = Address::factory()->create();
+    #[Test]
+    public function it_belongs_to_a_user(): void
+    {
+        /* Arrange */
+        $address = Address::factory()->forUser()->create();
 
-    $this->assertTrue($address->country->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($address->user()->exists());
+    }
 
-test('an address belongs to customer', function () {
-    $address = Address::factory()->forCustomer()->create();
+    #[Test]
+    public function it_belongs_to_a_country(): void
+    {
+        /* Arrange */
+        $address = Address::factory()->create();
 
-    $this->assertTrue($address->customer()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($address->country()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_a_customer(): void
+    {
+        /* Arrange */
+        $address = Address::factory()->forCustomer()->create();
+
+        /* Act & Assert */
+        $this->assertTrue($address->customer()->exists());
+    }
+}

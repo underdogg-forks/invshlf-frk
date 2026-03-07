@@ -32,6 +32,40 @@ class SendInvoiceRequest extends FormRequest
             'to' => [
                 'required',
             ],
+            'cc' => [
+                'nullable',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value === null) {
+                        return;
+                    }
+
+                    $emails = is_array($value) ? $value : [$value];
+
+                    foreach ($emails as $email) {
+                        if (!is_string($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $fail("The {$attribute} field must be a valid email address or an array of valid email addresses.");
+                            break;
+                        }
+                    }
+                },
+            ],
+            'bcc' => [
+                'nullable',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    if ($value === null) {
+                        return;
+                    }
+
+                    $emails = is_array($value) ? $value : [$value];
+
+                    foreach ($emails as $email) {
+                        if (!is_string($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                            $fail("The {$attribute} field must be a valid email address or an array of valid email addresses.");
+                            break;
+                        }
+                    }
+                },
+            ],
         ];
     }
 }

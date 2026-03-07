@@ -51,23 +51,23 @@ Route::post('/{company:slug}/customer/logout', function () {
 Route::middleware('auth:sanctum')->prefix('reports')->group(function () {
 
     // sales report by customer
-    //----------------------------------
+    // ----------------------------------
     Route::get('/sales/customers/{hash}', CustomerSalesReportController::class);
 
     // sales report by items
-    //----------------------------------
+    // ----------------------------------
     Route::get('/sales/items/{hash}', ItemSalesReportController::class);
 
     // report for expenses
-    //----------------------------------
+    // ----------------------------------
     Route::get('/expenses/{hash}', ExpensesReportController::class);
 
     // report for tax summary
-    //----------------------------------
+    // ----------------------------------
     Route::get('/tax-summary/{hash}', TaxSummaryReportController::class);
 
     // report for profit and loss
-    //----------------------------------
+    // ----------------------------------
     Route::get('/profit-loss/{hash}', ProfitLossReportController::class);
 
     // download expense receipt
@@ -113,7 +113,8 @@ Route::prefix('/customer')->group(function () {
 
 Route::get('/installation', function () {
     return view('app');
-})->name('install')->middleware('redirect-if-installed');
+})->name('install')
+    ->middleware(['redirect-if-installed']);
 
 // Move other http requests to the Vue App
 // -------------------------------------------------

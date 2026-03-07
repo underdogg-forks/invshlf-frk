@@ -1,23 +1,43 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\PaymentMethod;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class PaymentMethodTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('payment method has many payment', function () {
-    $method = PaymentMethod::factory()->hasPayments(5)->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertCount(5, $method->payments);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertTrue($method->payments()->exists());
-});
+    #[Test]
+    public function it_has_many_payments(): void
+    {
+        /* Arrange */
+        $method = PaymentMethod::factory()->hasPayments(5)->create();
 
-test('payment method belongs to company', function () {
-    $method = PaymentMethod::factory()->create();
+        /* Act & Assert */
+        $this->assertCount(5, $method->payments);
+        $this->assertTrue($method->payments()->exists());
+    }
 
-    $this->assertTrue($method->company()->exists());
-});
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        /* Arrange */
+        $method = PaymentMethod::factory()->create();
+
+        /* Act & Assert */
+        $this->assertTrue($method->company()->exists());
+    }
+}

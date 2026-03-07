@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Settings\CompanyController;
 use App\Http\Requests\CompanyRequest;
 use App\Http\Requests\ProfileRequest;
@@ -7,194 +9,192 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Tax;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class CompanySettingTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get profile', function () {
-    getJson('api/v1/me')
-        ->assertOk();
-});
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-test('update profile using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        CompanyController::class,
-        'updateProfile',
-        ProfileRequest::class
-    );
-});
+    #[Test]
+    public function it_retrieves_the_current_user_profile(): void
+    {
+        /* Arrange */
 
-test('update profile', function () {
-    $user = [
-        'name' => 'John Doe',
-        'password' => 'admin@123',
-        'email' => 'admin@invoiceshelf.com',
-    ];
+        /* Act */
+        $response = $this->getJson('api/v1/me');
 
-    $response = putJson('api/v1/me', $user);
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
+    {
+        /* Arrange */
 
-    $response->assertOk();
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            CompanyController::class,
+            'updateProfile',
+            ProfileRequest::class
+        );
+    }
 
-    $this->assertDatabaseHas('users', [
-        'name' => $user['name'],
-        'email' => $user['email'],
-    ]);
-});
+    #[Test]
+    public function it_updates_the_user_profile(): void
+    {
+        /* Arrange */
+        $user = [
+            'name' => 'John Doe',
+            'password' => 'admin@123',
+            'email' => 'admin@invoiceshelf.com',
+        ];
 
-test('update company using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        CompanyController::class,
-        'updateCompany',
-        CompanyRequest::class
-    );
-});
+        /* Act */
+        $response = $this->putJson('api/v1/me', $user);
 
-test('update company', function () {
-    $company = [
-        'name' => 'XYZ',
-        'country_id' => 2,
-        'state' => 'city',
-        'city' => 'state',
-        'address_street_1' => 'test1',
-        'address_street_2' => 'test2',
-        'phone' => '1234567890',
-        'zip' => '112233',
-        'address' => [
+        /* Assert */
+        $response->assertOk();
+        $this->assertDatabaseHas('users', [
+            'name' => $user['name'],
+            'email' => $user['email'],
+        ]);
+    }
+
+    #[Test]
+    public function it_validates_the_update_company_action_uses_a_form_request(): void
+    {
+        /* Arrange */
+
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            CompanyController::class,
+            'updateCompany',
+            CompanyRequest::class
+        );
+    }
+
+    #[Test]
+    public function it_updates_the_company_details(): void
+    {
+        /* Arrange */
+        $company = [
+            'name' => 'XYZ',
             'country_id' => 2,
-        ],
-    ];
+            'state' => 'city',
+            'city' => 'state',
+            'address_street_1' => 'test1',
+            'address_street_2' => 'test2',
+            'phone' => '1234567890',
+            'zip' => '112233',
+            'address' => ['country_id' => 2],
+        ];
 
-    putJson('api/v1/company', $company)
-        ->assertOk();
+        /* Act */
+        $this->putJson('api/v1/company', $company)->assertOk();
 
-    $this->assertDatabaseHas('companies', [
-        'name' => $company['name'],
-    ]);
-
-    $this->assertDatabaseHas('addresses', [
-        'country_id' => $company['country_id'],
-    ]);
-});
-
-test('update settings', function () {
-    $settings = [
-        'currency' => 1,
-        'time_zone' => 'Asia/Kolkata',
-        'language' => 'en',
-        'fiscal_year' => '1-12',
-        'carbon_date_format' => 'Y/m/d',
-        'moment_date_format' => 'YYYY/MM/DD',
-        'notification_email' => 'noreply@invoiceshelf.com',
-        'notify_invoice_viewed' => 'YES',
-        'notify_estimate_viewed' => 'YES',
-        'tax_per_item' => 'YES',
-        'discount_per_item' => 'YES',
-    ];
-
-    $response = postJson('/api/v1/company/settings', ['settings' => $settings]);
-
-    $response->assertOk()
-        ->assertJson([
-            'success' => true,
-        ]);
-
-    foreach ($settings as $key => $value) {
-        $this->assertDatabaseHas('company_settings', [
-            'option' => $key,
-            'value' => $value,
-        ]);
+        /* Assert */
+        $this->assertDatabaseHas('companies', ['name' => $company['name']]);
+        $this->assertDatabaseHas('addresses', ['country_id' => $company['country_id']]);
     }
-});
 
-test('update settings without currency setting', function () {
-    $settings = [
-        'notification_email' => 'noreply@invoiceshelf.com',
-    ];
+    #[Test]
+    public function it_updates_company_settings(): void
+    {
+        /* Arrange */
+        $settings = [
+            'currency' => 1,
+            'time_zone' => 'Asia/Kolkata',
+            'language' => 'en',
+            'fiscal_year' => '1-12',
+            'carbon_date_format' => 'Y/m/d',
+            'moment_date_format' => 'YYYY/MM/DD',
+            'notification_email' => 'noreply@invoiceshelf.com',
+            'notify_invoice_viewed' => 'YES',
+            'notify_estimate_viewed' => 'YES',
+            'tax_per_item' => 'YES',
+            'tax_included' => 'YES',
+            'tax_included_by_default' => 'YES',
+            'discount_per_item' => 'YES',
+        ];
 
-    $response = postJson('/api/v1/company/settings', ['settings' => $settings]);
+        /* Act */
+        $response = $this->postJson('/api/v1/company/settings', ['settings' => $settings]);
 
-    $response->assertOk()
-        ->assertJson([
-            'success' => true,
-        ]);
-
-    foreach ($settings as $key => $value) {
-        $this->assertDatabaseHas('company_settings', [
-            'option' => $key,
-            'value' => $value,
-        ]);
+        /* Assert */
+        $response->assertOk()->assertJson(['success' => true]);
+        foreach ($settings as $key => $value) {
+            $this->assertDatabaseHas('company_settings', ['option' => $key, 'value' => $value]);
+        }
     }
-});
 
-test('update currency settings after company has currency and transactions is not allowed', function () {
-    $settings = [
-        'currency' => 1,
-    ];
+    #[Test]
+    public function it_updates_company_settings_without_a_currency(): void
+    {
+        /* Arrange */
+        $settings = ['notification_email' => 'noreply@invoiceshelf.com'];
 
-    $response = postJson('/api/v1/company/settings', ['settings' => $settings]);
+        /* Act */
+        $response = $this->postJson('/api/v1/company/settings', ['settings' => $settings]);
 
-    $response->assertOk()
-        ->assertJson([
-            'success' => true,
-        ]);
+        /* Assert */
+        $response->assertOk()->assertJson(['success' => true]);
+        foreach ($settings as $key => $value) {
+            $this->assertDatabaseHas('company_settings', ['option' => $key, 'value' => $value]);
+        }
+    }
 
-    Invoice::factory()
-        ->raw([
+    #[Test]
+    public function it_prevents_updating_currency_when_transactions_exist(): void
+    {
+        /* Arrange */
+        $this->postJson('/api/v1/company/settings', ['settings' => ['currency' => 1]])
+            ->assertOk()
+            ->assertJson(['success' => true]);
+
+        Invoice::factory()->create([
             'taxes' => [Tax::factory()->raw()],
             'items' => [InvoiceItem::factory()->raw()],
         ]);
 
-    $settings = [
-        'currency' => 2,
-    ];
+        /* Act */
+        $response = $this->postJson('/api/v1/company/settings', ['settings' => ['currency' => 2]]);
 
-    $response = postJson('/api/v1/company/settings', ['settings' => $settings]);
-
-    $response->assertOK()
-        ->assertJson([
+        /* Assert */
+        $response->assertOk()->assertJson([
             'success' => false,
             'message' => 'Cannot update company currency after transactions are created.',
         ]);
+        $this->assertDatabaseHas('company_settings', ['option' => 'currency', 'value' => 1]);
+    }
 
-    $this->assertDatabaseHas('company_settings', [
-        'option' => 'currency',
-        'value' => 1,
-    ]);
-});
+    #[Test]
+    public function it_retrieves_company_notification_settings(): void
+    {
+        /* Arrange */
+        $settingKeys = [
+            'currency', 'time_zone', 'language', 'fiscal_year',
+            'carbon_date_format', 'moment_date_format', 'notification_email',
+            'notify_invoice_viewed', 'notify_estimate_viewed',
+            'tax_per_item', 'discount_per_item',
+        ];
 
-test('get notification email settings', function () {
-    $data['settings'] = [
-        'currency',
-        'time_zone',
-        'language',
-        'fiscal_year',
-        'carbon_date_format',
-        'moment_date_format',
-        'notification_email',
-        'notify_invoice_viewed',
-        'notify_estimate_viewed',
-        'tax_per_item',
-        'discount_per_item',
-    ];
+        /* Act */
+        $response = $this->getJson('/api/v1/company/settings?'.http_build_query(['settings' => $settingKeys]));
 
-    $response = getJson('/api/v1/company/settings?'.http_build_query($data));
-
-    $response->assertOk();
-});
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure($settingKeys);

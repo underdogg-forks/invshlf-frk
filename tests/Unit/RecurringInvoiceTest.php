@@ -1,39 +1,65 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\RecurringInvoice;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class RecurringInvoiceTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('recurring invoice has many invoices', function () {
-    $recurringInvoice = RecurringInvoice::factory()->hasInvoices(5)->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertCount(5, $recurringInvoice->invoices);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertTrue($recurringInvoice->invoices()->exists());
-});
+    #[Test]
+    public function it_has_many_invoices(): void
+    {
+        /* Arrange */
+        $recurringInvoice = RecurringInvoice::factory()->hasInvoices(5)->create();
 
-test('recurring invoice has many invoice items', function () {
-    $recurringInvoice = RecurringInvoice::factory()->hasItems(5)->create();
+        /* Act & Assert */
+        $this->assertCount(5, $recurringInvoice->invoices);
+        $this->assertTrue($recurringInvoice->invoices()->exists());
+    }
 
-    $this->assertCount(5, $recurringInvoice->items);
+    #[Test]
+    public function it_has_many_invoice_items(): void
+    {
+        /* Arrange */
+        $recurringInvoice = RecurringInvoice::factory()->hasItems(5)->create();
 
-    $this->assertTrue($recurringInvoice->items()->exists());
-});
+        /* Act & Assert */
+        $this->assertCount(5, $recurringInvoice->items);
+        $this->assertTrue($recurringInvoice->items()->exists());
+    }
 
-test('recurring invoice has many taxes', function () {
-    $recurringInvoice = RecurringInvoice::factory()->hasTaxes(5)->create();
+    #[Test]
+    public function it_has_many_taxes(): void
+    {
+        /* Arrange */
+        $recurringInvoice = RecurringInvoice::factory()->hasTaxes(5)->create();
 
-    $this->assertCount(5, $recurringInvoice->taxes);
+        /* Act & Assert */
+        $this->assertCount(5, $recurringInvoice->taxes);
+        $this->assertTrue($recurringInvoice->taxes()->exists());
+    }
 
-    $this->assertTrue($recurringInvoice->taxes()->exists());
-});
+    #[Test]
+    public function it_belongs_to_a_customer(): void
+    {
+        /* Arrange */
+        $recurringInvoice = RecurringInvoice::factory()->forCustomer()->create();
 
-test('recurring invoice belongs to customer', function () {
-    $recurringInvoice = RecurringInvoice::factory()->forCustomer()->create();
-
-    $this->assertTrue($recurringInvoice->customer()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($recurringInvoice->customer()->exists());
+    }
+}

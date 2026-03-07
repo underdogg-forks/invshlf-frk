@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Currency;
 use App\Models\Customer;
 use App\Models\Invoice;
@@ -23,7 +24,7 @@ class InvoiceFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Invoice::STATUS_SENT,
+                'status' => InvoiceStatus::Sent,
             ];
         });
     }
@@ -32,7 +33,7 @@ class InvoiceFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Invoice::STATUS_VIEWED,
+                'status' => InvoiceStatus::Viewed,
             ];
         });
     }
@@ -41,7 +42,7 @@ class InvoiceFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Invoice::STATUS_COMPLETED,
+                'status' => InvoiceStatus::Completed,
             ];
         });
     }
@@ -50,7 +51,7 @@ class InvoiceFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Invoice::STATUS_UNPAID,
+                'status' => InvoiceStatus::Unpaid,
             ];
         });
     }
@@ -59,7 +60,7 @@ class InvoiceFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Invoice::STATUS_PARTIALLY_PAID,
+                'status' => InvoiceStatus::PartiallyPaid,
             ];
         });
     }
@@ -68,7 +69,7 @@ class InvoiceFactory extends Factory
     {
         return $this->state(function (array $attributes) {
             return [
-                'status' => Invoice::STATUS_PAID,
+                'status' => InvoiceStatus::Paid,
             ];
         });
     }
@@ -78,8 +79,8 @@ class InvoiceFactory extends Factory
      */
     public function definition(): array
     {
-        $sequenceNumber = (new SerialNumberFormatter())
-            ->setModel(new Invoice())
+        $sequenceNumber = (new SerialNumberFormatter)
+            ->setModel(new Invoice)
             ->setCompany(User::find(1)->companies()->first()->id)
             ->setNextNumbers();
 
@@ -91,10 +92,11 @@ class InvoiceFactory extends Factory
             'customer_sequence_number' => $sequenceNumber->nextCustomerSequenceNumber,
             'reference_number' => $sequenceNumber->getNextNumber(),
             'template_name' => 'invoice1',
-            'status' => Invoice::STATUS_DRAFT,
+            'status' => InvoiceStatus::Draft,
             'tax_per_item' => 'NO',
+            'tax_included' => false,
             'discount_per_item' => 'NO',
-            'paid_status' => Invoice::STATUS_UNPAID,
+            'paid_status' => InvoiceStatus::Unpaid,
             'company_id' => User::find(1)->companies()->first()->id,
             'sub_total' => $this->faker->randomDigitNotNull(),
             'total' => $this->faker->randomDigitNotNull(),

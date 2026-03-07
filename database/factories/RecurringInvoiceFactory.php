@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Enums\RecurringInvoiceLimitBy;
+use App\Enums\RecurringInvoiceStatus;
 use App\Models\Customer;
 use App\Models\RecurringInvoice;
 use App\Models\User;
@@ -24,8 +26,9 @@ class RecurringInvoiceFactory extends Factory
         return [
             'starts_at' => $this->faker->iso8601(),
             'send_automatically' => false,
-            'status' => $this->faker->randomElement(['COMPLETED', 'ON_HOLD', 'ACTIVE']),
+            'status' => $this->faker->randomElement([RecurringInvoiceStatus::Completed, RecurringInvoiceStatus::OnHold, RecurringInvoiceStatus::Active]),
             'tax_per_item' => 'NO',
+            'tax_included' => false,
             'discount_per_item' => 'NO',
             'sub_total' => $this->faker->randomDigitNotNull(),
             'total' => $this->faker->randomDigitNotNull(),
@@ -36,7 +39,7 @@ class RecurringInvoiceFactory extends Factory
             'customer_id' => Customer::factory(),
             'company_id' => User::find(1)->companies()->first()->id,
             'frequency' => '* * 18 * *',
-            'limit_by' => $this->faker->randomElement(['NONE', 'COUNT', 'DATE']),
+            'limit_by' => $this->faker->randomElement([RecurringInvoiceLimitBy::None, RecurringInvoiceLimitBy::Count, RecurringInvoiceLimitBy::Date]),
             'limit_count' => $this->faker->randomDigit(),
             'limit_date' => $this->faker->date(),
             'exchange_rate' => $this->faker->randomDigitNotNull(),

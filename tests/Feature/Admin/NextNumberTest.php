@@ -1,48 +1,45 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\{getJson};
+class NextNumberTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-test('next number', function () {
-    $key = 'invoice';
+    #[Test]
+    public function it_returns_the_next_sequential_number_for_each_document_type(): void
+    {
+        /* Arrange */
+        $documentTypes = [
+            'invoice' => 'INV-000001',
+            'estimate' => 'EST-000001',
+            'payment' => 'PAY-000001',
+        ];
 
-    $response = getJson('api/v1/next-number?key='.$key);
-
-    $response->assertStatus(200)->assertJson([
-        'nextNumber' => 'INV-000001',
-    ]);
-
-    $key = 'estimate';
-
-    $response = getJson('api/v1/next-number?key='.$key);
-
-    $response->assertStatus(200)->assertJson([
-        'nextNumber' => 'EST-000001',
-    ]);
-
-    $key = 'payment';
-
-    $response = getJson('api/v1/next-number?key='.$key);
-
-    $response->assertStatus(200)->assertJson([
-        'nextNumber' => 'PAY-000001',
-    ]);
-});
+        /* Act & Assert */
+        foreach ($documentTypes as $key => $expectedNumber) {
+            $this->getJson('api/v1/next-number?key='.$key)
+                ->assertStatus(200)
+                ->assertJson(['nextNumber' => $expectedNumber]);
+        }
+    }
+}

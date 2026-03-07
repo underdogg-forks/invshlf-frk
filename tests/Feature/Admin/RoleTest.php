@@ -1,47 +1,45 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\postJson;
+class RoleTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('create super admin role', function () {
-    $data = [
-        'email' => 'loremipsum@gmail.com',
-        'name' => 'lorem',
-        'password' => 'lorem@123',
-    ];
-    $data['companies'] = [
-        [
-            'role' => 'super admin',
-            'id' => 1,
-        ],
-    ];
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    postJson('api/v1/users', $data)
-        ->assertStatus(201);
+    #[Test]
+    public function it_creates_a_user_with_a_super_admin_role(): void
+    {
+        /* Arrange */
+        $data = [
+            'email' => 'loremipsum@gmail.com',
+            'name' => 'lorem',
+            'password' => 'lorem@123',
+            'companies' => [['role' => 'super admin', 'id' => 1]],
+        ];
 
-    $data = collect($data)
-        ->only([
-            'email',
-            'name',
-        ])
-        ->toArray();
+        /* Act */
+        $this->postJson('api/v1/users', $data)->assertStatus(201);
 
-    $this->assertDatabaseHas('users', $data);
-});
+        /* Assert */
+        $this->assertDatabaseHas('users', collect($data)->only(['email', 'name'])->toArray());
+    }
+}

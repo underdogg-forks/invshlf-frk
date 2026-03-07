@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Settings;
 
+use App\Enums\TaxTypeType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\TaxTypeRequest;
 use App\Http\Resources\TaxTypeResource;
@@ -22,7 +23,7 @@ class TaxTypesController extends Controller
         $limit = $request->has('limit') ? $request->limit : 5;
 
         $taxTypes = TaxType::applyFilters($request->all())
-            ->where('type', TaxType::TYPE_GENERAL)
+            ->where('type', TaxTypeType::General)
             ->whereCompany()
             ->latest()
             ->paginateData($limit);

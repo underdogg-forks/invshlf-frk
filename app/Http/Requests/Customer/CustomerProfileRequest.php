@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Customer;
 
+use App\Enums\AddressType;
 use App\Models\Address;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -102,7 +103,7 @@ class CustomerProfileRequest extends FormRequest
     {
         return collect($this->shipping)
             ->merge([
-                'type' => Address::SHIPPING_TYPE,
+                'type' => AddressType::Shipping,
             ])
             ->toArray();
     }
@@ -111,7 +112,7 @@ class CustomerProfileRequest extends FormRequest
     {
         return collect($this->billing)
             ->merge([
-                'type' => Address::BILLING_TYPE,
+                'type' => AddressType::Billing,
             ])
             ->toArray();
     }

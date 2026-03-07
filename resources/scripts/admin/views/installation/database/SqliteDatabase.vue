@@ -1,6 +1,6 @@
 <template>
   <form action="" @submit.prevent="next">
-    <div class="grid grid-cols-1 gap-5 md:grid-cols-2 lg:mb-6 md:mb-6">
+    <div class="grid grid-cols-1 gap-5 md:grid-cols-2 mb-6">
       <BaseInputGroup
         :label="$t('wizard.database.app_url')"
         :content-loading="isFetchingInitialData"
@@ -49,6 +49,10 @@
       </BaseInputGroup>
     </div>
 
+    <div class="w-full">
+      <BaseCheckbox v-model="databaseData.database_overwrite" :label="$t('wizard.database.overwrite')"/>
+    </div>
+
     <BaseButton
       v-show="!isFetchingInitialData"
       :content-loading="isFetchingInitialData"
@@ -58,7 +62,7 @@
       :disabled="isSaving"
     >
       <template #left="slotProps">
-        <BaseIcon v-if="!isSaving" name="SaveIcon" :class="slotProps.class" />
+        <BaseIcon v-if="!isSaving" name="ArrowDownOnSquareIcon" :class="slotProps.class" />
       </template>
       {{ $t('wizard.save_cont') }}
     </BaseButton>
@@ -71,6 +75,7 @@ import { useInstallationStore } from '@/scripts/admin/stores/installation'
 import { helpers, required } from '@vuelidate/validators'
 import useVuelidate from '@vuelidate/core'
 import { useI18n } from 'vue-i18n'
+import BaseCheckbox from '@/scripts/components/base/BaseCheckbox.vue'
 
 const props = defineProps({
   configData: {

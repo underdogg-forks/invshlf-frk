@@ -1,32 +1,48 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Unit;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+class UnitTest extends TestCase
+{
+    use RefreshDatabase;
 
-    $user = User::where('role', 'super admin')->first();
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-test('unit has many items', function () {
-    $unit = Unit::factory()->hasItems(5)->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    $this->assertTrue($unit->items()->exists());
-});
+        $user = User::where('role', 'super admin')->first();
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-test('unit belongs to company', function () {
-    $unit = Unit::factory()->create();
+    #[Test]
+    public function it_has_many_items(): void
+    {
+        /* Arrange */
+        $unit = Unit::factory()->hasItems(5)->create();
 
-    $this->assertTrue($unit->company()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($unit->items()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        /* Arrange */
+        $unit = Unit::factory()->create();
+
+        /* Act & Assert */
+        $this->assertTrue($unit->company()->exists());
+    }
+}

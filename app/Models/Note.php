@@ -2,20 +2,59 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Note extends Model
+class Note extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $guarded = ['id'];
+
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -30,6 +69,11 @@ class Note extends Model
         }
     }
 
+    public function scopeWhereCompany($query)
+    {
+        $query->where('notes.company_id', request()->header('company'));
+    }
+
     public function scopeWhereSearch($query, $search)
     {
         $query->where('name', 'LIKE', '%'.$search.'%');
@@ -40,8 +84,13 @@ class Note extends Model
         return $query->where('type', $type);
     }
 
-    public function scopeWhereCompany($query)
-    {
-        $query->where('notes.company_id', request()->header('company'));
-    }
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

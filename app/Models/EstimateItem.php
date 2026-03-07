@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use App\Traits\HasCustomFieldsTrait;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class EstimateItem extends Model
+class EstimateItem extends BaseModel
 {
+    use BelongsToFranchise;
     use HasCustomFieldsTrait;
-    use HasFactory;
 
     protected $guarded = [
         'id',
@@ -29,6 +29,21 @@ class EstimateItem extends Model
         ];
     }
 
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
     public function estimate(): BelongsTo
     {
         return $this->belongsTo(Estimate::class);
@@ -44,8 +59,42 @@ class EstimateItem extends Model
         return $this->hasMany(Tax::class);
     }
 
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
     public function scopeWhereCompany($query, $company_id)
     {
         $query->where('company_id', $company_id);
     }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

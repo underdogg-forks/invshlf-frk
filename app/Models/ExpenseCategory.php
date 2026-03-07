@@ -2,33 +2,56 @@
 
 namespace App\Models;
 
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class ExpenseCategory extends Model
+class ExpenseCategory extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $fillable = ['name', 'company_id', 'description'];
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
     protected $appends = ['amount', 'formattedCreatedAt'];
+
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
+    }
 
     public function expenses(): HasMany
     {
         return $this->hasMany(Expense::class);
     }
 
-    public function company(): BelongsTo
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getAmountAttribute()
     {
-        return $this->belongsTo(Company::class);
+        return $this->expenses()->sum('amount');
     }
 
     public function getFormattedCreatedAtAttribute($value)
@@ -38,25 +61,21 @@ class ExpenseCategory extends Model
         return Carbon::parse($this->created_at)->format($dateFormat);
     }
 
-    public function getAmountAttribute()
-    {
-        return $this->expenses()->sum('amount');
-    }
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
 
-    public function scopeWhereCompany($query)
-    {
-        $query->where('company_id', request()->header('company'));
-    }
-
-    public function scopeWhereCategory($query, $category_id)
-    {
-        $query->orWhere('id', $category_id);
-    }
-
-    public function scopeWhereSearch($query, $search)
-    {
-        $query->where('name', 'LIKE', '%'.$search.'%');
-    }
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -83,4 +102,29 @@ class ExpenseCategory extends Model
 
         return $query->paginate($limit);
     }
+
+    public function scopeWhereCategory($query, $category_id)
+    {
+        $query->orWhere('id', $category_id);
+    }
+
+    public function scopeWhereCompany($query)
+    {
+        $query->where('company_id', request()->header('company'));
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        $query->where('name', 'LIKE', '%'.$search.'%');
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

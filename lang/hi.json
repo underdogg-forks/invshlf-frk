@@ -29,6 +29,8 @@
     "to_date": "इस तारीख तक",
     "from": "से",
     "to": "के लिये",
+    "cc": "CC",
+    "bcc": "BCC",
     "ok": "ठीक",
     "yes": "हां",
     "no": "नहीं",
@@ -100,14 +102,33 @@
     "pay_invoice": "बिल का भुगतान करो",
     "login_successfully": "सफलतापूर्वक लॉगिन किया गया",
     "logged_out_successfully": "सफलतापूर्वक लॉग आउट किया गया",
-    "mark_as_default": "डिफ़ॉल्ट के रूप में चिह्नित करें"
+    "mark_as_default": "डिफ़ॉल्ट के रूप में चिह्नित करें",
+    "no_data_found": "डाटा प्राप्त नहीं हुआ",
+    "pagination": {
+      "previous": "पहले का",
+      "next": "अगला",
+      "showing": "दिखा रहा है",
+      "to": "को",
+      "of": "का",
+      "results": "परिणाम"
+    },
+    "file_upload": {
+      "drag_a_file": "फ़ाइल को यहाँ खींचें.",
+      "browse": "browse",
+      "to_choose": "to choose a file"
+    },
+    "multiselect": {
+      "the_list_is_empty": "सूची खाली है",
+      "no_results_found": "कोई परिणाम नहीं मिला"
+    },
+    "copy_to_clipboard": "क्लिपबोर्ड पर नक़ल करें"
   },
   "dashboard": {
     "select_year": "वर्ष चुनें",
     "cards": {
       "due_amount": "देय राशि",
-      "customers": "Customer | Customers",
-      "invoices": "Invoice | Invoices",
+      "customers": "ग्राहक | ग्राहकों",
+      "invoices": "",
       "estimates": "Estimate | Estimates",
       "payments": "Payment | Payments"
     },
@@ -142,7 +163,10 @@
     "name": "नाम",
     "description": "विवरण",
     "percent": "प्रतिशत",
-    "compound_tax": "यौगिक कर"
+    "compound_tax": "यौगिक कर",
+    "percentage": "Percentage",
+    "fixed_amount": "Fixed Amount",
+    "tax_type": "Tax Type"
   },
   "global_search": {
     "search": "खोज़े...",
@@ -172,7 +196,7 @@
   "customers": {
     "title": "ग्राहक",
     "prefix": "प्रीफ़िक्स",
-    "tax_id": "Tax ID",
+    "tax_id": "टैक्स आईडी",
     "add_customer": "ग्राहक जोड़ें",
     "contacts_list": "ग्राहक सूची",
     "name": "नाम",
@@ -284,6 +308,7 @@
     "total": "कुल",
     "discount": "छूट",
     "sub_total": "उप योग",
+    "net_total": "Net",
     "estimate_number": "अनुमान संख्या",
     "ref_number": "प्रसंग संख्या",
     "contact": "संपर्क",
@@ -305,6 +330,9 @@
     "record_payment": "रिकॉर्ड भुगतान",
     "add_estimate": "अनुमान जोड़ें",
     "save_estimate": "अनुमान बचाएं",
+    "cloned_successfully": "अनुमान सफलतापूर्वक क्लोन किया गया",
+    "clone_estimate": "Clone Estimate",
+    "confirm_clone": "This Estimate will be cloned into a new Estimate",
     "confirm_conversion": "इस अनुमान का उपयोग एक नया चालान बनाने के लिए किया जाएगा।",
     "conversion_message": "चालान सफल बनाया गया",
     "confirm_send_estimate": "यह अनुमान ग्राहक को ईमेल के माध्यम से भेजा जाएगा",
@@ -517,7 +545,7 @@
     "update_invoice": "आवर्ती चालान में परिवर्तन करें",
     "add_new_tax": "नया टैक्स जोड़ें",
     "no_invoices": "No Recurring Invoices yet!",
-    "mark_as_rejected": "Mark as rejected",
+    "mark_as_rejected": "अस्वीकृत के रूप में चिह्नित करें",
     "mark_as_accepted": "Mark as accepted",
     "list_of_invoices": "This section will contain the list of recurring invoices.",
     "select_invoice": "Select Invoice",
@@ -543,22 +571,38 @@
       "type_item_description": "Type Item Description (optional)"
     },
     "frequency": {
-      "title": "Frequency",
+      "title": "Frequency (using cron format)",
       "select_frequency": "Select Frequency",
       "minute": "Minute",
       "hour": "Hour",
       "day_month": "Day of month",
       "month": "Month",
-      "day_week": "Day of week"
+      "day_week": "Day of week",
+      "every_minute": "Every Minute",
+      "every_30_minute": "Every 30 Minute",
+      "every_hour": "Every Hour",
+      "every_2_hour": "Every 2 Hour",
+      "every_day_at_midnight": "Every day at midnight",
+      "every_week": "Every Week",
+      "every_15_days_at_midnight": "Every 15 days at midnight",
+      "on_the_first_day_of_every_month_at_midnight": "On the first day of every month at 00:00",
+      "every_6_month": "Every 6 Month",
+      "every_year_on_the_first_day_of_january_at_midnight": "हर वर्ष 1 जनवरी को 00:00 बजे",
+      "custom": "स्वनिर्मित"
     },
-    "confirm_delete": "You will not be able to recover this Invoice | You will not be able to recover these Invoices",
-    "created_message": "Recurring Invoice created successfully",
+    "confirm_delete": "आप इस चालान को पुनर्प्राप्त नहीं कर पाएंगे | आप इन चालानों को पुनर्प्राप्त नहीं कर पाएंगे",
+    "created_message": "आवर्ती चालान सफलतापूर्वक बनाया गया",
     "updated_message": "Recurring Invoice updated successfully",
-    "deleted_message": "Recurring Invoice deleted successfully | Recurring Invoices deleted successfully",
-    "marked_as_sent_message": "Recurring Invoice marked as sent successfully",
+    "deleted_message": "आवर्ती चालान सफलतापूर्वक हटा दिया गया",
+    "marked_as_sent_message": "आवर्ती चालान को सफलतापूर्वक भेजा गया के रूप में चिह्नित किया गया",
     "user_email_does_not_exist": "User email does not exist",
     "something_went_wrong": "something went wrong",
-    "invalid_due_amount_message": "Total Recurring Invoice amount cannot be less than total paid amount for this Recurring Invoice. Please update the invoice or delete the associated payments to continue."
+    "invalid_due_amount_message": "कुल चालान राशि इस चालान के लिए कुल भुगतान की गई राशि से कम नहीं हो सकती है। जारी रखने के लिए कृपया इनवॉइस अपडेट करें या संबद्ध भुगतानों को हटा दें।",
+    "limit": {
+      "none": "कोई नहीं",
+      "date": "दिनांक",
+      "count": "गिनती"
+    }
   },
   "payments": {
     "title": "भुगतान",
@@ -588,7 +632,7 @@
     "no_matching_payments": "कोई मिलान भुगतान नहीं हैं!",
     "list_of_payments": "इस खंड में भुगतान की सूची होगी।",
     "select_payment_mode": "भुगतान मोड चुनें",
-    "confirm_mark_as_sent": "This estimate will be marked as sent",
+    "confirm_mark_as_sent": "इस अनुमान को भेजा गया के रूप में चिह्नित किया जाएगा",
     "confirm_send_payment": "यह भुगतान ग्राहक को ईमेल के माध्यम से भेजा जाएगा",
     "send_payment_successfully": "भुगतान सफलतापूर्वक भेजा गया",
     "something_went_wrong": "कुछ गलत हो गया",
@@ -596,7 +640,8 @@
     "created_message": "भुगतान सफलतापूर्वक बनाया गया",
     "updated_message": "भुगतान सफलतापूर्वक अपडेट किया गया",
     "deleted_message": "भुगतान सफलतापूर्वक हटाया गया | भुगतान सफलतापूर्वक हटा दिए गए",
-    "invalid_amount_message": "भुगतान राशि अमान्य है"
+    "invalid_amount_message": "भुगतान राशि अमान्य है",
+    "amount_due": "बकाया राशि"
   },
   "expenses": {
     "title": "व्यय",
@@ -604,12 +649,14 @@
     "select_a_customer": "एक ग्राहक चुनें",
     "expense_title": "शीर्षक",
     "customer": "ग्राहक",
-    "currency": "Currency",
+    "currency": "मुद्रा",
     "contact": "संपर्क",
     "category": "वर्ग",
     "from_date": "इस तारीख से",
     "to_date": "इस तारीख तक",
     "expense_date": "दिनांक",
+    "expense_number": "व्यय संख्या",
+    "expense_number_placeholder": "EXP-001",
     "description": "विवरण",
     "receipt": "रसीद",
     "amount": "राशि",
@@ -659,7 +706,7 @@
     "retype_password": "पासवर्ड पुन: लिखें"
   },
   "modules": {
-    "buy_now": "Buy Now",
+    "buy_now": "अभी खरीदें",
     "install": "इंस्टॉल",
     "price": "मूल्य",
     "download_zip_file": "ज़िप डाउनलोड करे",
@@ -700,8 +747,9 @@
     "purchased": "खरीदी",
     "installed": "इंस्टॉल हुआ।",
     "no_modules_installed": "अभी तक कोई मॉड्यूल स्थापित नहीं है!",
-    "disable_warning": "All the settings for this particular will be reverted.",
-    "what_you_get": "What you get"
+    "disable_warning": "इस विशेष के लिए सभी सेटिंग्स पूर्ववत कर दी जाएंगी.",
+    "what_you_get": "What you get",
+    "sign_up_and_get_token": "Sign up & Get Token"
   },
   "users": {
     "title": "उपयोगकर्ताओं",
@@ -729,7 +777,7 @@
     "updated_message": "उपयोगकर्ता सफलतापूर्वक अपडेट किया गया",
     "deleted_message": "उपयोगकर्ता सफलतापूर्वक हटाया गया | उपयोगकर्ता सफलतापूर्वक हटा दिया गया",
     "select_company_role": "Select Role for {company}",
-    "companies": "Companies"
+    "companies": "कंपनियों"
   },
   "reports": {
     "title": "रिपोर्ट",
@@ -753,7 +801,11 @@
       "date_range": "दिनांक सीमा चुनें",
       "to_date": "इस तारीख तक",
       "from_date": "इस तारीख से",
-      "report_type": "रिपोर्ट का प्रकार"
+      "report_type": "रिपोर्ट का प्रकार",
+      "sort": {
+        "by_customer": "ग्राहक द्वारा",
+        "by_item": "आइटम द्वारा"
+      }
     },
     "taxes": {
       "taxes": "करों",
@@ -807,11 +859,12 @@
       "custom_fields": "कस्टम फील्ड्स",
       "payment_modes": "भुगतान के प्रकार",
       "notes": "नोट्स",
-      "exchange_rate": "Exchange Rate",
-      "address_information": "Address Information"
+      "exchange_rate": "विनिमय दर",
+      "address_information": "पते के बारे में जानकारी",
+      "pdf_generation": "PDF Generation"
     },
     "address_information": {
-      "section_description": "  You can update Your Address information using form below."
+      "section_description": "  आप नीचे दिए गए फॉर्म का उपयोग करके अपनी पता जानकारी अपडेट कर सकते हैं"
     },
     "title": "समायोजन",
     "setting": "सेटिंग्स | समायोजन",
@@ -820,6 +873,7 @@
     "primary_currency": "Primary Currency",
     "timezone": "Time Zone",
     "date_format": "Date Format",
+    "time_format": "Time Format",
     "currencies": {
       "title": "Currencies",
       "currency": "Currency | Currencies",
@@ -848,6 +902,7 @@
       "mailgun_endpoint": "Mailgun Endpoint",
       "ses_secret": "SES Secret",
       "ses_key": "SES Key",
+      "ses_region": "AWS Region",
       "password": "Mail Password",
       "username": "Mail Username",
       "mail_config": "Mail Configuration",
@@ -859,7 +914,15 @@
     "pdf": {
       "title": "PDF Setting",
       "footer_text": "Footer Text",
-      "pdf_layout": "PDF Layout"
+      "pdf_layout": "PDF Layout",
+      "pdf_configuration": "PDF Generation Settings",
+      "section_description": "Change the way PDFs are generated",
+      "driver": "PDF Driver to use",
+      "papersize": "Papersize",
+      "papersize_hint": "Papersize in width and height (ex. \"210mm 297mm\")",
+      "gotenberg_host": "Gotenberg service host",
+      "pdf_variables_save_successfully": "PDF configuration saved successfully",
+      "pdf_variables_save_error": "PDF configuration could not be saved"
     },
     "company_info": {
       "company_info": "Company info",
@@ -921,7 +984,14 @@
       "added_message": "Custom Field added successfully",
       "press_enter_to_add": "Press enter to add new option",
       "model_in_use": "Cannot update model for fields which are already in use.",
-      "type_in_use": "Cannot update type for fields which are already in use."
+      "type_in_use": "Cannot update type for fields which are already in use.",
+      "model_type": {
+        "customer": "Customer",
+        "invoice": "Invoice",
+        "estimate": "Estimate",
+        "expense": "Expense",
+        "payment": "Payment"
+      }
     },
     "customization": {
       "customization": "customization",
@@ -939,6 +1009,7 @@
       "delimiter_description": "Single character for specifying the boundary between 2 separate components. By default its set to -",
       "delimiter_param_label": "Delimiter Value",
       "date_format": "Date Format",
+      "time_format": "Time Format",
       "date_format_description": "A local date and time field which accepts a format parameter. The default format: 'Y' renders the current year.",
       "date_format_param_label": "Format",
       "sequence": "Sequence",
@@ -1034,6 +1105,8 @@
         "description": "Save time by creating notes and reusing them on your invoices, estimates & payments.",
         "notes": "Notes",
         "type": "Type",
+        "is_default": "Select by default",
+        "is_default_description": "This note will be selected by default in new invoices.",
         "add_note": "Add Note",
         "add_new_note": "Add New Note",
         "name": "Name",
@@ -1042,7 +1115,12 @@
         "note_updated": "Note Updated successfully",
         "note_confirm_delete": "You will not be able to recover this Note",
         "already_in_use": "Note is already in use",
-        "deleted_message": "Note deleted successfully"
+        "deleted_message": "Note deleted successfully",
+        "types": {
+          "estimate": "Estimate",
+          "invoice": "Invoice",
+          "payment": "Payment"
+        }
       }
     },
     "account_settings": {
@@ -1135,14 +1213,23 @@
       "tax_per_item": "Tax Per Item",
       "tax_name": "Tax Name",
       "compound_tax": "Compound Tax",
+      "amount": "Amount",
       "percent": "Percent",
+      "fixed_amount": "Fixed Amount",
+      "calculation_type": "Calculation Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed",
       "action": "Action",
       "tax_setting_description": "Enable this if you want to add taxes to individual invoice items. By default, taxes are added directly to the invoice.",
       "created_message": "Tax type created successfully",
       "updated_message": "Tax type updated successfully",
       "deleted_message": "Tax type deleted successfully",
       "confirm_delete": "You will not be able to recover this Tax Type",
-      "already_in_use": "Tax is already in use"
+      "already_in_use": "Tax is already in use",
+      "tax_included": "Inclusive taxes",
+      "tax_included_description": "Enable this if you want to report that taxes are already included in the invoice items or invoice total.",
+      "tax_included_by_default": "Enable inclusive taxes by default",
+      "tax_included_by_default_description": "Enable this if you want to set inclusive taxes by default"
     },
     "payment_modes": {
       "title": "Payment Modes",
@@ -1178,6 +1265,7 @@
       "time_zone": "Time Zone",
       "fiscal_year": "Financial Year",
       "date_format": "Date Format",
+      "time_format": "Time Format",
       "discount_setting": "Discount Setting",
       "discount_per_item": "Discount Per Item ",
       "discount_setting_description": "Enable this if you want to add Discount to individual invoice items. By default, Discount is added directly to the invoice.",
@@ -1190,6 +1278,7 @@
       "select_language": "Select Language",
       "select_time_zone": "Select Time Zone",
       "select_date_format": "Select Date Format",
+      "select_time_format": "Select Time Format",
       "select_financial_year": "Select Financial Year",
       "recurring_invoice_status": "Recurring Invoice Status",
       "create_status": "Create Status",
@@ -1197,12 +1286,29 @@
       "on_hold": "On Hold",
       "update_status": "Update Status",
       "completed": "Completed",
-      "company_currency_unchangeable": "Company currency cannot be changed"
+      "company_currency_unchangeable": "Company currency cannot be changed",
+      "invoice_use_time": "Use time in invoices",
+      "invoice_use_time_description": "Enable this if you want to select exact invoice time.",
+      "fiscal_years": {
+        "january_december": "January - December",
+        "february_january": "February - January",
+        "march_february": "March - February",
+        "april_march": "April - March",
+        "may_april": "May - April",
+        "june_may": "June - May",
+        "july_june": "July - June",
+        "august_july": "August - July",
+        "september_august": "September - August",
+        "october_september": "October - September",
+        "november_october": "November - October",
+        "december_november": "December - November"
+      }
     },
     "update_app": {
       "title": "Update App",
       "description": "You can easily update InvoiceShelf by checking for a new update by clicking the button below",
       "check_update": "Check for updates",
+      "insider_consent": "Opt-in for Insider releases. Recommended for testing purposes only.",
       "avail_update": "New Update available",
       "next_version": "Next version",
       "requirements": "Requirements",
@@ -1351,11 +1457,16 @@
     "time_zone": "Time Zone",
     "fiscal_year": "Financial Year",
     "date_format": "Date Format",
+    "time_format": "Time Format",
     "from_address": "From Address",
     "username": "Username",
     "next": "Next",
     "continue": "Continue",
     "skip": "Skip",
+    "install_language": {
+      "title": "Choose your language",
+      "description": "Select language wizard to install InvoiceShelf"
+    },
     "database": {
       "database": "Site URL & Database",
       "connection": "Database Connection",
@@ -1367,6 +1478,7 @@
       "username": "Database Username",
       "db_name": "Database Name",
       "db_path": "Database Path",
+      "overwrite": "Overwrite existing database and proceed",
       "desc": "Create a database on your server and set the credentials using the form below."
     },
     "permissions": {
@@ -1382,7 +1494,14 @@
       "verify_now": "Verify Now",
       "success": "Domain Verify Successfully.",
       "failed": "Domain verification failed. Please enter valid domain name.",
-      "verify_and_continue": "Verify And Continue"
+      "verify_and_continue": "Verify And Continue",
+      "notes": {
+        "notes": "Notes:",
+        "not_contain": "App domain should not contain",
+        "or": "or",
+        "in_front": "in front of the domain.",
+        "if_you": "If you're accessing the website on a different port, please mention the port. For example:"
+      }
     },
     "mail": {
       "host": "Mail Host",
@@ -1498,7 +1617,7 @@
   "pdf_invoice_label": "Invoice",
   "pdf_invoice_number": "Invoice Number",
   "pdf_invoice_date": "Invoice Date",
-  "pdf_invoice_due_date": "Due date",
+  "pdf_invoice_due_date": "Due Date",
   "pdf_notes": "Notes",
   "pdf_items_label": "Items",
   "pdf_quantity_label": "Quantity",
@@ -1506,6 +1625,7 @@
   "pdf_discount_label": "Discount",
   "pdf_amount_label": "Amount",
   "pdf_subtotal": "Subtotal",
+  "pdf_net_total": "Net",
   "pdf_total": "Total",
   "pdf_payment_label": "Payment",
   "pdf_payment_receipt_label": "PAYMENT RECEIPT",
@@ -1534,6 +1654,8 @@
   "pdf_tax_label": "Tax",
   "pdf_tax_id": "Tax-ID",
   "pdf_vat_id": "VAT-ID",
+  "pdf_amount_paid": "Amount Paid",
+  "pdf_amount_due": "Amount Due",
   "mail_thanks": "Thanks",
   "mail_view_estimate": "View Estimate",
   "mail_viewed_estimate": ":name viewed this Estimate.",

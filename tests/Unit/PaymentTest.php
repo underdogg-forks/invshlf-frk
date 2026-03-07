@@ -1,27 +1,52 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Payment;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class PaymentTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('payment belongs to invoice', function () {
-    $payment = Payment::factory()->forInvoice()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($payment->invoice()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('payment belongs to customer', function () {
-    $payment = Payment::factory()->forCustomer()->create();
+    #[Test]
+    public function it_belongs_to_an_invoice(): void
+    {
+        /* Arrange */
+        $payment = Payment::factory()->forInvoice()->create();
 
-    $this->assertTrue($payment->customer()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($payment->invoice()->exists());
+    }
 
-test('payment belongs to payment method', function () {
-    $payment = Payment::factory()->forPaymentMethod()->create();
+    #[Test]
+    public function it_belongs_to_a_customer(): void
+    {
+        /* Arrange */
+        $payment = Payment::factory()->forCustomer()->create();
 
-    $this->assertTrue($payment->paymentMethod()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($payment->customer()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_a_payment_method(): void
+    {
+        /* Arrange */
+        $payment = Payment::factory()->forPaymentMethod()->create();
+
+        /* Act & Assert */
+        $this->assertTrue($payment->paymentMethod()->exists());
+    }
+}

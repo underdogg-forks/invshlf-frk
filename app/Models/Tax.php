@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\DB;
 
-class Tax extends Model
+class Tax extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $guarded = [
         'id',
@@ -21,22 +22,28 @@ class Tax extends Model
         return [
             'amount' => 'integer',
             'percent' => 'float',
+            'fixed_amount' => 'integer',
         ];
     }
 
-    public function taxType(): BelongsTo
-    {
-        return $this->belongsTo(TaxType::class);
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
 
-    public function invoice(): BelongsTo
-    {
-        return $this->belongsTo(Invoice::class);
-    }
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
-    public function recurringInvoice(): BelongsTo
+    public function currency(): BelongsTo
     {
-        return $this->belongsTo(RecurringInvoice::class);
+        return $this->belongsTo(Currency::class);
     }
 
     public function estimate(): BelongsTo
@@ -44,9 +51,14 @@ class Tax extends Model
         return $this->belongsTo(Estimate::class);
     }
 
-    public function currency(): BelongsTo
+    public function estimateItem(): BelongsTo
     {
-        return $this->belongsTo(Currency::class);
+        return $this->belongsTo(EstimateItem::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function invoiceItem(): BelongsTo
@@ -54,19 +66,61 @@ class Tax extends Model
         return $this->belongsTo(InvoiceItem::class);
     }
 
-    public function estimateItem(): BelongsTo
-    {
-        return $this->belongsTo(EstimateItem::class);
-    }
-
     public function item(): BelongsTo
     {
         return $this->belongsTo(Item::class);
     }
 
-    public function scopeWhereCompany($query, $company_id)
+    public function recurringInvoice(): BelongsTo
     {
-        $query->where('company_id', $company_id);
+        return $this->belongsTo(RecurringInvoice::class);
+    }
+
+    public function taxType(): BelongsTo
+    {
+        return $this->belongsTo(TaxType::class);
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeInvoicesBetween($query, $start, $end)
+    {
+        $query->whereHas('invoice', function ($query) use ($start, $end) {
+            $query->where('paid_status', InvoiceStatus::Paid)
+                ->whereBetween(
+                    'invoice_date',
+                    [$start->format('Y-m-d'), $end->format('Y-m-d')]
+                );
+        })
+            ->orWhereHas('invoiceItem.invoice', function ($query) use ($start, $end) {
+                $query->where('paid_status', InvoiceStatus::Paid)
+                    ->whereBetween(
+                        'invoice_date',
+                        [$start->format('Y-m-d'), $end->format('Y-m-d')]
+                    );
+            });
     }
 
     public function scopeTaxAttributes($query)
@@ -76,22 +130,9 @@ class Tax extends Model
         )->groupBy('tax_type_id');
     }
 
-    public function scopeInvoicesBetween($query, $start, $end)
+    public function scopeWhereCompany($query, $company_id)
     {
-        $query->whereHas('invoice', function ($query) use ($start, $end) {
-            $query->where('paid_status', Invoice::STATUS_PAID)
-                ->whereBetween(
-                    'invoice_date',
-                    [$start->format('Y-m-d'), $end->format('Y-m-d')]
-                );
-        })
-            ->orWhereHas('invoiceItem.invoice', function ($query) use ($start, $end) {
-                $query->where('paid_status', Invoice::STATUS_PAID)
-                    ->whereBetween(
-                        'invoice_date',
-                        [$start->format('Y-m-d'), $end->format('Y-m-d')]
-                    );
-            });
+        $query->where('company_id', $company_id);
     }
 
     public function scopeWhereInvoicesFilters($query, array $filters)
@@ -105,4 +146,14 @@ class Tax extends Model
             $query->invoicesBetween($start, $end);
         }
     }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

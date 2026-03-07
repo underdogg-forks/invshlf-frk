@@ -1,26 +1,50 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\ExchangeRateLog;
 use App\Models\Expense;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class ExchangeRateLogTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('an exchange rate log belongs to company', function () {
-    $exchangeRateLog = ExchangeRateLog::factory()->forCompany()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($exchangeRateLog->company->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('add exchange rate log', function () {
-    $expense = Expense::factory()->create();
-    $response = ExchangeRateLog::addExchangeRateLog($expense);
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        /* Arrange */
+        $exchangeRateLog = ExchangeRateLog::factory()->forCompany()->create();
 
-    $this->assertDatabaseHas('exchange_Rate_logs', [
-        'exchange_rate' => $response->exchange_rate,
-        'base_currency_id' => $response->base_currency_id,
-        'currency_id' => $response->currency_id,
-    ]);
-});
+        /* Act & Assert */
+        $this->assertTrue($exchangeRateLog->company()->exists());
+    }
+
+    #[Test]
+    public function it_adds_an_exchange_rate_log_from_an_expense(): void
+    {
+        /* Arrange */
+        $expense = Expense::factory()->create();
+
+        /* Act */
+        $response = ExchangeRateLog::addExchangeRateLog($expense);
+
+        /* Assert */
+        $this->assertDatabaseHas('exchange_rate_logs', [
+            'exchange_rate' => $response->exchange_rate,
+            'base_currency_id' => $response->base_currency_id,
+            'currency_id' => $response->currency_id,
+        ]);
+    }
+}

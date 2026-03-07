@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Customer\Invoice;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Customer\InvoiceResource;
 use App\Models\Company;
@@ -21,7 +22,7 @@ class InvoicesController extends Controller
         $limit = $request->has('limit') ? $request->limit : 10;
 
         $invoices = Invoice::with(['items', 'customer', 'creator', 'taxes'])
-            ->where('status', '<>', 'DRAFT')
+            ->where('status', '<>', InvoiceStatus::Draft)
             ->applyFilters($request->all())
             ->whereCustomer(Auth::guard('customer')->id())
             ->latest()
@@ -29,7 +30,7 @@ class InvoicesController extends Controller
 
         return InvoiceResource::collection($invoices)
             ->additional(['meta' => [
-                'invoiceTotalCount' => Invoice::where('status', '<>', 'DRAFT')->whereCustomer(Auth::guard('customer')->id())->count(),
+                'invoiceTotalCount' => Invoice::where('status', '<>', InvoiceStatus::Draft)->whereCustomer(Auth::guard('customer')->id())->count(),
             ]]);
     }
 

@@ -1,195 +1,216 @@
 <?php
 
+namespace Tests\Unit;
+
+use App\Enums\InvoiceStatus;
 use App\Http\Requests\InvoicesRequest;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Tax;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class InvoiceTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('invoice has many invoice items', function () {
-    $invoice = Invoice::factory()->hasItems(5)->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertCount(5, $invoice->items);
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $this->assertTrue($invoice->items()->exists());
-});
+    #[Test]
+    public function it_has_many_invoice_items(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->hasItems(5)->create();
 
-test('invoice has many taxes', function () {
-    $invoice = Invoice::factory()->hasTaxes(5)->create();
+        /* Act */
+        $itemCount = $invoice->items()->count();
 
-    $this->assertCount(5, $invoice->taxes);
+        /* Assert */
+        $this->assertCount(5, $invoice->items);
+        $this->assertEquals(5, $itemCount);
+        $this->assertTrue($invoice->items()->exists());
+    }
 
-    $this->assertTrue($invoice->taxes()->exists());
-});
+    #[Test]
+    public function it_has_many_taxes(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->hasTaxes(5)->create();
 
-test('invoice has many payments', function () {
-    $invoice = Invoice::factory()->hasPayments(5)->create();
+        /* Act */
+        $taxCount = $invoice->taxes()->count();
 
-    $this->assertCount(5, $invoice->payments);
+        /* Assert */
+        $this->assertCount(5, $invoice->taxes);
+        $this->assertEquals(5, $taxCount);
+        $this->assertTrue($invoice->taxes()->exists());
+    }
 
-    $this->assertTrue($invoice->payments()->exists());
-});
+    #[Test]
+    public function it_has_many_payments(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->hasPayments(5)->create();
 
-test('invoice belongs to customer', function () {
-    $invoice = Invoice::factory()->forCustomer()->create();
+        /* Act */
+        $paymentCount = $invoice->payments()->count();
 
-    $this->assertTrue($invoice->customer()->exists());
-});
+        /* Assert */
+        $this->assertCount(5, $invoice->payments);
+        $this->assertEquals(5, $paymentCount);
+        $this->assertTrue($invoice->payments()->exists());
+    }
 
-test('get previous status', function () {
-    $invoice = Invoice::factory()->create();
+    #[Test]
+    public function it_belongs_to_a_customer(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->forCustomer()->create();
 
-    $status = $invoice->getPreviousStatus();
+        /* Act & Assert */
+        $this->assertTrue($invoice->customer()->exists());
+    }
 
-    $this->assertEquals('DRAFT', $status);
-});
+    #[Test]
+    public function it_returns_the_previous_status_as_draft_for_a_new_invoice(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->create();
 
-test('create invoice', function () {
-    $invoice = Invoice::factory()->raw();
+        /* Act */
+        $status = $invoice->getPreviousStatus();
 
-    $item = InvoiceItem::factory()->raw();
+        /* Assert */
+        $this->assertEquals(InvoiceStatus::Draft, $status);
+    }
 
-    $invoice['items'] = [];
-    array_push($invoice['items'], $item);
+    #[Test]
+    public function it_creates_an_invoice_with_items_and_taxes(): void
+    {
+        /* Arrange */
+        $invoiceData = Invoice::factory()->raw();
+        $item = InvoiceItem::factory()->raw();
 
-    $invoice['taxes'] = [];
-    array_push($invoice['taxes'], Tax::factory()->raw());
+        $invoiceData['items'] = [$item];
+        $invoiceData['taxes'] = [Tax::factory()->raw()];
 
-    $request = new InvoicesRequest();
+        $request = new InvoicesRequest;
+        $request->replace($invoiceData);
 
-    $request->replace($invoice);
+        /* Act */
+        $response = Invoice::createInvoice($request);
 
-    $invoice_number = explode('-', $invoice['invoice_number']);
-    $number_attributes['invoice_number'] = $invoice_number[0].'-'.sprintf('%06d', intval($invoice_number[1]));
+        /* Assert */
+        $this->assertDatabaseHas('invoice_items', [
+            'invoice_id' => $response->id,
+            'name' => $item['name'],
+            'description' => $item['description'],
+            'total' => $item['total'],
+            'quantity' => $item['quantity'],
+            'discount' => $item['discount'],
+            'price' => $item['price'],
+        ]);
+        $this->assertDatabaseHas('invoices', [
+            'invoice_number' => $invoiceData['invoice_number'],
+            'sub_total' => $invoiceData['sub_total'],
+            'total' => $invoiceData['total'],
+            'tax' => $invoiceData['tax'],
+            'discount' => $invoiceData['discount'],
+            'notes' => $invoiceData['notes'],
+            'customer_id' => $invoiceData['customer_id'],
+            'template_name' => $invoiceData['template_name'],
+        ]);
+    }
 
-    $response = Invoice::createInvoice($request);
+    #[Test]
+    public function it_updates_an_invoice_with_new_items_and_taxes(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->create();
+        $newInvoiceData = Invoice::factory()->raw();
+        $item = InvoiceItem::factory()->raw(['invoice_id' => $invoice->id]);
+        $tax = Tax::factory()->raw(['invoice_id' => $invoice->id]);
 
-    $this->assertDatabaseHas('invoice_items', [
-        'invoice_id' => $response->id,
-        'name' => $item['name'],
-        'description' => $item['description'],
-        'total' => $item['total'],
-        'quantity' => $item['quantity'],
-        'discount' => $item['discount'],
-        'price' => $item['price'],
-    ]);
+        $newInvoiceData['items'] = [$item];
+        $newInvoiceData['taxes'] = [$tax];
 
-    $this->assertDatabaseHas('invoices', [
-        'invoice_number' => $invoice['invoice_number'],
-        'sub_total' => $invoice['sub_total'],
-        'total' => $invoice['total'],
-        'tax' => $invoice['tax'],
-        'discount' => $invoice['discount'],
-        'notes' => $invoice['notes'],
-        'customer_id' => $invoice['customer_id'],
-        'template_name' => $invoice['template_name'],
-    ]);
-});
+        $request = new InvoicesRequest;
+        $request->replace($newInvoiceData);
 
-test('update invoice', function () {
-    $invoice = Invoice::factory()->create();
+        /* Act */
+        $response = $invoice->updateInvoice($request);
 
-    $newInvoice = Invoice::factory()->raw();
+        /* Assert */
+        $this->assertDatabaseHas('invoice_items', [
+            'invoice_id' => $response->id,
+            'name' => $item['name'],
+            'description' => $item['description'],
+            'total' => $item['total'],
+            'quantity' => $item['quantity'],
+            'discount' => $item['discount'],
+            'price' => $item['price'],
+        ]);
+        $this->assertDatabaseHas('invoices', [
+            'invoice_number' => $newInvoiceData['invoice_number'],
+            'sub_total' => $newInvoiceData['sub_total'],
+            'total' => $newInvoiceData['total'],
+            'tax' => $newInvoiceData['tax'],
+            'discount' => $newInvoiceData['discount'],
+            'notes' => $newInvoiceData['notes'],
+            'customer_id' => $newInvoiceData['customer_id'],
+            'template_name' => $newInvoiceData['template_name'],
+        ]);
+    }
 
-    $item = InvoiceItem::factory()->raw([
-        'invoice_id' => $invoice->id,
-    ]);
+    #[Test]
+    public function it_creates_items_for_an_invoice(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->create();
+        $item = InvoiceItem::factory()->raw(['invoice_id' => $invoice->id]);
+        $request = new InvoicesRequest;
+        $request->replace(['items' => [$item]]);
 
-    $tax = Tax::factory()->raw([
-        'invoice_id' => $invoice->id,
-    ]);
+        /* Act */
+        Invoice::createItems($invoice, $request->items);
 
-    $newInvoice['items'] = [];
-    $newInvoice['taxes'] = [];
+        /* Assert */
+        $this->assertDatabaseHas('invoice_items', [
+            'invoice_id' => $invoice->id,
+            'description' => $item['description'],
+            'price' => $item['price'],
+            'tax' => $item['tax'],
+            'quantity' => $item['quantity'],
+            'total' => $item['total'],
+        ]);
+    }
 
-    array_push($newInvoice['items'], $item);
-    array_push($newInvoice['taxes'], $tax);
+    #[Test]
+    public function it_creates_taxes_for_an_invoice(): void
+    {
+        /* Arrange */
+        $invoice = Invoice::factory()->create();
+        $tax = Tax::factory()->raw(['invoice_id' => $invoice->id]);
+        $request = new Request;
+        $request->replace(['taxes' => [$tax]]);
 
-    $request = new InvoicesRequest();
+        /* Act */
+        Invoice::createTaxes($invoice, $request->taxes);
 
-    $request->replace($newInvoice);
-
-    $invoice_number = explode('-', $newInvoice['invoice_number']);
-
-    $number_attributes['invoice_number'] = $invoice_number[0].'-'.sprintf('%06d', intval($invoice_number[1]));
-
-    $response = $invoice->updateInvoice($request);
-
-    $this->assertDatabaseHas('invoice_items', [
-        'invoice_id' => $response->id,
-        'name' => $item['name'],
-        'description' => $item['description'],
-        'total' => $item['total'],
-        'quantity' => $item['quantity'],
-        'discount' => $item['discount'],
-        'price' => $item['price'],
-    ]);
-
-    $this->assertDatabaseHas('invoices', [
-        'invoice_number' => $newInvoice['invoice_number'],
-        'sub_total' => $newInvoice['sub_total'],
-        'total' => $newInvoice['total'],
-        'tax' => $newInvoice['tax'],
-        'discount' => $newInvoice['discount'],
-        'notes' => $newInvoice['notes'],
-        'customer_id' => $newInvoice['customer_id'],
-        'template_name' => $newInvoice['template_name'],
-    ]);
-});
-
-test('create items', function () {
-    $invoice = Invoice::factory()->create();
-
-    $items = [];
-
-    $item = InvoiceItem::factory()->raw([
-        'invoice_id' => $invoice->id,
-    ]);
-
-    array_push($items, $item);
-
-    $request = new InvoicesRequest();
-
-    $request->replace(['items' => $items]);
-
-    Invoice::createItems($invoice, $request->items);
-
-    $this->assertDatabaseHas('invoice_items', [
-        'invoice_id' => $invoice->id,
-        'description' => $item['description'],
-        'price' => $item['price'],
-        'tax' => $item['tax'],
-        'quantity' => $item['quantity'],
-        'total' => $item['total'],
-    ]);
-});
-
-test('create taxes', function () {
-    $invoice = Invoice::factory()->create();
-
-    $taxes = [];
-
-    $tax = Tax::factory()->raw([
-        'invoice_id' => $invoice->id,
-    ]);
-
-    array_push($taxes, $tax);
-
-    $request = new Request();
-
-    $request->replace(['taxes' => $taxes]);
-
-    Invoice::createTaxes($invoice, $request->taxes);
-
-    $this->assertDatabaseHas('taxes', [
-        'invoice_id' => $invoice->id,
-        'name' => $tax['name'],
-        'amount' => $tax['amount'],
-    ]);
-});
+        /* Assert */
+        $this->assertDatabaseHas('taxes', [
+            'invoice_id' => $invoice->id,
+            'name' => $tax['name'],
+            'amount' => $tax['amount'],
+        ]);
+    }
+}

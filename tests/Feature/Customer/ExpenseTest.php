@@ -4,39 +4,51 @@ namespace Tests\Feature\Customer;
 
 use App\Models\Customer;
 use App\Models\Expense;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
+class ExpenseTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $customer = Customer::factory()->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    Sanctum::actingAs(
-        $customer,
-        ['*'],
-        'customer'
-    );
-});
+        $customer = Customer::factory()->create();
+        Sanctum::actingAs($customer, ['*'], 'customer');
+    }
 
-test('get customer expenses', function () {
-    $customer = Auth::guard('customer')->user();
+    #[Test]
+    public function it_retrieves_all_expenses_for_the_customer(): void
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
 
-    getJson("api/v1/{$customer->company->slug}/customer/expenses?page=1")->assertOk();
-});
+        /* Act */
+        $response = $this->getJson("api/v1/{$customer->company->slug}/customer/expenses?page=1");
 
-test('get customer expense', function () {
-    $customer = Auth::guard('customer')->user();
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
+        $expense = Expense::factory()->create([
+            'customer_id' => $customer->id,
+            'company_id' => $customer->company->id,
+        ]);
 
-    $expense = Expense::factory()->create([
-        'customer_id' => $customer->id,
-        'company_id' => $customer->company->id,
-    ]);
+        /* Act */
+        $response = $this->getJson("/api/v1/{$customer->company->slug}/customer/expenses/{$expense->id}");
 
-    getJson("/api/v1/{$customer->company->slug}/customer/expenses/{$expense->id}")
-        ->assertOk();
-});
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonFragment(['id' => $expense->id, 'amount' => $expense->amount]);

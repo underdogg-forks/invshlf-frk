@@ -29,6 +29,8 @@
     "to_date": "ถึงวันที่",
     "from": "จาก",
     "to": "ถึง",
+    "cc": "CC",
+    "bcc": "BCC",
     "ok": "ตกลง",
     "yes": "ใช่",
     "no": "ไม่",
@@ -100,7 +102,26 @@
     "pay_invoice": "ชำระใบวางบิล",
     "login_successfully": "เข้าสู่ระบบเรียบร้อยแล้ว!",
     "logged_out_successfully": "ออกจากระบบเรียบร้อยแล้ว",
-    "mark_as_default": "Mark as default"
+    "mark_as_default": "Mark as default",
+    "no_data_found": "No data found",
+    "pagination": {
+      "previous": "Previous",
+      "next": "Next",
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "results": "results"
+    },
+    "file_upload": {
+      "drag_a_file": "Drag a file here or",
+      "browse": "browse",
+      "to_choose": "to choose a file"
+    },
+    "multiselect": {
+      "the_list_is_empty": "The list is empty",
+      "no_results_found": "No results found"
+    },
+    "copy_to_clipboard": "Copy to Clipboard"
   },
   "dashboard": {
     "select_year": "เลือกปี",
@@ -142,7 +163,10 @@
     "name": "ชื่อ",
     "description": "คำอธิบาย",
     "percent": "เปอร์เซ็นต์",
-    "compound_tax": "ภาษีมูลค่าเพิ่ม"
+    "compound_tax": "ภาษีมูลค่าเพิ่ม",
+    "percentage": "Percentage",
+    "fixed_amount": "Fixed Amount",
+    "tax_type": "Tax Type"
   },
   "global_search": {
     "search": "ค้นหา...",
@@ -284,6 +308,7 @@
     "total": "จำนวนเงินสุทธิ",
     "discount": "ส่วนลด",
     "sub_total": "รวมเงิน",
+    "net_total": "Net",
     "estimate_number": "เลขที่ใบเสนอราคา",
     "ref_number": "หมายเลขอ้างอิง",
     "contact": "ติดต่อเรา",
@@ -305,6 +330,9 @@
     "record_payment": "บันทึกการชำระเงิน",
     "add_estimate": "เพิ่มค่าใบเสนอราคา",
     "save_estimate": "บันทึกใบเสนอราคา",
+    "cloned_successfully": "Estimate cloned successfully",
+    "clone_estimate": "Clone Estimate",
+    "confirm_clone": "This Estimate will be cloned into a new Estimate",
     "confirm_conversion": "ใบเสนอราคานี้จะใช้ในการสร้างใบวางบิลใหม่",
     "conversion_message": "ใบวางบิลที่สร้างเสร็จสมบูรณ์",
     "confirm_send_estimate": "ใบเสนอราคานี้จะถูกส่งผ่านทางอีเมลถึงลูกค้า",
@@ -543,13 +571,24 @@
       "type_item_description": "คำอธิบาย (ไม่จำเป็น)"
     },
     "frequency": {
-      "title": "ระยะเวลา",
+      "title": "Frequency (using cron format)",
       "select_frequency": "กำหนดระยะเวลารอบบิล",
       "minute": "นาที",
       "hour": "ชั่วโมง",
       "day_month": "วันของเดือน",
       "month": "เดือน",
-      "day_week": "วันในสัปดาห์"
+      "day_week": "วันในสัปดาห์",
+      "every_minute": "Every Minute",
+      "every_30_minute": "Every 30 Minute",
+      "every_hour": "Every Hour",
+      "every_2_hour": "Every 2 Hour",
+      "every_day_at_midnight": "Every day at midnight",
+      "every_week": "Every Week",
+      "every_15_days_at_midnight": "Every 15 days at midnight",
+      "on_the_first_day_of_every_month_at_midnight": "On the first day of every month at 00:00",
+      "every_6_month": "Every 6 Month",
+      "every_year_on_the_first_day_of_january_at_midnight": "Every year on the first day of january at 00:00",
+      "custom": "Custom"
     },
     "confirm_delete": "คุณจะไม่สามารถกู้คืนใบวางบิลนี้ได้ | คุณจะไม่สามารถกู้คืนใบวางบิลเหล่านี้ได้",
     "created_message": "สร้างใบวางบิลประจำเรียบร้อยแล้ว",
@@ -558,7 +597,12 @@
     "marked_as_sent_message": "ใบวางบิลประจำทำเครื่องหมายว่าส่งเรียบร้อยแล้ว",
     "user_email_does_not_exist": "ไม่มีอีเมลของผู้ใช้",
     "something_went_wrong": "มีบางอย่างผิดพลาด",
-    "invalid_due_amount_message": "จำนวนใบวางบิลประจำทั้งหมดต้องไม่น้อยกว่าจำนวนเงินที่จ่ายทั้งหมดสำหรับใบวางบิลประจำนี้โปรดอัปเดตใบวางบิลหรือลบการชำระเงินที่เกี่ยวข้องเพื่อดำเนินการต่อ"
+    "invalid_due_amount_message": "จำนวนใบวางบิลประจำทั้งหมดต้องไม่น้อยกว่าจำนวนเงินที่จ่ายทั้งหมดสำหรับใบวางบิลประจำนี้โปรดอัปเดตใบวางบิลหรือลบการชำระเงินที่เกี่ยวข้องเพื่อดำเนินการต่อ",
+    "limit": {
+      "none": "None",
+      "date": "Date",
+      "count": "Count"
+    }
   },
   "payments": {
     "title": "การชำระเงิน",
@@ -596,7 +640,8 @@
     "created_message": "สร้างการชำระเงินเรียบร้อยแล้ว",
     "updated_message": "อัพเดตการชำระเงินเรียบร้อยแล้ว",
     "deleted_message": "การชำระเงินถูกลบเรียบร้อยแล้ว | การชำระเงินถูกลบเรียบร้อยแล้ว",
-    "invalid_amount_message": "จำนวนเงินที่ชำระไม่ถูกต้อง"
+    "invalid_amount_message": "จำนวนเงินที่ชำระไม่ถูกต้อง",
+    "amount_due": "Due Amount"
   },
   "expenses": {
     "title": "ค่าใช้จ่าย",
@@ -610,6 +655,8 @@
     "from_date": "จากวันที่",
     "to_date": "ถึงวันที่",
     "expense_date": "วันที่",
+    "expense_number": "เลขที่ค่าใช้จ่าย",
+    "expense_number_placeholder": "EXP-001",
     "description": "คำอธิบาย",
     "receipt": "ใบเสร็จ",
     "amount": "จำนวนเงิน (บาท)",
@@ -701,7 +748,8 @@
     "installed": "ติดตั้งแล้ว",
     "no_modules_installed": "ยังไม่มีการติดตั้งโมดูล!",
     "disable_warning": "การตั้งค่าทั้งหมดสำหรับเรื่องนี้จะถูกย้อนกลับ",
-    "what_you_get": "สิ่งที่คุณได้รับ"
+    "what_you_get": "สิ่งที่คุณได้รับ",
+    "sign_up_and_get_token": "Sign up & Get Token"
   },
   "users": {
     "title": "ผู้ใช้งาน",
@@ -753,7 +801,11 @@
       "date_range": "เลือกช่วงวันที่",
       "to_date": "ถึงวันที่",
       "from_date": "จากวันที่",
-      "report_type": "ประเภทรายงาน"
+      "report_type": "ประเภทรายงาน",
+      "sort": {
+        "by_customer": "By Customer",
+        "by_item": "By Item"
+      }
     },
     "taxes": {
       "taxes": "ภาษี",
@@ -808,7 +860,8 @@
       "payment_modes": "วิธีการชำระเงิน",
       "notes": "หมายเหตุ",
       "exchange_rate": "อัตราแลกเปลี่ยน",
-      "address_information": "ข้อมูลที่อยู่"
+      "address_information": "ข้อมูลที่อยู่",
+      "pdf_generation": "PDF Generation"
     },
     "address_information": {
       "section_description": "  คุณสามารถอัปเดตข้อมูลที่อยู่ของคุณโดยใช้แบบฟอร์มด้านล่าง"
@@ -820,6 +873,7 @@
     "primary_currency": "สกุลเงินหลัก",
     "timezone": "เขตเวลา",
     "date_format": "รูปแบบวันที่",
+    "time_format": "Time Format",
     "currencies": {
       "title": "สกุลเงิน",
       "currency": "สกุลเงิน | สกุลเงิน",
@@ -848,6 +902,7 @@
       "mailgun_endpoint": "ปลายทาง Mailgun",
       "ses_secret": "SES ซีเคร็ต",
       "ses_key": "SES คีย์",
+      "ses_region": "AWS Region",
       "password": "รหัสผ่านจดหมาย",
       "username": "ชื่อผู้ใช้จดหมาย",
       "mail_config": "การกำหนดค่าจดหมาย",
@@ -859,7 +914,15 @@
     "pdf": {
       "title": "การตั้งค่า PDF",
       "footer_text": "ข้อความท้ายกระดาษ",
-      "pdf_layout": "รูปแบบไฟล์ PDF"
+      "pdf_layout": "รูปแบบไฟล์ PDF",
+      "pdf_configuration": "PDF Generation Settings",
+      "section_description": "Change the way PDFs are generated",
+      "driver": "PDF Driver to use",
+      "papersize": "Papersize",
+      "papersize_hint": "Papersize in width and height (ex. \"210mm 297mm\")",
+      "gotenberg_host": "Gotenberg service host",
+      "pdf_variables_save_successfully": "PDF configuration saved successfully",
+      "pdf_variables_save_error": "PDF configuration could not be saved"
     },
     "company_info": {
       "company_info": "ข้อมูลบริษัท",
@@ -921,7 +984,14 @@
       "added_message": "ฟิลด์ที่กำหนดเองเพิ่มเรียบร้อยแล้ว",
       "press_enter_to_add": "กด Enter เพื่อเพิ่มตัวเลือกใหม่",
       "model_in_use": "ไม่สามารถอัพเดตรูปแบบสำหรับเขตข้อมูลที่มีอยู่แล้วในการใช้งาน",
-      "type_in_use": "ไม่สามารถอัพเดตชนิดสำหรับเขตข้อมูลที่มีอยู่แล้วในการใช้งาน"
+      "type_in_use": "ไม่สามารถอัพเดตชนิดสำหรับเขตข้อมูลที่มีอยู่แล้วในการใช้งาน",
+      "model_type": {
+        "customer": "Customer",
+        "invoice": "Invoice",
+        "estimate": "Estimate",
+        "expense": "Expense",
+        "payment": "Payment"
+      }
     },
     "customization": {
       "customization": "การปรับแต่ง",
@@ -939,6 +1009,7 @@
       "delimiter_description": "ตัวอักษรตัวเดียวสำหรับการระบุเขตแดนระหว่าง 2 องค์ประกอบที่แยกต่างหากโดยค่าเริ่มต้นตั้งค่าเป็น -",
       "delimiter_param_label": "ตัวคั่น",
       "date_format": "รูปแบบวันที่",
+      "time_format": "Time Format",
       "date_format_description": "วันที่และเวลาท้องถิ่นฟิลด์ซึ่งยอมรับพารามิเตอร์รูปแบบรูปแบบเริ่มต้น: 'Y' วาทกรรมในปีปัจจุบัน",
       "date_format_param_label": "รูปแบบ",
       "sequence": "ลำดับ",
@@ -1034,6 +1105,8 @@
         "description": "ประหยัดเวลาด้วยการสร้างหมายเหตุและนำกลับมาใช้ใหม่ในใบวางบิล ใบเสนอราคาและการชำระเงิน",
         "notes": "หมายเหตุ",
         "type": "ประเภท",
+        "is_default": "Select by default",
+        "is_default_description": "This note will be selected by default in new invoices.",
         "add_note": "เพิ่มโน้ต",
         "add_new_note": "เพิ่มหมายเหตุใหม่",
         "name": "ชื่อ",
@@ -1042,7 +1115,12 @@
         "note_updated": "หมายเหตุ:อัพเดตเสร็จเรียบร้อยแล้ว",
         "note_confirm_delete": "คุณจะไม่สามารถกู้คืนหมายเหตุนี้ได้",
         "already_in_use": "หมายเหตุมีอยู่แล้วในการใช้งาน",
-        "deleted_message": "หมายเหตุถูกลบเรียบร้อยแล้ว"
+        "deleted_message": "หมายเหตุถูกลบเรียบร้อยแล้ว",
+        "types": {
+          "estimate": "Estimate",
+          "invoice": "Invoice",
+          "payment": "Payment"
+        }
       }
     },
     "account_settings": {
@@ -1135,14 +1213,23 @@
       "tax_per_item": "ภาษีต่อรายการ",
       "tax_name": "ชื่อภาษี",
       "compound_tax": "ภาษีมูลค่าเพิ่ม",
+      "amount": "Amount",
       "percent": "เปอร์เซ็นต์",
+      "fixed_amount": "Fixed Amount",
+      "calculation_type": "Calculation Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed",
       "action": "จัดการ",
       "tax_setting_description": "เปิดใช้งานนี้ถ้าคุณต้องการเพิ่มภาษีให้กับรายการใบวางบิลแต่ละรายการโดยค่าเริ่มต้นภาษีจะถูกเพิ่มลงในใบวางบิลโดยตรง",
       "created_message": "สร้างประเภทภาษีเรียบร้อยแล้ว",
       "updated_message": "อัพเดตประเภทภาษีเรียบร้อยแล้ว",
       "deleted_message": "ประเภทภาษีที่ถูกลบเรียบร้อยแล้ว",
       "confirm_delete": "คุณจะไม่สามารถกู้คืนภาษีประเภทนี้ได้",
-      "already_in_use": "ภาษีมีอยู่แล้วในการใช้งาน"
+      "already_in_use": "ภาษีมีอยู่แล้วในการใช้งาน",
+      "tax_included": "Inclusive taxes",
+      "tax_included_description": "Enable this if you want to report that taxes are already included in the invoice items or invoice total.",
+      "tax_included_by_default": "Enable inclusive taxes by default",
+      "tax_included_by_default_description": "Enable this if you want to set inclusive taxes by default"
     },
     "payment_modes": {
       "title": "วิธีการชำระเงิน",
@@ -1178,6 +1265,7 @@
       "time_zone": "เขตเวลา",
       "fiscal_year": "ปีงบการเงิน",
       "date_format": "รูปแบบวันที่",
+      "time_format": "Time Format",
       "discount_setting": "การตั้งค่าส่วนลด",
       "discount_per_item": "ส่วนลดต่อรายการ ",
       "discount_setting_description": "เปิดใช้งานตัวเลือกนี้หากคุณต้องการเพิ่มส่วนลดให้กับรายการใบวางบิลแต่ละรายการโดยค่าเริ่มต้นส่วนลดจะถูกเพิ่มโดยตรงไปยังใบวางบิล",
@@ -1190,6 +1278,7 @@
       "select_language": "เลือกภาษา",
       "select_time_zone": "เลือกโซนเวลา",
       "select_date_format": "เลือกรูปแบบวันที่",
+      "select_time_format": "Select Time Format",
       "select_financial_year": "เลือกปีการเงิน",
       "recurring_invoice_status": "สถานะใบวางบิลประจำ",
       "create_status": "สร้างสถานะ",
@@ -1197,12 +1286,29 @@
       "on_hold": "พักไว้",
       "update_status": "สถานะการอัพเดต",
       "completed": "เสร็จสมบูรณ์",
-      "company_currency_unchangeable": "สกุลเงินของบริษัทไม่สามารถเปลี่ยนแปลงได้"
+      "company_currency_unchangeable": "สกุลเงินของบริษัทไม่สามารถเปลี่ยนแปลงได้",
+      "invoice_use_time": "Use time in invoices",
+      "invoice_use_time_description": "Enable this if you want to select exact invoice time.",
+      "fiscal_years": {
+        "january_december": "January - December",
+        "february_january": "February - January",
+        "march_february": "March - February",
+        "april_march": "April - March",
+        "may_april": "May - April",
+        "june_may": "June - May",
+        "july_june": "July - June",
+        "august_july": "August - July",
+        "september_august": "September - August",
+        "october_september": "October - September",
+        "november_october": "November - October",
+        "december_november": "December - November"
+      }
     },
     "update_app": {
       "title": "อัพเดทแอพ",
       "description": "คุณสามารถอัปเดตระบบได้ง่ายๆ โดยการตรวจหาการอัปเดตใหม่โดยคลิกที่ปุ่มด้านล่าง",
       "check_update": "ตรวจหาการอัพเดต",
+      "insider_consent": "Opt-in for Insider releases. Recommended for testing purposes only.",
       "avail_update": "อัปเดตใหม่พร้อมใช้งาน",
       "next_version": "รุ่นถัดไป",
       "requirements": "ข้อกำหนด",
@@ -1351,11 +1457,16 @@
     "time_zone": "เขตเวลา",
     "fiscal_year": "ปีงบการเงิน",
     "date_format": "รูปแบบวันที่",
+    "time_format": "Time Format",
     "from_address": "จากที่อยู่",
     "username": "ชื่อผู้ใช้",
     "next": "ถัดไป",
     "continue": "ดำเนินการต่อ",
     "skip": "ข้าม",
+    "install_language": {
+      "title": "Choose your language",
+      "description": "Select language wizard to install InvoiceShelf"
+    },
     "database": {
       "database": "URL ของไซต์และฐานข้อมูล",
       "connection": "การเชื่อมต่อฐานข้อมูล",
@@ -1367,6 +1478,7 @@
       "username": "ชื่อผู้ใช้ฐานข้อมูล",
       "db_name": "ชื่อฐานข้อมูล",
       "db_path": "เส้นทางฐานข้อมูล",
+      "overwrite": "Overwrite existing database and proceed",
       "desc": "สร้างฐานข้อมูลบนเซิร์ฟเวอร์ของคุณและตั้งค่าข้อมูลประจำตัวโดยใช้แบบฟอร์มด้านล่าง"
     },
     "permissions": {
@@ -1382,7 +1494,14 @@
       "verify_now": "ตรวจสอบเดี๋ยวนี้",
       "success": "ตรวจสอบโดเมนเรียบร้อยแล้ว",
       "failed": "การตรวจสอบโดเมนล้มเหลวโปรดป้อนชื่อโดเมนที่ถูกต้อง",
-      "verify_and_continue": "ยืนยันและดำเนินการต่อ"
+      "verify_and_continue": "ยืนยันและดำเนินการต่อ",
+      "notes": {
+        "notes": "Notes:",
+        "not_contain": "App domain should not contain",
+        "or": "or",
+        "in_front": "in front of the domain.",
+        "if_you": "If you're accessing the website on a different port, please mention the port. For example:"
+      }
     },
     "mail": {
       "host": "โฮสต์จดหมาย",
@@ -1498,7 +1617,7 @@
   "pdf_invoice_label": "ใบวางบิล",
   "pdf_invoice_number": "เลขที่ใบวางบิล",
   "pdf_invoice_date": "วันที่ใบวางบิล",
-  "pdf_invoice_due_date": "วันครบกำหนด",
+  "pdf_invoice_due_date": "Due Date",
   "pdf_notes": "หมายเหตุ",
   "pdf_items_label": "บริการ",
   "pdf_quantity_label": "หน่วย",
@@ -1506,6 +1625,7 @@
   "pdf_discount_label": "ส่วนลด",
   "pdf_amount_label": "จำนวนเงิน (บาท)",
   "pdf_subtotal": "ยอดรวม",
+  "pdf_net_total": "Net",
   "pdf_total": "จำนวนเงินทั้งสิ้น",
   "pdf_payment_label": "การชำระเงิน",
   "pdf_payment_receipt_label": "ใบเสร็จรับเงิน",
@@ -1534,6 +1654,8 @@
   "pdf_tax_label": "ภาษี",
   "pdf_tax_id": "Tax-ID",
   "pdf_vat_id": "VAT-ID",
+  "pdf_amount_paid": "Amount Paid",
+  "pdf_amount_due": "Amount Due",
   "mail_thanks": "Thanks",
   "mail_view_estimate": "View Estimate",
   "mail_viewed_estimate": ":name viewed this Estimate.",

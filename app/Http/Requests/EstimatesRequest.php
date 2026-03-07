@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\EstimateStatus;
 use App\Models\CompanySetting;
 use App\Models\Customer;
 use App\Models\Estimate;
@@ -122,7 +123,7 @@ class EstimatesRequest extends FormRequest
         return collect($this->except('items', 'taxes'))
             ->merge([
                 'creator_id' => $this->user()->id ?? null,
-                'status' => $this->has('estimateSend') ? Estimate::STATUS_SENT : Estimate::STATUS_DRAFT,
+                'status' => $this->has('estimateSend') ? EstimateStatus::Sent : EstimateStatus::Draft,
                 'company_id' => $this->header('company'),
                 'tax_per_item' => CompanySetting::getSetting('tax_per_item', $this->header('company')) ?? 'NO ',
                 'discount_per_item' => CompanySetting::getSetting('discount_per_item', $this->header('company')) ?? 'NO',

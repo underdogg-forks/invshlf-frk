@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Invoice;
 
+use App\Enums\InvoiceStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\InvoiceResource;
 use App\Models\CompanySetting;
@@ -24,7 +25,7 @@ class CloneInvoiceController extends Controller
 
         $date = Carbon::now();
 
-        $serial = (new SerialNumberFormatter())
+        $serial = (new SerialNumberFormatter)
             ->setModel($invoice)
             ->setCompany($invoice->company_id)
             ->setCustomer($invoice->customer_id)
@@ -46,8 +47,18 @@ class CloneInvoiceController extends Controller
 
         $exchange_rate = $invoice->exchange_rate;
 
+        $dateFormat = 'Y-m-d';
+        $invoiceTimeEnabled = CompanySetting::getSetting(
+            'invoice_use_time',
+            $request->header('company')
+        );
+
+        if ($invoiceTimeEnabled === 'YES') {
+            $dateFormat .= ' H:i';
+        }
+
         $newInvoice = Invoice::create([
-            'invoice_date' => $date->format('Y-m-d'),
+            'invoice_date' => $date->format($dateFormat),
             'due_date' => $due_date,
             'invoice_number' => $serial->getNextNumber(),
             'sequence_number' => $serial->nextSequenceNumber,
@@ -56,8 +67,8 @@ class CloneInvoiceController extends Controller
             'customer_id' => $invoice->customer_id,
             'company_id' => $request->header('company'),
             'template_name' => $invoice->template_name,
-            'status' => Invoice::STATUS_DRAFT,
-            'paid_status' => Invoice::STATUS_UNPAID,
+            'status' => InvoiceStatus::Draft,
+            'paid_status' => InvoiceStatus::Unpaid,
             'sub_total' => $invoice->sub_total,
             'discount' => $invoice->discount,
             'discount_type' => $invoice->discount_type,

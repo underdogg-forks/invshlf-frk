@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\AddressType;
 use App\Models\Address;
 use App\Models\Customer;
 use App\Models\User;
@@ -32,7 +33,7 @@ class AddressFactory extends Factory
             'zip' => $this->faker->postcode(),
             'phone' => $this->faker->phoneNumber(),
             'fax' => $this->faker->phoneNumber(),
-            'type' => $this->faker->randomElement([Address::BILLING_TYPE, Address::SHIPPING_TYPE]),
+            'type' => $this->faker->randomElement([AddressType::Billing, AddressType::Shipping]),
             'user_id' => User::factory(),
             'customer_id' => Customer::factory(),
         ];

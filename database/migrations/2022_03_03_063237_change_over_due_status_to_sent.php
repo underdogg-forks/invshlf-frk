@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use Illuminate\Database\Migrations\Migration;
 
@@ -14,7 +15,7 @@ return new class extends Migration
 
         if ($overdueInvoices) {
             $overdueInvoices->map(function ($overdueInvoice) {
-                $overdueInvoice->status = Invoice::STATUS_SENT;
+                $overdueInvoice->status = InvoiceStatus::Sent;
                 $overdueInvoice->overdue = true;
                 $overdueInvoice->save();
             });

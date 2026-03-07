@@ -1,70 +1,49 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
+class ConfigTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('get all languages', function () {
-    $key = 'languages';
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
+    #[Test]
+    public function it_retrieves_config_values_for_supported_keys(): void
+    {
+        /* Arrange */
+        $supportedKeys = [
+            'languages',
+            'fiscal_years',
+            'convert_estimate_options',
+            'retrospective_edits',
+            'currency_converter_servers',
+            'exchange_rate_drivers',
+            'custom_field_models',
+        ];
 
-test('get all fiscal years', function () {
-    $key = 'fiscal_years';
-
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
-
-test('get all convert estimate options', function () {
-    $key = 'convert_estimate_options';
-
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
-
-test('get all retrospective edits', function () {
-    $key = 'retrospective_edits';
-
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
-
-test('get all currency converter servers', function () {
-    $key = 'currency_converter_servers';
-
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
-
-test('get all exchange rate drivers', function () {
-    $key = 'exchange_rate_drivers';
-
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
-
-test('get all custom field models', function () {
-    $key = 'custom_field_models';
-
-    getJson('api/v1/config?key='.$key)
-        ->assertOk();
-});
+        /* Act & Assert */
+        foreach ($supportedKeys as $key) {
+            $this->getJson('api/v1/config?key='.$key)
+                ->assertOk()
+                ->assertJsonStructure([$key]);
+        }
+    }
+}

@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\PaymentMethodType;
 use App\Models\PaymentMethod;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('payment_methods', function (Blueprint $table) {
             $table->string('driver')->nullable();
-            $table->enum('type', ['GENERAL', 'MODULE'])->default(PaymentMethod::TYPE_GENERAL);
+            $table->enum('type', ['GENERAL', 'MODULE'])->default(PaymentMethodType::General->value);
             $table->json('settings')->nullable();
             $table->boolean('active')->default(false);
             $table->boolean('use_test_env')->default(false);
@@ -24,7 +25,7 @@ return new class extends Migration
 
         if ($paymentMethods) {
             foreach ($paymentMethods as $paymentMethod) {
-                $paymentMethod->type = PaymentMethod::TYPE_GENERAL;
+                $paymentMethod->type = PaymentMethodType::General;
                 $paymentMethod->save();
             }
         }

@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Enums\AddressType;
 use App\Http\Requests\UserRequest;
+use App\Models\Concerns\BelongsToFranchise;
 use App\Notifications\MailResetPasswordNotification;
 use App\Traits\HasCustomFieldsTrait;
 use Carbon\Carbon;
@@ -22,6 +24,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class User extends Authenticatable implements HasMedia
 {
+    use BelongsToFranchise;
     use HasApiTokens;
     use HasCustomFieldsTrait;
     use HasFactory;
@@ -57,6 +60,13 @@ class User extends Authenticatable implements HasMedia
         'avatar',
     ];
 
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
     /**
      * Find the user instance for the given username.
      *
@@ -66,13 +76,6 @@ class User extends Authenticatable implements HasMedia
     public function findForPassport($username)
     {
         return $this->where('email', $username)->first();
-    }
-
-    public function setPasswordAttribute($value)
-    {
-        if ($value != null) {
-            $this->attributes['password'] = bcrypt($value);
-        }
     }
 
     public function isSuperAdminOrAdmin()
@@ -89,201 +92,12 @@ class User extends Authenticatable implements HasMedia
         return \Auth::attempt(['email' => $email, 'password' => $password], $remember);
     }
 
-    public function getFormattedCreatedAtAttribute($value)
-    {
-        $company_id = (CompanySetting::where('company_id', request()->header('company'))->exists())
-            ? request()->header('company')
-            : $this->companies()->first()->id;
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company_id);
-
-        return Carbon::parse($this->created_at)->format($dateFormat);
-    }
-
-    public function estimates(): HasMany
-    {
-        return $this->hasMany(Estimate::class, 'creator_id');
-    }
-
-    public function customers(): HasMany
-    {
-        return $this->hasMany(Customer::class, 'creator_id');
-    }
-
-    public function recurringInvoices(): HasMany
-    {
-        return $this->hasMany(RecurringInvoice::class, 'creator_id');
-    }
-
-    public function currency(): BelongsTo
-    {
-        return $this->belongsTo(Currency::class, 'currency_id');
-    }
-
-    public function creator(): BelongsTo
-    {
-        return $this->belongsTo(\App\Models\User::class, 'creator_id');
-    }
-
-    public function companies(): BelongsToMany
-    {
-        return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id');
-    }
-
-    public function expenses(): HasMany
-    {
-        return $this->hasMany(Expense::class, 'creator_id');
-    }
-
-    public function payments(): HasMany
-    {
-        return $this->hasMany(Payment::class, 'creator_id');
-    }
-
-    public function invoices(): HasMany
-    {
-        return $this->hasMany(Invoice::class, 'creator_id');
-    }
-
-    public function items(): HasMany
-    {
-        return $this->hasMany(Item::class, 'creator_id');
-    }
-
-    public function settings(): HasMany
-    {
-        return $this->hasMany(UserSetting::class, 'user_id');
-    }
-
-    public function addresses(): HasMany
-    {
-        return $this->hasMany(Address::class);
-    }
-
-    public function billingAddress(): HasOne
-    {
-        return $this->hasOne(Address::class)->where('type', Address::BILLING_TYPE);
-    }
-
-    public function shippingAddress(): HasOne
-    {
-        return $this->hasOne(Address::class)->where('type', Address::SHIPPING_TYPE);
-    }
-
     /**
      * Override the mail body for reset password notification mail.
      */
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new MailResetPasswordNotification($token));
-    }
-
-    public function scopeWhereOrder($query, $orderByField, $orderBy)
-    {
-        $query->orderBy($orderByField, $orderBy);
-    }
-
-    public function scopeWhereSearch($query, $search)
-    {
-        foreach (explode(' ', $search) as $term) {
-            $query->where(function ($query) use ($term) {
-                $query->where('name', 'LIKE', '%'.$term.'%')
-                    ->orWhere('email', 'LIKE', '%'.$term.'%')
-                    ->orWhere('phone', 'LIKE', '%'.$term.'%');
-            });
-        }
-    }
-
-    public function scopeWhereContactName($query, $contactName)
-    {
-        return $query->where('contact_name', 'LIKE', '%'.$contactName.'%');
-    }
-
-    public function scopeWhereDisplayName($query, $displayName)
-    {
-        return $query->where('name', 'LIKE', '%'.$displayName.'%');
-    }
-
-    public function scopeWherePhone($query, $phone)
-    {
-        return $query->where('phone', 'LIKE', '%'.$phone.'%');
-    }
-
-    public function scopeWhereEmail($query, $email)
-    {
-        return $query->where('email', 'LIKE', '%'.$email.'%');
-    }
-
-    public function scopePaginateData($query, $limit)
-    {
-        if ($limit == 'all') {
-            return $query->get();
-        }
-
-        return $query->paginate($limit);
-    }
-
-    public function scopeApplyFilters($query, array $filters)
-    {
-        $filters = collect($filters);
-
-        if ($filters->get('search')) {
-            $query->whereSearch($filters->get('search'));
-        }
-
-        if ($filters->get('display_name')) {
-            $query->whereDisplayName($filters->get('display_name'));
-        }
-
-        if ($filters->get('email')) {
-            $query->whereEmail($filters->get('email'));
-        }
-
-        if ($filters->get('phone')) {
-            $query->wherePhone($filters->get('phone'));
-        }
-
-        if ($filters->get('orderByField') || $filters->get('orderBy')) {
-            $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'name';
-            $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'asc';
-            $query->whereOrder($field, $orderBy);
-        }
-    }
-
-    public function scopeWhereSuperAdmin($query)
-    {
-        $query->orWhere('role', 'super admin');
-    }
-
-    public function scopeApplyInvoiceFilters($query, array $filters)
-    {
-        $filters = collect($filters);
-
-        if ($filters->get('from_date') && $filters->get('to_date')) {
-            $start = Carbon::createFromFormat('Y-m-d', $filters->get('from_date'));
-            $end = Carbon::createFromFormat('Y-m-d', $filters->get('to_date'));
-            $query->invoicesBetween($start, $end);
-        }
-    }
-
-    public function scopeInvoicesBetween($query, $start, $end)
-    {
-        $query->whereHas('invoices', function ($query) use ($start, $end) {
-            $query->whereBetween(
-                'invoice_date',
-                [$start->format('Y-m-d'), $end->format('Y-m-d')]
-            );
-        });
-    }
-
-    public function getAvatarAttribute()
-    {
-        $avatar = $this->getMedia('admin_avatar')->first();
-
-        if ($avatar) {
-            return asset($avatar->getUrl());
-        }
-
-        return 0;
     }
 
     public function setSettings($settings)
@@ -337,42 +151,6 @@ class User extends Authenticatable implements HasMedia
         return false;
     }
 
-    public static function createFromRequest(UserRequest $request)
-    {
-        $user = self::create($request->getUserPayload());
-
-        $user->setSettings([
-            'language' => CompanySetting::getSetting('language', $request->header('company')),
-        ]);
-
-        $companies = collect($request->companies);
-        $user->companies()->sync($companies->pluck('id'));
-
-        foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($user)->roles([$company['role']]);
-        }
-
-        return $user;
-    }
-
-    public function updateFromRequest(UserRequest $request)
-    {
-        $this->update($request->getUserPayload());
-
-        $companies = collect($request->companies);
-        $this->companies()->sync($companies->pluck('id'));
-
-        foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($this)->roles([$company['role']]);
-        }
-
-        return $this;
-    }
-
     public function checkAccess($data)
     {
         if ($this->isOwner()) {
@@ -392,6 +170,262 @@ class User extends Authenticatable implements HasMedia
         }
 
         return false;
+    }
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function addresses(): HasMany
+    {
+        return $this->hasMany(Address::class);
+    }
+
+    public function billingAddress(): HasOne
+    {
+        return $this->hasOne(Address::class)->where('type', AddressType::Billing);
+    }
+
+    public function companies(): BelongsToMany
+    {
+        return $this->belongsToMany(Company::class, 'user_company', 'user_id', 'company_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'creator_id');
+    }
+
+    public function currency(): BelongsTo
+    {
+        return $this->belongsTo(Currency::class, 'currency_id');
+    }
+
+    public function customers(): HasMany
+    {
+        return $this->hasMany(Customer::class, 'creator_id');
+    }
+
+    public function estimates(): HasMany
+    {
+        return $this->hasMany(Estimate::class, 'creator_id');
+    }
+
+    public function expenses(): HasMany
+    {
+        return $this->hasMany(Expense::class, 'creator_id');
+    }
+
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'creator_id');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(Item::class, 'creator_id');
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class, 'creator_id');
+    }
+
+    public function recurringInvoices(): HasMany
+    {
+        return $this->hasMany(RecurringInvoice::class, 'creator_id');
+    }
+
+    public function settings(): HasMany
+    {
+        return $this->hasMany(UserSetting::class, 'user_id');
+    }
+
+    public function shippingAddress(): HasOne
+    {
+        return $this->hasOne(Address::class)->where('type', AddressType::Shipping);
+    }
+
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
+
+    public function getAvatarAttribute()
+    {
+        $avatar = $this->getMedia('admin_avatar')->first();
+
+        if ($avatar) {
+            return asset($avatar->getUrl());
+        }
+
+        return 0;
+    }
+
+    public function getFormattedCreatedAtAttribute($value)
+    {
+        $company_id = (CompanySetting::where('company_id', request()->header('company'))->exists())
+            ? request()->header('company')
+            : $this->companies()->first()->id;
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $company_id);
+
+        return Carbon::parse($this->created_at)->format($dateFormat);
+    }
+
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    public function setPasswordAttribute($value)
+    {
+        if ($value != null) {
+            $this->attributes['password'] = bcrypt($value);
+        }
+    }
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    public function scopeApplyFilters($query, array $filters)
+    {
+        $filters = collect($filters);
+
+        if ($filters->get('search')) {
+            $query->whereSearch($filters->get('search'));
+        }
+
+        if ($filters->get('display_name')) {
+            $query->whereDisplayName($filters->get('display_name'));
+        }
+
+        if ($filters->get('email')) {
+            $query->whereEmail($filters->get('email'));
+        }
+
+        if ($filters->get('phone')) {
+            $query->wherePhone($filters->get('phone'));
+        }
+
+        if ($filters->get('orderByField') || $filters->get('orderBy')) {
+            $field = $filters->get('orderByField') ? $filters->get('orderByField') : 'name';
+            $orderBy = $filters->get('orderBy') ? $filters->get('orderBy') : 'asc';
+            $query->whereOrder($field, $orderBy);
+        }
+    }
+
+    public function scopeApplyInvoiceFilters($query, array $filters)
+    {
+        $filters = collect($filters);
+
+        if ($filters->get('from_date') && $filters->get('to_date')) {
+            $start = Carbon::createFromFormat('Y-m-d', $filters->get('from_date'));
+            $end = Carbon::createFromFormat('Y-m-d', $filters->get('to_date'));
+            $query->invoicesBetween($start, $end);
+        }
+    }
+
+    public function scopeInvoicesBetween($query, $start, $end)
+    {
+        $query->whereHas('invoices', function ($query) use ($start, $end) {
+            $query->whereBetween(
+                'invoice_date',
+                [$start->format('Y-m-d'), $end->format('Y-m-d')]
+            );
+        });
+    }
+
+    public function scopePaginateData($query, $limit)
+    {
+        if ($limit == 'all') {
+            return $query->get();
+        }
+
+        return $query->paginate($limit);
+    }
+
+    public function scopeWhereContactName($query, $contactName)
+    {
+        return $query->where('contact_name', 'LIKE', '%'.$contactName.'%');
+    }
+
+    public function scopeWhereDisplayName($query, $displayName)
+    {
+        return $query->where('name', 'LIKE', '%'.$displayName.'%');
+    }
+
+    public function scopeWhereEmail($query, $email)
+    {
+        return $query->where('email', 'LIKE', '%'.$email.'%');
+    }
+
+    public function scopeWhereOrder($query, $orderByField, $orderBy)
+    {
+        $query->orderBy($orderByField, $orderBy);
+    }
+
+    public function scopeWherePhone($query, $phone)
+    {
+        return $query->where('phone', 'LIKE', '%'.$phone.'%');
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        foreach (explode(' ', $search) as $term) {
+            $query->where(function ($query) use ($term) {
+                $query->where('name', 'LIKE', '%'.$term.'%')
+                    ->orWhere('email', 'LIKE', '%'.$term.'%')
+                    ->orWhere('phone', 'LIKE', '%'.$term.'%');
+            });
+        }
+    }
+
+    public function scopeWhereSuperAdmin($query)
+    {
+        $query->orWhere('role', 'super admin');
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    public static function createFromRequest(UserRequest $request)
+    {
+        $user = self::create($request->getUserPayload());
+
+        $user->setSettings([
+            'language' => CompanySetting::getSetting('language', $request->header('company')),
+        ]);
+
+        $companies = collect($request->companies);
+        $user->companies()->sync($companies->pluck('id'));
+
+        foreach ($companies as $company) {
+            BouncerFacade::scope()->to($company['id']);
+
+            BouncerFacade::sync($user)->roles([$company['role']]);
+        }
+
+        return $user;
     }
 
     public static function deleteUsers($ids)
@@ -436,4 +470,22 @@ class User extends Authenticatable implements HasMedia
 
         return true;
     }
+
+    public function updateFromRequest(UserRequest $request)
+    {
+        $this->update($request->getUserPayload());
+
+        $companies = collect($request->companies);
+        $this->companies()->sync($companies->pluck('id'));
+
+        foreach ($companies as $company) {
+            BouncerFacade::scope()->to($company['id']);
+
+            BouncerFacade::sync($this)->roles([$company['role']]);
+        }
+
+        return $this;
+    }
+
+    #endregion
 }

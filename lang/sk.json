@@ -11,7 +11,7 @@
     "reports": "Reporty",
     "settings": "Nastavenia",
     "logout": "Odhlásiť sa",
-    "users": "Uživatelia",
+    "users": "Užívatelia",
     "modules": "Moduly"
   },
   "general": {
@@ -29,6 +29,8 @@
     "to_date": "Do dátumu",
     "from": "Od",
     "to": "Pre",
+    "cc": "CC",
+    "bcc": "BCC",
     "ok": "OK",
     "yes": "Áno",
     "no": "Nie",
@@ -100,7 +102,26 @@
     "pay_invoice": "Zaplatiť faktúru",
     "login_successfully": "Prihlásenie bolo úspešné!",
     "logged_out_successfully": "Odhlásenie bolo úspešné",
-    "mark_as_default": "Nastaviť ako predvolené"
+    "mark_as_default": "Nastaviť ako predvolené",
+    "no_data_found": "Žiadne dáta nenájdené",
+    "pagination": {
+      "previous": "Predchádzajúca",
+      "next": "Ďalšia",
+      "showing": "Zobrazenie",
+      "to": "do",
+      "of": "z",
+      "results": "výsledky"
+    },
+    "file_upload": {
+      "drag_a_file": "Pretiahnite sem súbor alebo",
+      "browse": "prehliadaním",
+      "to_choose": "vyberter súbor"
+    },
+    "multiselect": {
+      "the_list_is_empty": "Zoznam je prázdny",
+      "no_results_found": "Žiadne výsledky nenájdené"
+    },
+    "copy_to_clipboard": "Kopírovať do schránky"
   },
   "dashboard": {
     "select_year": "Vyberte rok",
@@ -142,7 +163,10 @@
     "name": "Meno",
     "description": "Popis",
     "percent": "Percento",
-    "compound_tax": "Zložená daň"
+    "compound_tax": "Zložená daň",
+    "percentage": "Percentá",
+    "fixed_amount": "Fixná suma",
+    "tax_type": "Typ dane"
   },
   "global_search": {
     "search": "Hľadať...",
@@ -172,7 +196,7 @@
   "customers": {
     "title": "Zákazníci",
     "prefix": "Predpona",
-    "tax_id": "Tax ID",
+    "tax_id": "DIČ",
     "add_customer": "Pridať Zákazníka",
     "contacts_list": "Zoznam zákazníkov",
     "name": "Meno",
@@ -284,6 +308,7 @@
     "total": "Spolu",
     "discount": "Zľava",
     "sub_total": "Medzisúčet",
+    "net_total": "Net",
     "estimate_number": "Číslo Cenového odhadu",
     "ref_number": "Ref. Číslo",
     "contact": "Kontakt",
@@ -305,6 +330,9 @@
     "record_payment": "Zaznamenať Platbu",
     "add_estimate": "Vytvoriť Cenový odhad",
     "save_estimate": "Uložiť Cenový odhad",
+    "cloned_successfully": "Estimate cloned successfully",
+    "clone_estimate": "Clone Estimate",
+    "confirm_clone": "This Estimate will be cloned into a new Estimate",
     "confirm_conversion": "Tento cenový odhad bude použitý k vytvoreniu novej Faktúry.",
     "conversion_message": "Faktúra úspešne vytvorená",
     "confirm_send_estimate": "Tento Cenový odhad bude odoslaný zákazníkovi prostredníctvom e-mailu",
@@ -537,19 +565,30 @@
       "total": "Total",
       "total_discount": "Total Discount",
       "sub_total": "Sub Total",
-      "tax": "Tax",
+      "tax": "Daň",
       "amount": "Amount",
       "select_an_item": "Type or click to select an item",
       "type_item_description": "Type Item Description (optional)"
     },
     "frequency": {
-      "title": "Frequency",
+      "title": "Frequency (using cron format)",
       "select_frequency": "Select Frequency",
-      "minute": "Minute",
-      "hour": "Hour",
-      "day_month": "Day of month",
-      "month": "Month",
-      "day_week": "Day of week"
+      "minute": "Minúta",
+      "hour": "Hodina",
+      "day_month": "Deň v mesiaci",
+      "month": "Mesiac",
+      "day_week": "Deň v týždni",
+      "every_minute": "Every Minute",
+      "every_30_minute": "Every 30 Minute",
+      "every_hour": "Every Hour",
+      "every_2_hour": "Every 2 Hour",
+      "every_day_at_midnight": "Every day at midnight",
+      "every_week": "Every Week",
+      "every_15_days_at_midnight": "Every 15 days at midnight",
+      "on_the_first_day_of_every_month_at_midnight": "On the first day of every month at 00:00",
+      "every_6_month": "Every 6 Month",
+      "every_year_on_the_first_day_of_january_at_midnight": "Every year on the first day of january at 00:00",
+      "custom": "Custom"
     },
     "confirm_delete": "You will not be able to recover this Invoice | You will not be able to recover these Invoices",
     "created_message": "Recurring Invoice created successfully",
@@ -558,7 +597,12 @@
     "marked_as_sent_message": "Recurring Invoice marked as sent successfully",
     "user_email_does_not_exist": "User email does not exist",
     "something_went_wrong": "something went wrong",
-    "invalid_due_amount_message": "Total Recurring Invoice amount cannot be less than total paid amount for this Recurring Invoice. Please update the invoice or delete the associated payments to continue."
+    "invalid_due_amount_message": "Total Recurring Invoice amount cannot be less than total paid amount for this Recurring Invoice. Please update the invoice or delete the associated payments to continue.",
+    "limit": {
+      "none": "None",
+      "date": "Date",
+      "count": "Count"
+    }
   },
   "payments": {
     "title": "Platby",
@@ -596,7 +640,8 @@
     "created_message": "Platba úspešne vytvorená",
     "updated_message": "Platba úspešne upravena",
     "deleted_message": "Platba úspešne odstránená | Platby úspešne odstránené",
-    "invalid_amount_message": "Suma platby nie je správna"
+    "invalid_amount_message": "Suma platby nie je správna",
+    "amount_due": "Due Amount"
   },
   "expenses": {
     "title": "Výdaje",
@@ -610,6 +655,8 @@
     "from_date": "Od dátumu",
     "to_date": "Do dátumu",
     "expense_date": "Dátum",
+    "expense_number": "Številka odhodka",
+    "expense_number_placeholder": "EXP-001",
     "description": "Popis",
     "receipt": "Doklad o zaplatení",
     "amount": "Suma",
@@ -669,7 +716,7 @@
     "completing_installation": "Completing Installation",
     "update_failed": "Update Failed",
     "install_success": "Module has been installed successfully!",
-    "customer_reviews": "Reviews",
+    "customer_reviews": "Recenzie",
     "license": "License",
     "faq": "FAQ",
     "monthly": "Monthly",
@@ -689,19 +736,20 @@
     "other_modules": "Other Modules",
     "view_all": "View All",
     "no_reviews_found": "There are no reviews for this module yet!",
-    "module_not_purchased": "Module Not Purchased",
-    "module_not_found": "Module Not Found",
+    "module_not_purchased": "Modul nie je kúpený",
+    "module_not_found": "Modul sa nenašiel",
     "version_not_supported": "This module version doesn't support the current version of InvoiceShelf",
-    "last_updated": "Last Updated On",
-    "connect_installation": "Connect your installation",
-    "api_token_description": "Login to {url} and connect this installation by entering the API Token. Your purchased modules will show up here after the connection is established.",
-    "view_module": "View Module",
-    "update_available": "Update Available",
-    "purchased": "Purchased",
-    "installed": "Installed",
-    "no_modules_installed": "No Modules Installed Yet!",
-    "disable_warning": "All the settings for this particular will be reverted.",
-    "what_you_get": "What you get"
+    "last_updated": "Naposledy upravené",
+    "connect_installation": "Pripojte vašu inštaláciu",
+    "api_token_description": "Prihláste se k {url} a pripojte túto inštaláciu zadaním API tokenu. Vaše zakúpené moduly sa zobrazia tu po naviazaní pripojenia.",
+    "view_module": "Zobraziť modul",
+    "update_available": "Dostupná aktualizácia",
+    "purchased": "Zakúpené",
+    "installed": "Nainštalované",
+    "no_modules_installed": "Nie sú nainštalované žiadne moduly!",
+    "disable_warning": "Všetky nastavenia pre túto konkrétnu položku budú vrátené späť.",
+    "what_you_get": "Čo dostanete",
+    "sign_up_and_get_token": "Prihláste sa a získajte token"
   },
   "users": {
     "title": "Uživatelia",
@@ -728,8 +776,8 @@
     "created_message": "Užívateľ úspešne vytvorený",
     "updated_message": "Užívateľ úspešne aktualizovaná",
     "deleted_message": "Užívateľ úspešne odstránený | Užívatelia úspešne odstránení",
-    "select_company_role": "Select Role for {company}",
-    "companies": "Companies"
+    "select_company_role": "Vyberte rolu pre {company}",
+    "companies": "Spoločnosti"
   },
   "reports": {
     "title": "Reporty",
@@ -753,7 +801,11 @@
       "date_range": "Vybrať rozsah dátumu",
       "to_date": "Do dátumu",
       "from_date": "Od dátumu",
-      "report_type": "Typ Reportu"
+      "report_type": "Typ Reportu",
+      "sort": {
+        "by_customer": "Podľa zákazníka",
+        "by_item": "Podľa položky"
+      }
     },
     "taxes": {
       "taxes": "Dane",
@@ -807,11 +859,12 @@
       "custom_fields": "Vlastné Polia",
       "payment_modes": "Spôsoby Platby",
       "notes": "Poznámky",
-      "exchange_rate": "Exchange Rate",
-      "address_information": "Address Information"
+      "exchange_rate": "Výmenný kurz",
+      "address_information": "Informácie o adrese",
+      "pdf_generation": "PDF Generation"
     },
     "address_information": {
-      "section_description": "  You can update Your Address information using form below."
+      "section_description": "Adresu môžete aktualizovať pomocou formulára nižšie."
     },
     "title": "Nastavenia",
     "setting": "Nastavenia | Nastavenia",
@@ -820,6 +873,7 @@
     "primary_currency": "Hlavná Mena",
     "timezone": "Časové Pásmo",
     "date_format": "Formát Dátumu",
+    "time_format": "Formát času",
     "currencies": {
       "title": "Meny",
       "currency": "Mena | Meny",
@@ -827,7 +881,7 @@
       "select_currency": "Vyberte Menu",
       "name": "Meno",
       "code": "Kód",
-      "symbol": "Symbol",
+      "symbol": "Znak meny",
       "precision": "Presnosť",
       "thousand_separator": "Oddelovač Tisíciek",
       "decimal_separator": "Oddelovač Desatinných Miest",
@@ -848,6 +902,7 @@
       "mailgun_endpoint": "Endpoint Mailgun",
       "ses_secret": "SES Tajný Kľúč (secret)",
       "ses_key": "SES kľúč (key)",
+      "ses_region": "AWS Region",
       "password": "E-mailové heslo",
       "username": "E-mailové meno (username)",
       "mail_config": "Konfigurácia E-mailov",
@@ -859,12 +914,20 @@
     "pdf": {
       "title": "Nastavenia PDF",
       "footer_text": "Text v pätičke",
-      "pdf_layout": "Rozloženie PDF"
+      "pdf_layout": "Rozloženie PDF",
+      "pdf_configuration": "PDF Generation Settings",
+      "section_description": "Change the way PDFs are generated",
+      "driver": "PDF Driver to use",
+      "papersize": "Papersize",
+      "papersize_hint": "Papersize in width and height (ex. \"210mm 297mm\")",
+      "gotenberg_host": "Gotenberg service host",
+      "pdf_variables_save_successfully": "PDF configuration saved successfully",
+      "pdf_variables_save_error": "PDF configuration could not be saved"
     },
     "company_info": {
       "company_info": "Informácie o spoločnosti",
       "company_name": "Názov spoločnosti",
-      "tax_id": "Tax Identification Number",
+      "tax_id": "Daňové identifikačné číslo",
       "vat_id": "VAT Identification Number",
       "company_logo": "Logo spoločnosti",
       "section_description": "Informácie o Vašej firme, ktoré budú zobrazené na faktúrach, cenových odhadoch a iných dokumentoch vytvorených vďaka Creater.",
@@ -875,9 +938,9 @@
       "address": "Adresa",
       "zip": "PSČ",
       "save": "Uložiť",
-      "delete": "Delete",
+      "delete": "Odstrániť",
       "updated_message": "Informácie o firme úspešne aktualizované",
-      "delete_company": "Delete Company",
+      "delete_company": "Odstrániť spoločnosť",
       "delete_company_description": "Once you delete your company, you will lose all the data and files associated with it permanently.",
       "are_you_absolutely_sure": "Are you absolutely sure?",
       "delete_company_modal_desc": "This action cannot be undone. This will permanently delete {company} and all of its associated data.",
@@ -894,7 +957,7 @@
       "name": "Názov",
       "slug": "Slug",
       "required": "Povinné",
-      "placeholder": "Umiestnenie",
+      "placeholder": "Zástupný text",
       "help_text": "Pomocný Text",
       "default_value": "Predvolená hodnota",
       "prefix": "Predpona",
@@ -904,7 +967,7 @@
       "suffix": "Prípona",
       "yes": "Áno",
       "no": "Nie",
-      "order": "Objednať",
+      "order": "Poradie",
       "custom_field_confirm_delete": "Nebudete môcť obnovit toto vlastné pole",
       "already_in_use": "Toto vlastne pole sa už používa",
       "deleted_message": "Vlastné pole úspešne vymazané",
@@ -921,7 +984,14 @@
       "added_message": "Vlastne pole úspešne pridané",
       "press_enter_to_add": "Press enter to add new option",
       "model_in_use": "Cannot update model for fields which are already in use.",
-      "type_in_use": "Cannot update type for fields which are already in use."
+      "type_in_use": "Cannot update type for fields which are already in use.",
+      "model_type": {
+        "customer": "Customer",
+        "invoice": "Invoice",
+        "estimate": "Estimate",
+        "expense": "Expense",
+        "payment": "Payment"
+      }
     },
     "customization": {
       "customization": "Prispôsobenie",
@@ -939,6 +1009,7 @@
       "delimiter_description": "Single character for specifying the boundary between 2 separate components. By default its set to -",
       "delimiter_param_label": "Delimiter Value",
       "date_format": "Date Format",
+      "time_format": "Time Format",
       "date_format_description": "A local date and time field which accepts a format parameter. The default format: 'Y' renders the current year.",
       "date_format_param_label": "Format",
       "sequence": "Sequence",
@@ -954,8 +1025,8 @@
       "random_sequence_param_label": "Sequence Length",
       "invoices": {
         "title": "Faktúry",
-        "invoice_number_format": "Invoice Number Format",
-        "invoice_number_format_description": "Customize how your invoice number gets generated automatically when you create a new invoice.",
+        "invoice_number_format": "Číslovanie faktúr",
+        "invoice_number_format_description": "Prispôsobte, ako sa bude generovať číslo faktúry pri jej vytváraní.",
         "preview_invoice_number": "Preview Invoice Number",
         "due_date": "Due Date",
         "due_date_description": "Specify how due date is automatically set when you create an invoice.",
@@ -1034,6 +1105,8 @@
         "description": "Ušetrite čas vytváraním poznámok a ich opätovným použitím vo svojich faktúrach, odhadoch a platbách.",
         "notes": "Poznámky",
         "type": "Typ",
+        "is_default": "Select by default",
+        "is_default_description": "This note will be selected by default in new invoices.",
         "add_note": "Pridať poznámku",
         "add_new_note": "Pridať Novú Poznámku",
         "name": "Názov",
@@ -1042,7 +1115,12 @@
         "note_updated": "Poznámka úspešne aktualizovaná",
         "note_confirm_delete": "Nebudete môcť obnoviť túto Poznámku",
         "already_in_use": "Poznámka sa práve používa",
-        "deleted_message": "Poznámka úspešne odstránena"
+        "deleted_message": "Poznámka úspešne odstránena",
+        "types": {
+          "estimate": "Estimate",
+          "invoice": "Invoice",
+          "payment": "Payment"
+        }
       }
     },
     "account_settings": {
@@ -1075,18 +1153,18 @@
       "please_enter_email": "Zadajte e-mail"
     },
     "roles": {
-      "title": "Roles",
-      "description": "Manage the roles & permissions of this company",
-      "save": "Save",
-      "add_new_role": "Add New Role",
-      "role_name": "Role Name",
-      "added_on": "Added on",
-      "add_role": "Add Role",
-      "edit_role": "Edit Role",
+      "title": "Roly",
+      "description": "Spravujte roly a oprávnenia pre túto spoločnosť",
+      "save": "Uložiť",
+      "add_new_role": "Pridať novú rolu",
+      "role_name": "Názov role",
+      "added_on": "Pridané dňa",
+      "add_role": "Pridať rolu",
+      "edit_role": "Upraviť rolu",
       "name": "Name",
       "permission": "Permission | Permissions",
-      "select_all": "Select All",
-      "none": "None",
+      "select_all": "Vybrať všetko",
+      "none": "Žiadne",
       "confirm_delete": "You will not be able to recover this Role",
       "created_message": "Role created successfully",
       "updated_message": "Role updated successfully",
@@ -1135,14 +1213,23 @@
       "tax_per_item": "Daň pre každú Položku zvlášť",
       "tax_name": "Názov Dane",
       "compound_tax": "Zložená daň",
+      "amount": "Suma",
       "percent": "Percento",
+      "fixed_amount": "Fixná suma",
+      "calculation_type": "Typ výpočtu",
+      "percentage": "Percento",
+      "fixed": "Fixné",
       "action": "Akcia",
       "tax_setting_description": "Túto možnosť povoľte, ak chcete pridať dane k jednotlivým položkám faktúr. Štandardne sa dane pripočítavajú priamo k faktúre.",
       "created_message": "Daň úspešne vytvorená",
       "updated_message": "Daň úspešne aktualizovaná",
       "deleted_message": "Daň úspešne odstránená",
       "confirm_delete": "Nebudete môcť obnoviť daň",
-      "already_in_use": "Daň už sa už požíva"
+      "already_in_use": "Daň už sa už požíva",
+      "tax_included": "Inclusive taxes",
+      "tax_included_description": "Enable this if you want to report that taxes are already included in the invoice items or invoice total.",
+      "tax_included_by_default": "Enable inclusive taxes by default",
+      "tax_included_by_default_description": "Enable this if you want to set inclusive taxes by default"
     },
     "payment_modes": {
       "title": "Payment Modes",
@@ -1178,6 +1265,7 @@
       "time_zone": "Časové Pásmo",
       "fiscal_year": "Fiškálny Rok",
       "date_format": "Formát Dátumu",
+      "time_format": "Time Format",
       "discount_setting": "Nastavenia Zľavy",
       "discount_per_item": "Zľava pre každú Položku zvlášť ",
       "discount_setting_description": "Túto možnosť povoľte, ak chcete pridať zľavu k jednotlivým položkám faktúry. Štandardne sa zľava pripočítava priamo k faktúre.",
@@ -1190,6 +1278,7 @@
       "select_language": "Vyberte Jazyk",
       "select_time_zone": "Vyberte Časové Pásmo",
       "select_date_format": "Vybrať Formát Dátumu",
+      "select_time_format": "Select Time Format",
       "select_financial_year": "Vyberte Fiškálny Rok",
       "recurring_invoice_status": "Recurring Invoice Status",
       "create_status": "Create Status",
@@ -1197,12 +1286,29 @@
       "on_hold": "On Hold",
       "update_status": "Update Status",
       "completed": "Completed",
-      "company_currency_unchangeable": "Company currency cannot be changed"
+      "company_currency_unchangeable": "Company currency cannot be changed",
+      "invoice_use_time": "Use time in invoices",
+      "invoice_use_time_description": "Enable this if you want to select exact invoice time.",
+      "fiscal_years": {
+        "january_december": "January - December",
+        "february_january": "February - January",
+        "march_february": "March - February",
+        "april_march": "April - March",
+        "may_april": "May - April",
+        "june_may": "June - May",
+        "july_june": "July - June",
+        "august_july": "August - July",
+        "september_august": "September - August",
+        "october_september": "October - September",
+        "november_october": "November - October",
+        "december_november": "December - November"
+      }
     },
     "update_app": {
       "title": "Aktualizovať Aplikáciu",
       "description": "Aplikáciu môžte jednoducho aktualizovať tlačitkom nižšie",
       "check_update": "Skontrolovať Aktualizácie",
+      "insider_consent": "Opt-in for Insider releases. Recommended for testing purposes only.",
       "avail_update": "Nová aktualizácia je k dispozícii",
       "next_version": "Ďalšia Verzia",
       "requirements": "Požiadavky",
@@ -1310,16 +1416,16 @@
       "invalid_disk_credentials": "Neplatné prihlasovacie údaje pre Disk"
     },
     "taxations": {
-      "add_billing_address": "Enter Billing Address",
-      "add_shipping_address": "Enter Shipping Address",
-      "add_company_address": "Enter Company Address",
-      "modal_description": "The information below is required in order to fetch sales tax.",
-      "add_address": "Add Address for fetching sales tax.",
-      "address_placeholder": "Example: 123, My Street",
-      "city_placeholder": "Example: Los Angeles",
-      "state_placeholder": "Example: CA",
-      "zip_placeholder": "Example: 90024",
-      "invalid_address": "Please provide valid address details."
+      "add_billing_address": "Zadajte fakturačnú adresu",
+      "add_shipping_address": "Zadajte dodaciu adresu",
+      "add_company_address": "Zadajte adresu firmy",
+      "modal_description": "Na získanie dane z predaja sú potrebné nižšie uvedené informácie.",
+      "add_address": "Pridajte adresu pre vyzdvihnutie dane z predaja.",
+      "address_placeholder": "Príklad: Šoltésovej ulica 123",
+      "city_placeholder": "Príklad: Bratislava",
+      "state_placeholder": "Príklad: SK",
+      "zip_placeholder": "Príklad: 90024",
+      "invalid_address": "Uveďte prosím platné údaje o adrese."
     }
   },
   "wizard": {
@@ -1351,11 +1457,16 @@
     "time_zone": "Časové pásmo",
     "fiscal_year": "Fiškálny rok",
     "date_format": "Formát dátumu",
+    "time_format": "Time Format",
     "from_address": "Z adresy",
     "username": "Prihlasovacie meno",
     "next": "Ďaľší",
     "continue": "Pokračovať",
     "skip": "Vynechať",
+    "install_language": {
+      "title": "Choose your language",
+      "description": "Select language wizard to install InvoiceShelf"
+    },
     "database": {
       "database": "URL Adresa Aplikácie a Databáza",
       "connection": "Pripojenie k databáze",
@@ -1367,6 +1478,7 @@
       "username": "Prihlasovacie meno do databázy",
       "db_name": "Názov databázy",
       "db_path": "Databázá - cesta (path)",
+      "overwrite": "Overwrite existing database and proceed",
       "desc": "Vytvorte databázu na svojom serveri a pomocou nasledujúceho formulára nastavte poverenia."
     },
     "permissions": {
@@ -1382,7 +1494,14 @@
       "verify_now": "Verify Now",
       "success": "Domain Verify Successfully.",
       "failed": "Domain verification failed. Please enter valid domain name.",
-      "verify_and_continue": "Verify And Continue"
+      "verify_and_continue": "Verify And Continue",
+      "notes": {
+        "notes": "Notes:",
+        "not_contain": "App domain should not contain",
+        "or": "or",
+        "in_front": "in front of the domain.",
+        "if_you": "If you're accessing the website on a different port, please mention the port. For example:"
+      }
     },
     "mail": {
       "host": "Mail Host",
@@ -1498,7 +1617,7 @@
   "pdf_invoice_label": "Faktúra",
   "pdf_invoice_number": "Číslo faktúry",
   "pdf_invoice_date": "Dátum vystavenia",
-  "pdf_invoice_due_date": "Dátum splatnosti",
+  "pdf_invoice_due_date": "Due Date",
   "pdf_notes": "Poznámky",
   "pdf_items_label": "Položky",
   "pdf_quantity_label": "Počet",
@@ -1506,6 +1625,7 @@
   "pdf_discount_label": "Zľava",
   "pdf_amount_label": "Celkom",
   "pdf_subtotal": "Medzisúčet",
+  "pdf_net_total": "Net",
   "pdf_total": "Súčet",
   "pdf_payment_label": "Payment",
   "pdf_payment_receipt_label": "Doklad o zaplatení",
@@ -1518,7 +1638,7 @@
   "pdf_profit_loss_label": "Zisky a straty",
   "pdf_sales_customers_label": "Sales Customer Report",
   "pdf_sales_items_label": "Sales Item Report",
-  "pdf_tax_summery_label": "Tax Summary Report",
+  "pdf_tax_summery_label": "Súhrnná správa o daniach",
   "pdf_income_label": "Príjem",
   "pdf_net_profit_label": "Čistý príjem",
   "pdf_customer_sales_report": "Report predajov: Podľa zákazníkov",
@@ -1528,12 +1648,14 @@
   "pdf_total_tax_label": "Celkové dane",
   "pdf_tax_types_label": "Typy daní",
   "pdf_expenses_label": "Výdaje",
-  "pdf_bill_to": "Fakturovať,",
-  "pdf_ship_to": "Doručiť,",
+  "pdf_bill_to": "Odberateľ:",
+  "pdf_ship_to": "Doručiť do",
   "pdf_received_from": "Prijaté od:",
-  "pdf_tax_label": "Tax",
-  "pdf_tax_id": "Tax-ID",
+  "pdf_tax_label": "Daň",
+  "pdf_tax_id": "DIČ",
   "pdf_vat_id": "VAT-ID",
+  "pdf_amount_paid": "Amount Paid",
+  "pdf_amount_due": "Amount Due",
   "mail_thanks": "Thanks",
   "mail_view_estimate": "View Estimate",
   "mail_viewed_estimate": ":name viewed this Estimate.",

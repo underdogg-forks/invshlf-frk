@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Enums\TransactionStatus;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Vinkla\Hashids\Facades\Hashids;
 
-class Transaction extends Model
+class Transaction extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $guarded = [
         'id',
@@ -21,15 +22,57 @@ class Transaction extends Model
         'transaction_date',
     ];
 
-    public const PENDING = 'PENDING';
-
-    public const FAILED = 'FAILED';
-
-    public const SUCCESS = 'SUCCESS';
-
-    public function payments(): HasMany
+    protected function casts(): array
     {
-        return $this->hasMany(Payment::class);
+        return [
+            'status' => TransactionStatus::class,
+        ];
+    }
+
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    public function completeTransaction()
+    {
+        $this->status = TransactionStatus::Success;
+        $this->save();
+    }
+
+    public function failedTransaction()
+    {
+        $this->status = TransactionStatus::Failed;
+        $this->save();
+    }
+
+    public function isExpired()
+    {
+        $linkExpiryDays = (int) CompanySetting::getSetting('link_expiry_days', $this->company_id);
+        $checkExpiryLinks = CompanySetting::getSetting('automatically_expire_public_links', $this->company_id);
+
+        $expiryDate = $this->updated_at->addDays($linkExpiryDays);
+
+        if ($checkExpiryLinks == 'YES' && $this->status === TransactionStatus::Success && Carbon::now()->format('Y-m-d') > $expiryDate->format('Y-m-d')) {
+            return true;
+        }
+
+        return false;
+    }
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
+
+    public function company(): BelongsTo
+    {
+        return $this->belongsTo(Company::class);
     }
 
     public function invoice(): BelongsTo
@@ -37,22 +80,42 @@ class Transaction extends Model
         return $this->belongsTo(Invoice::class);
     }
 
-    public function company(): BelongsTo
+    public function payments(): HasMany
     {
-        return $this->belongsTo(Company::class);
+        return $this->hasMany(Payment::class);
     }
 
-    public function completeTransaction()
-    {
-        $this->status = self::SUCCESS;
-        $this->save();
-    }
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
 
-    public function failedTransaction()
-    {
-        $this->status = self::FAILED;
-        $this->save();
-    }
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
 
     public static function createTransaction($data)
     {
@@ -63,17 +126,5 @@ class Transaction extends Model
         return $transaction;
     }
 
-    public function isExpired()
-    {
-        $linkexpiryDays = CompanySetting::getSetting('link_expiry_days', $this->company_id);
-        $checkExpiryLinks = CompanySetting::getSetting('automatically_expire_public_links', $this->company_id);
-
-        $expiryDate = $this->updated_at->addDays($linkexpiryDays);
-
-        if ($checkExpiryLinks == 'YES' && $this->status == self::SUCCESS && Carbon::now()->format('Y-m-d') > $expiryDate->format('Y-m-d')) {
-            return true;
-        }
-
-        return false;
-    }
+    #endregion
 }

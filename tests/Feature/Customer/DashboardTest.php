@@ -3,27 +3,37 @@
 namespace Tests\Feature\Customer;
 
 use App\Models\Customer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
+class DashboardTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $customer = Customer::factory()->create();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    Sanctum::actingAs(
-        $customer,
-        ['*'],
-        'customer'
-    );
-});
+        $customer = Customer::factory()->create();
+        Sanctum::actingAs($customer, ['*'], 'customer');
+    }
 
-test('customer dashboard', function () {
-    $customer = Auth::guard('customer')->user();
+    #[Test]
+    public function it_retrieves_the_customer_dashboard(): void
+    {
+        /* Arrange */
+        $customer = Auth::guard('customer')->user();
 
-    getJson("api/v1/{$customer->company->slug}/customer/dashboard")->assertOk();
-});
+        /* Act */
+        $response = $this->getJson("api/v1/{$customer->company->slug}/customer/dashboard");
+
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['due_amount', 'invoice_count', 'estimate_count', 'payment_count']);

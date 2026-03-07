@@ -1,27 +1,52 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Expense;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class ExpenseTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('expense belongs to category', function () {
-    $expense = Expense::factory()->forCategory()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($expense->category()->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('expense belongs to customer', function () {
-    $expense = Expense::factory()->forCustomer()->create();
+    #[Test]
+    public function it_belongs_to_a_category(): void
+    {
+        /* Arrange */
+        $expense = Expense::factory()->forCategory()->create();
 
-    $this->assertTrue($expense->customer()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($expense->category()->exists());
+    }
 
-test('expense belongs to company', function () {
-    $expense = Expense::factory()->forCompany()->create();
+    #[Test]
+    public function it_belongs_to_a_customer(): void
+    {
+        /* Arrange */
+        $expense = Expense::factory()->forCustomer()->create();
 
-    $this->assertTrue($expense->company()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($expense->customer()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_a_company(): void
+    {
+        /* Arrange */
+        $expense = Expense::factory()->forCompany()->create();
+
+        /* Act & Assert */
+        $this->assertTrue($expense->company()->exists());
+    }
+}

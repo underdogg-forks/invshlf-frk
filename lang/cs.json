@@ -29,7 +29,9 @@
     "to_date": "Do data",
     "from": "Od",
     "to": "Do",
-    "ok": "OK",
+    "cc": "CC",
+    "bcc": "BCC",
+    "ok": "Ok",
     "yes": "Ano",
     "no": "Ne",
     "sort_by": "Seřadit podle",
@@ -100,7 +102,26 @@
     "pay_invoice": "Zaplatit fakturu",
     "login_successfully": "Přihlášení proběhlo úspěšně!",
     "logged_out_successfully": "Odhlášení proběhlo úspěšně",
-    "mark_as_default": "Označit jako výchozí"
+    "mark_as_default": "Označit jako výchozí",
+    "no_data_found": "Data nenalezena",
+    "pagination": {
+      "previous": "Předchozí",
+      "next": "Další",
+      "showing": "Zobrazeno",
+      "to": "až",
+      "of": "z",
+      "results": "výsledků"
+    },
+    "file_upload": {
+      "drag_a_file": "Sem přetáhněte soubor nebo",
+      "browse": "procházet",
+      "to_choose": "pro výběr souboru"
+    },
+    "multiselect": {
+      "the_list_is_empty": "Seznam je prázdný",
+      "no_results_found": "Nebyly nalezeny žádné výsledky"
+    },
+    "copy_to_clipboard": "Kopírovat do schránky"
   },
   "dashboard": {
     "select_year": "Vybrat rok",
@@ -112,8 +133,8 @@
       "payments": "Platby"
     },
     "chart_info": {
-      "total_sales": "Slevy",
-      "total_receipts": "Doklady",
+      "total_sales": "Vydané faktury",
+      "total_receipts": "Zaplacené faktury",
       "total_expense": "Výdaje",
       "net_income": "Čistý příjem",
       "year": "Vybrat rok"
@@ -142,7 +163,10 @@
     "name": "Jméno",
     "description": "Popis",
     "percent": "Procento",
-    "compound_tax": "Kombinovaná daň"
+    "compound_tax": "Kombinovaná daň",
+    "percentage": "Percentage",
+    "fixed_amount": "Fixed Amount",
+    "tax_type": "Tax Type"
   },
   "global_search": {
     "search": "Hledat...",
@@ -171,8 +195,8 @@
   },
   "customers": {
     "title": "Zákazníci",
-    "prefix": "Prefix",
-    "tax_id": "Tax ID",
+    "prefix": "Předpona",
+    "tax_id": "DIČ",
     "add_customer": "Přidat zákazníka",
     "contacts_list": "Seznam zákazníků",
     "name": "Jméno",
@@ -182,7 +206,7 @@
     "primary_contact_name": "Jméno primárního kontaktu",
     "contact_name": "Jméno kontaktu",
     "amount_due": "Částka k zaplacení",
-    "email": "Email",
+    "email": "E-mail",
     "address": "Adresa",
     "phone": "Telefon",
     "website": "Webová stránka",
@@ -284,6 +308,7 @@
     "total": "Celkem",
     "discount": "Sleva",
     "sub_total": "Mezisoučet",
+    "net_total": "Net",
     "estimate_number": "Číslo nabídky",
     "ref_number": "Referenční číslo",
     "contact": "Kontakt",
@@ -305,6 +330,9 @@
     "record_payment": "Zaznamenat platbu",
     "add_estimate": "Přidat nabídku",
     "save_estimate": "Uložit nabídku",
+    "cloned_successfully": "Odhad úspěšně naklonován",
+    "clone_estimate": "Klonovat odhad",
+    "confirm_clone": "Tento odhad bude klonován do nového odhadu",
     "confirm_conversion": "Tento odhad bude použit k vytvoření nové faktury.",
     "conversion_message": "Faktura byla úspěšně vytvořena",
     "confirm_send_estimate": "Tento odhad bude zaslán e-mailem zákazníkovi",
@@ -543,13 +571,24 @@
       "type_item_description": "Zadejte popis položky (volitelné)"
     },
     "frequency": {
-      "title": "Četnost",
+      "title": "Frekvence (pomocí formátu cron)",
       "select_frequency": "Vybrat četnost",
       "minute": "Minuta",
       "hour": "Hodina",
       "day_month": "Den v měsíci",
       "month": "Měsíc",
-      "day_week": "Den v týdnu"
+      "day_week": "Den v týdnu",
+      "every_minute": "Každou minutu",
+      "every_30_minute": "Každých 30 minut",
+      "every_hour": "Každou hodinu",
+      "every_2_hour": "Každé 2 hodiny",
+      "every_day_at_midnight": "Každý den o půlnoci",
+      "every_week": "Každý týden",
+      "every_15_days_at_midnight": "Každých 15 dní o půlnoci",
+      "on_the_first_day_of_every_month_at_midnight": "První den každého měsíce ve 00:00",
+      "every_6_month": "Každých 6 měsíců",
+      "every_year_on_the_first_day_of_january_at_midnight": "Každý rok první den v lednu v 00:00",
+      "custom": "Vlastní"
     },
     "confirm_delete": "Nebudete moci obnovit tuto fakturu | Nebudete moci obnovit tyto faktury",
     "created_message": "Opakující se faktura byla úspěšně vytvořena",
@@ -558,7 +597,12 @@
     "marked_as_sent_message": "Opakující se faktura označena jako úspěšně odeslána",
     "user_email_does_not_exist": "E-mail uživatele neexistuje",
     "something_went_wrong": "něco se nezdařilo",
-    "invalid_due_amount_message": "Celková částka opakované faktury nemůže být nižší než celková částka zaplacená za tuto opakující se fakturu. Pro pokračování aktualizujte fakturu nebo odstraňte související platby."
+    "invalid_due_amount_message": "Celková částka opakované faktury nemůže být nižší než celková částka zaplacená za tuto opakující se fakturu. Pro pokračování aktualizujte fakturu nebo odstraňte související platby.",
+    "limit": {
+      "none": "Žádné",
+      "date": "Datum",
+      "count": "Počet"
+    }
   },
   "payments": {
     "title": "Platby",
@@ -596,7 +640,8 @@
     "created_message": "Platba úspěšně vytvořena",
     "updated_message": "Platba úspěšně upravena",
     "deleted_message": "Platba úspěšně odstraněna | Platby úspěšně odstraněny",
-    "invalid_amount_message": "Částka platby je neplatná"
+    "invalid_amount_message": "Částka platby je neplatná",
+    "amount_due": "Částka k úhradě"
   },
   "expenses": {
     "title": "Výdaje",
@@ -610,6 +655,8 @@
     "from_date": "Od data",
     "to_date": "Do data",
     "expense_date": "Datum",
+    "expense_number": "Číslo výdaje",
+    "expense_number_placeholder": "EXP-001",
     "description": "Popis",
     "receipt": "Doklad",
     "amount": "Částka",
@@ -684,14 +731,14 @@
     "module_updated": "Modul byl úspěšně aktualizován!",
     "title": "Moduly",
     "module": "Modul | Moduly",
-    "api_token": "API token",
+    "api_token": "API Token",
     "invalid_api_token": "Neplatný API token.",
     "other_modules": "Další moduly",
     "view_all": "Zobrazit vše",
     "no_reviews_found": "Pro tento modul zatím neexistují žádné recenze!",
     "module_not_purchased": "Modul není zakoupený",
     "module_not_found": "Modul nebyl nalezen",
-    "version_not_supported": "This module version doesn't support the current version of InvoiceShelf",
+    "version_not_supported": "Tento modul nepodporuje současnou verzi InvoiceShelf.",
     "last_updated": "Naposledy aktualizováno",
     "connect_installation": "Připojte vaši instalaci",
     "api_token_description": "Přihlaste se k {url} a připojte tuto instalaci zadáním API tokenu. Vaše zakoupené moduly se zde zobrazí po navázání připojení.",
@@ -701,7 +748,8 @@
     "installed": "Nainstalováno",
     "no_modules_installed": "Nejsou nainstalovány žádné moduly!",
     "disable_warning": "Všechna nastavení pro tuto konkrétní položku budou vrácena zpět.",
-    "what_you_get": "Co získáte"
+    "what_you_get": "Co získáte",
+    "sign_up_and_get_token": "Zaregistrujte se a získejte Token"
   },
   "users": {
     "title": "Uživatelé",
@@ -753,7 +801,11 @@
       "date_range": "Vybrat časový rozsah",
       "to_date": "Do data",
       "from_date": "Od data",
-      "report_type": "Typ hlášení"
+      "report_type": "Typ hlášení",
+      "sort": {
+        "by_customer": "Podle zákazníka",
+        "by_item": "Podle položky"
+      }
     },
     "taxes": {
       "taxes": "Daně",
@@ -808,7 +860,8 @@
       "payment_modes": "Způsoby plateb",
       "notes": "Poznámky",
       "exchange_rate": "Směnný kurz",
-      "address_information": "Adresa"
+      "address_information": "Adresa",
+      "pdf_generation": "Generování PDF"
     },
     "address_information": {
       "section_description": "  Adresu můžete aktualizovat pomocí formuláře níže."
@@ -820,6 +873,7 @@
     "primary_currency": "Primární měna",
     "timezone": "Časová zóna",
     "date_format": "Formát data",
+    "time_format": "Formát času",
     "currencies": {
       "title": "Měny",
       "currency": "Měna | Měny",
@@ -843,11 +897,12 @@
       "port": "Port e-mailu",
       "driver": "Ovladač e-mailů",
       "secret": "Tajný klíč",
-      "mailgun_secret": "Mailgun Secret",
+      "mailgun_secret": "Mailgun tajný klíč (secret)",
       "mailgun_domain": "Doména",
       "mailgun_endpoint": "Mailgun Endpoint",
-      "ses_secret": "SES Secret",
-      "ses_key": "SES Key",
+      "ses_secret": "SES tajný klíč (secret)",
+      "ses_key": "Klíč SES",
+      "ses_region": "AWS Region",
       "password": "E-mailové heslo",
       "username": "Uživatelské jméno pro e-mail",
       "mail_config": "Konfigurace e-mailu",
@@ -859,13 +914,21 @@
     "pdf": {
       "title": "Nastavení PDF",
       "footer_text": "Text zápatí",
-      "pdf_layout": "Rozvržení PDF"
+      "pdf_layout": "Rozvržení PDF",
+      "pdf_configuration": "Generování PDF",
+      "section_description": "Úprava možností jak jsou generovány PDF soubory.",
+      "driver": "Používaný PDF driver",
+      "papersize": "Velikost dokumentu",
+      "papersize_hint": "Velikost dokumentu v milimetrech (např. \"210mm 297mm\")",
+      "gotenberg_host": "Gotenberg server",
+      "pdf_variables_save_successfully": "Nastavení generování PDF proběhlo úspěšně.",
+      "pdf_variables_save_error": "Nastavení generování PDF nemůže být uloženo."
     },
     "company_info": {
       "company_info": "Údaje o společnosti",
       "company_name": "Název společnosti",
-      "tax_id": "Tax Identification Number",
-      "vat_id": "VAT Identification Number",
+      "tax_id": "Identifikační číslo osoby (IČO)",
+      "vat_id": "Daňové identifikační číslo (DIČ)",
       "company_logo": "Logo společnosti",
       "section_description": "Informace o vaší společnosti, která bude zobrazena na fakturách, odhadech a dalších dokladech vytvořených v InvoiceShelfu.",
       "phone": "Telefon",
@@ -897,7 +960,7 @@
       "placeholder": "Zástupný text",
       "help_text": "Text nápovědy",
       "default_value": "Výchozí hodnota",
-      "prefix": "Prefix",
+      "prefix": "Předpona",
       "starting_number": "Počáteční číslo",
       "model": "Model",
       "help_text_description": "Zadejte nějaký text, který pomůže uživatelům pochopit účel tohoto vlastního pole.",
@@ -921,7 +984,14 @@
       "added_message": "Vlastní pole bylo úspěšně přidáno",
       "press_enter_to_add": "Stiskněte Enter pro přidání nové možnosti",
       "model_in_use": "Nelze aktualizovat model pro pole, která jsou již používána.",
-      "type_in_use": "Nelze aktualizovat typ pro pole, která jsou již používána."
+      "type_in_use": "Nelze aktualizovat typ pro pole, která jsou již používána.",
+      "model_type": {
+        "customer": "Zákazník",
+        "invoice": "Faktura",
+        "estimate": "Odhad",
+        "expense": "Výdaj",
+        "payment": "Platba"
+      }
     },
     "customization": {
       "customization": "přizpůsobení",
@@ -939,6 +1009,7 @@
       "delimiter_description": "Jeden znak pro určení hranice mezi 2 samostatnými komponentami. Ve výchozím nastavení je nastaveno na -",
       "delimiter_param_label": "Hodnota oddělovače",
       "date_format": "Formát data",
+      "time_format": "Formát času",
       "date_format_description": "Pole pro formát místní data a času. Výchozí formát: 'Y' vykresluje aktuální rok.",
       "date_format_param_label": "Formát",
       "sequence": "Sekvence",
@@ -1034,6 +1105,8 @@
         "description": "Ušetřete čas vytvořením poznámek a jejich opětovným použitím na fakturách, odhadech a platbách.",
         "notes": "Poznámky",
         "type": "Typ",
+        "is_default": "Select by default",
+        "is_default_description": "This note will be selected by default in new invoices.",
         "add_note": "Přidat poznámku",
         "add_new_note": "Přidat novou poznámku",
         "name": "Jméno",
@@ -1042,7 +1115,12 @@
         "note_updated": "Poznámka úspěšně upravena",
         "note_confirm_delete": "Nebudete moci obnovit tuto poznámku",
         "already_in_use": "Poznámka je již používána",
-        "deleted_message": "Poznámka byla úspěšně smazána"
+        "deleted_message": "Poznámka byla úspěšně smazána",
+        "types": {
+          "estimate": "Odhad",
+          "invoice": "Faktura",
+          "payment": "Platba"
+        }
       }
     },
     "account_settings": {
@@ -1135,14 +1213,23 @@
       "tax_per_item": "Daň za položku",
       "tax_name": "Název daně",
       "compound_tax": "Složená daň",
+      "amount": "Amount",
       "percent": "Procento",
+      "fixed_amount": "Fixed Amount",
+      "calculation_type": "Calculation Type",
+      "percentage": "Percentage",
+      "fixed": "Fixed",
       "action": "Akce",
       "tax_setting_description": "Povolte, pokud chcete přidat daně k jednotlivým položkám faktury. Ve výchozím nastavení jsou daně přidány přímo na fakturu.",
       "created_message": "Typ daně úspěšně vytvořen",
       "updated_message": "Typ daně úspěšně upraven",
       "deleted_message": "Typ daně úspěšně odstraněn",
       "confirm_delete": "Tento typ daně nebudete moci obnovit",
-      "already_in_use": "Daň se již používá"
+      "already_in_use": "Daň se již používá",
+      "tax_included": "Inclusive taxes",
+      "tax_included_description": "Enable this if you want to report that taxes are already included in the invoice items or invoice total.",
+      "tax_included_by_default": "Enable inclusive taxes by default",
+      "tax_included_by_default_description": "Enable this if you want to set inclusive taxes by default"
     },
     "payment_modes": {
       "title": "Platební metody",
@@ -1178,6 +1265,7 @@
       "time_zone": "Časové pásmo",
       "fiscal_year": "Fiskální rok",
       "date_format": "Formát data",
+      "time_format": "Time Format",
       "discount_setting": "Nastavení slev",
       "discount_per_item": "Sleva za položku ",
       "discount_setting_description": "Povolte tuto možnost, pokud chcete přidat slevu do jednotlivých položek faktury. Ve výchozím nastavení je sleva přidána přímo na fakturu.",
@@ -1190,6 +1278,7 @@
       "select_language": "Vyberte jazyk",
       "select_time_zone": "Vyberte časové pásmo",
       "select_date_format": "Vyberte formát data",
+      "select_time_format": "Vyberte formát času",
       "select_financial_year": "Vyberte fiskální rok",
       "recurring_invoice_status": "Stav opakující se faktury",
       "create_status": "Vytvořit stav",
@@ -1197,12 +1286,29 @@
       "on_hold": "Čekající",
       "update_status": "Upravit stav",
       "completed": "Dokončeno",
-      "company_currency_unchangeable": "Měnu společnosti nelze měnit"
+      "company_currency_unchangeable": "Měnu společnosti nelze měnit",
+      "invoice_use_time": "Použítat čas ve fakturách",
+      "invoice_use_time_description": "Povolte, pokud chcete zvolit přesný čas faktury.",
+      "fiscal_years": {
+        "january_december": "Leden - Prosinec",
+        "february_january": "Únor - Leden",
+        "march_february": "Březen - Únor",
+        "april_march": "Duben - Březen",
+        "may_april": "Květen - Duben",
+        "june_may": "Červen - Květen",
+        "july_june": "Červenec - Červen",
+        "august_july": "Srpen - Červenec",
+        "september_august": "Září - Srpen",
+        "october_september": "Říjen - Září",
+        "november_october": "Listopad - Říjen",
+        "december_november": "Prosinec - Listopad"
+      }
     },
     "update_app": {
       "title": "Aktualizace aplikace",
       "description": "Kliknutím na tlačítko níže můžete jednoduše aktualizovat InvoiceShelf",
       "check_update": "Zkontrolovat aktualizace",
+      "insider_consent": "Přihlaste se k odběru novinek Insider. Doporučujeme pouze pro testovací účely.",
       "avail_update": "K dispozici je nová aktualizace",
       "next_version": "Další verze",
       "requirements": "Požadavky",
@@ -1231,7 +1337,7 @@
       "backup_confirm_delete": "Tuto zálohu nebudete moci obnovit",
       "path": "cesta",
       "new_disk": "Nový disk",
-      "created_at": "vytvořeno v",
+      "created_at": "vytvořeno",
       "size": "velikost",
       "dropbox": "dropbox",
       "local": "místní",
@@ -1271,9 +1377,9 @@
       "aws_bucket": "AWS Bucket",
       "aws_root": "AWS Root",
       "s3_endpoint": "S3 Endpoint",
-      "s3_key": "S3 Key",
-      "s3_secret": "S3 Secret",
-      "s3_region": "S3 Region",
+      "s3_key": "S3 klíč",
+      "s3_secret": "S3 tajný klíč",
+      "s3_region": "S3 region",
       "s3_bucket": "S3 Bucket",
       "s3_root": "S3 Root",
       "do_spaces_type": "Do Spaces type",
@@ -1283,12 +1389,12 @@
       "do_spaces_bucket": "Do Spaces Bucket",
       "do_spaces_endpoint": "Do Spaces Endpoint",
       "do_spaces_root": "Do Spaces Root",
-      "dropbox_type": "Dropbox Type",
-      "dropbox_token": "Dropbox Token",
-      "dropbox_key": "Dropbox Key",
-      "dropbox_secret": "Dropbox Secret",
-      "dropbox_app": "Dropbox App",
-      "dropbox_root": "Dropbox Root",
+      "dropbox_type": "Typ Dropboxu",
+      "dropbox_token": "Dropbox token",
+      "dropbox_key": "Dropbox klíč",
+      "dropbox_secret": "Dropbox tajný klíč",
+      "dropbox_app": "Aplikace Dropboxu",
+      "dropbox_root": "Kořenový adresář Dropboxu",
       "default_driver": "Výchozí ovladač",
       "is_default": "JE VÝCHOZÍ",
       "set_default_disk": "Nastavit výchozí disk",
@@ -1345,17 +1451,22 @@
     "street": "Ulice1 | Ulice2",
     "phone": "Telefon",
     "zip_code": "PSČ",
-    "go_back": "Jít zpět",
+    "go_back": "Zpět",
     "currency": "Měna",
     "language": "Jazyk",
     "time_zone": "Časové pásmo",
     "fiscal_year": "Fiskální rok",
     "date_format": "Formát data",
+    "time_format": "Formát času",
     "from_address": "Z adresy",
     "username": "Uživatelské jméno",
     "next": "Další",
     "continue": "Pokračovat",
     "skip": "Přeskočit",
+    "install_language": {
+      "title": "Vyberte svůj jazyk",
+      "description": "Vyberte jazyk průvodce pro instalaci InvoiceShelf"
+    },
     "database": {
       "database": "URL webu a databáze",
       "connection": "Připojení k databázi",
@@ -1367,6 +1478,7 @@
       "username": "Uživatelské jméno k databázi",
       "db_name": "Název databáze",
       "db_path": "Cesta k databázi",
+      "overwrite": "Přepsat existující databázi a pokračovat",
       "desc": "Vytvořte databázi na svém serveru a nastavte přihlašovací údaje pomocí níže uvedeného formuláře."
     },
     "permissions": {
@@ -1382,18 +1494,25 @@
       "verify_now": "Ověřit teď",
       "success": "Ověření domény bylo úspěšné.",
       "failed": "Ověření domény se nezdařilo. Zadejte prosím platný název domény.",
-      "verify_and_continue": "Ověřit a pokračovat"
+      "verify_and_continue": "Ověřit a pokračovat",
+      "notes": {
+        "notes": "Poznámky:",
+        "not_contain": "Doména aplikace by neměla obsahovat",
+        "or": "nebo",
+        "in_front": "před doménou.",
+        "if_you": "Pokud přistupujete k webu na jiném portu, uveďte prosím i port. Například:"
+      }
     },
     "mail": {
       "host": "Hostitel e-mailu",
       "port": "Port e-mailu",
       "driver": "Ovladač e-mailů",
-      "secret": "Secret",
-      "mailgun_secret": "Mailgun Secret",
+      "secret": "Tajný klíč",
+      "mailgun_secret": "Mailgun tajný klíč",
       "mailgun_domain": "Doména",
       "mailgun_endpoint": "Mailgun Endpoint",
-      "ses_secret": "SES Secret",
-      "ses_key": "SES Key",
+      "ses_secret": "SES tajný klíč",
+      "ses_key": "SES klíč",
       "password": "E-mailové heslo",
       "username": "Uživatelské jméno e-mailu",
       "mail_config": "Konfigurace e-mailu",
@@ -1404,7 +1523,7 @@
     },
     "req": {
       "system_req": "Systémové požadavky",
-      "php_req_version": "Php (požadovaná verze {version})",
+      "php_req_version": "PHP (požadovaná verze {version})",
       "check_req": "Zkontrolujte požadavky",
       "system_req_desc": "InvoiceShelf má několik požadavků na server. Ujistěte se, že váš server má požadovanou php verzi a všechna níže uvedená rozšíření."
     },
@@ -1504,8 +1623,9 @@
   "pdf_quantity_label": "Množství",
   "pdf_price_label": "Cena",
   "pdf_discount_label": "Sleva",
-  "pdf_amount_label": "Množství",
+  "pdf_amount_label": "Celkem",
   "pdf_subtotal": "Mezisoučet",
+  "pdf_net_total": "Net",
   "pdf_total": "Celkem",
   "pdf_payment_label": "Platba",
   "pdf_payment_receipt_label": "DOKLAD O PLATBĚ",
@@ -1532,15 +1652,17 @@
   "pdf_ship_to": "Příjemce",
   "pdf_received_from": "Přijato od:",
   "pdf_tax_label": "Daň",
-  "pdf_tax_id": "Tax-ID",
-  "pdf_vat_id": "VAT-ID",
-  "mail_thanks": "Thanks",
-  "mail_view_estimate": "View Estimate",
-  "mail_viewed_estimate": ":name viewed this Estimate.",
-  "mail_view_invoice": "View Invoice",
-  "mail_viewed_invoice": ":name viewed this Invoice.",
-  "mail_view_payment": "View Payment",
-  "notification_view_estimate": "[Notification] Estimate viewed",
-  "notification_view_invoice": "[Notification] Invoice viewed",
-  "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:": "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:"
+  "pdf_tax_id": "DIČ",
+  "pdf_vat_id": "DIČ",
+  "pdf_amount_paid": "Uhrazená částka",
+  "pdf_amount_due": "Splatná částka",
+  "mail_thanks": "Díky",
+  "mail_view_estimate": "Zobrazit odhad",
+  "mail_viewed_estimate": ":name si prohlédl tento odhad.",
+  "mail_view_invoice": "Zobrazit fakturu",
+  "mail_viewed_invoice": ":name si prohlédl tuto fakturu.",
+  "mail_view_payment": "Zobrazit platbu",
+  "notification_view_estimate": "[Notifikace] Zobrazený odhad",
+  "notification_view_invoice": "[Notifikace] Zobrazená faktura",
+  "You have received a new invoice from <b>{COMPANY_NAME}</b>.</br> Please download using the button below:": "Obdrželi jste novou fakturu od <b>{COMPANY_NAME}</b>.</br> Stáhněte si pomocí tlačítka níže:"
 }

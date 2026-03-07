@@ -1,97 +1,76 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Users\UsersController;
 use App\Http\Requests\UserRequest;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Faker\fake;
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
-use function Pest\Laravel\putJson;
+class UserTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::where('role', 'super admin')->first();
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
+        $user = User::where('role', 'super admin')->first();
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+    #[Test]
+    public function it_retrieves_all_users(): void
+    {
+        /* Arrange */
 
-getJson('/api/v1/users')->assertOk();
+        /* Act */
+        $response = $this->getJson('/api/v1/users');
 
-test('store user using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        UsersController::class,
-        'store',
-        UserRequest::class
-    );
-});
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data', 'meta']);
+    {
+        /* Arrange */
 
-// test('store user', function () {
-//     $data = [
-//         'name' => fake()->name,
-//         'email' => fake()->unique()->safeEmail,
-//         'phone' => fake()->phoneNumber,
-//         'password' => fake()->password
-//     ];
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            UsersController::class,
+            'store',
+            UserRequest::class
+        );
+    }
 
-//     postJson('/api/v1/users', $data)->assertOk();
+    #[Test]
+    public function it_retrieves_a_single_user(): void
+    {
+        /* Arrange */
+        $user = User::factory()->create();
 
-//     $this->assertDatabaseHas('users', [
-//         'name' => $data['name'],
-//         'email' => $data['email'],
-//         'phone' => $data['phone'],
-//     ]);
-// });
+        /* Act & Assert */
+        $this->getJson("/api/v1/users/{$user->id}")
+            ->assertOk()
+            ->assertJsonStructure(['data' => ['id', 'name', 'email']]);
+    }
 
-test('get user', function () {
-    $user = User::factory()->create();
+    #[Test]
+    public function it_validates_the_update_action_uses_a_form_request(): void
+    {
+        /* Arrange */
 
-    getJson("/api/v1/users/{$user->id}")->assertOk();
-});
-
-test('update user using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        UsersController::class,
-        'update',
-        UserRequest::class
-    );
-});
-
-// test('update user', function () {
-//     $user = User::factory()->create();
-
-//     $data = [
-//         'name' => fake()->name,
-//         'email' => fake()->unique()->safeEmail,
-//         'phone' => fake()->phoneNumber,
-//         'password' => fake()->password
-//     ];
-
-//     putJson("/api/v1/users/{$user->id}", $data)->assertOk();
-
-//     $this->assertDatabaseHas('users', [
-//         'name' => $data['name'],
-//         'email' => $data['email'],
-//         'phone' => $data['phone'],
-//     ]);
-// });
-
-// test('delete users', function () {
-//     $user = User::factory()->create();
-//     $data['users'] = [$user->id];
-
-//     postJson("/api/v1/users/delete", $data)
-//         ->assertOk();
-
-//     $this->assertModelMissing($user);
-// });
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            UsersController::class,
+            'update',
+            UserRequest::class
+        );
+    }
+}

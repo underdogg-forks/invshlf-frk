@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Setting;
 use App\Space\Updater;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
 
 // Implementation taken from Akaunting - https://github.com/akaunting/akaunting
 class UpdateCommand extends Command
@@ -98,7 +98,7 @@ class UpdateCommand extends Command
 
     public function getInstalledVersion()
     {
-        return Setting::getSetting('version');
+        return preg_replace('~[\r\n]+~', '', File::get(base_path('version.md')));
     }
 
     public function getLatestVersionResponse()

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\TaxTypeType;
 use App\Models\TaxType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,8 +23,11 @@ class TaxTypeFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
+            'type' => TaxTypeType::General,
+            'calculation_type' => 'percentage',
             'company_id' => User::find(1)->companies()->first()->id,
             'percent' => $this->faker->numberBetween($min = 0, $max = 100),
+            'fixed_amount' => null,
             'description' => $this->faker->text(),
             'compound_tax' => 0,
             'collective_tax' => 0,

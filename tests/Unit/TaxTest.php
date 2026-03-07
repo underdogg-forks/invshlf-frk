@@ -1,59 +1,100 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Estimate;
 use App\Models\EstimateItem;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Tax;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+class TaxTest extends TestCase
+{
+    use RefreshDatabase;
 
-test('tax belongs to tax type', function () {
-    $tax = Tax::factory()->create();
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $this->assertTrue($tax->taxType->exists());
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-test('tax belongs to invoice', function () {
-    $tax = Tax::factory()->forInvoice()->create();
+    #[Test]
+    public function it_belongs_to_a_tax_type(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->create();
 
-    $this->assertTrue($tax->invoice()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($tax->taxType()->exists());
+    }
 
-test('tax belongs to recurring invoice', function () {
-    $tax = Tax::factory()->forRecurringInvoice()->create();
+    #[Test]
+    public function it_belongs_to_an_invoice(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->forInvoice()->create();
 
-    $this->assertTrue($tax->recurringInvoice()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($tax->invoice()->exists());
+    }
 
-test('tax belongs to estimate', function () {
-    $tax = Tax::factory()->forEstimate()->create();
+    #[Test]
+    public function it_belongs_to_a_recurring_invoice(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->forRecurringInvoice()->create();
 
-    $this->assertTrue($tax->estimate()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($tax->recurringInvoice()->exists());
+    }
 
-test('tax belongs to invoice item', function () {
-    $tax = Tax::factory()->for(InvoiceItem::factory()->state([
-        'invoice_id' => Invoice::factory(),
-    ]))->create();
+    #[Test]
+    public function it_belongs_to_an_estimate(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->forEstimate()->create();
 
-    $this->assertTrue($tax->invoiceItem()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($tax->estimate()->exists());
+    }
 
-test('tax belongs to estimate item', function () {
-    $tax = Tax::factory()->for(EstimateItem::factory()->state([
-        'estimate_id' => Estimate::factory(),
-    ]))->create();
+    #[Test]
+    public function it_belongs_to_an_invoice_item(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->for(InvoiceItem::factory()->state([
+            'invoice_id' => Invoice::factory(),
+        ]))->create();
 
-    $this->assertTrue($tax->estimateItem()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($tax->invoiceItem()->exists());
+    }
 
-test('tax belongs to item', function () {
-    $tax = Tax::factory()->forItem()->create();
+    #[Test]
+    public function it_belongs_to_an_estimate_item(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->for(EstimateItem::factory()->state([
+            'estimate_id' => Estimate::factory(),
+        ]))->create();
 
-    $this->assertTrue($tax->item()->exists());
-});
+        /* Act & Assert */
+        $this->assertTrue($tax->estimateItem()->exists());
+    }
+
+    #[Test]
+    public function it_belongs_to_an_item(): void
+    {
+        /* Arrange */
+        $tax = Tax::factory()->forItem()->create();
+
+        /* Act & Assert */
+        $this->assertTrue($tax->item()->exists());
+    }
+}

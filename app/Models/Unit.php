@@ -2,41 +2,65 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\BaseModel;
+use App\Models\Concerns\BelongsToFranchise;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class Unit extends Model
+class Unit extends BaseModel
 {
-    use HasFactory;
+    use BelongsToFranchise;
 
     protected $fillable = ['name', 'company_id'];
 
-    public function items(): HasMany
-    {
-        return $this->hasMany(Item::class);
-    }
+    #region Static Methods
+    /*
+    |--------------------------------------------------------------------------
+    | Static Methods
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Relationships
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
     }
 
-    public function scopeWhereCompany($query)
+    public function items(): HasMany
     {
-        $query->where('company_id', request()->header('company'));
+        return $this->hasMany(Item::class);
     }
 
-    public function scopeWhereUnit($query, $unit_id)
-    {
-        $query->orWhere('id', $unit_id);
-    }
+    #endregion
+    #region Accessors
+    /*
+    |--------------------------------------------------------------------------
+    | Accessors
+    |--------------------------------------------------------------------------
+    */
 
-    public function scopeWhereSearch($query, $search)
-    {
-        return $query->where('name', 'LIKE', '%'.$search.'%');
-    }
+    #endregion
+    #region Mutators
+    /*
+    |--------------------------------------------------------------------------
+    | Mutators
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
+    #region Scopes
+    /*
+    |--------------------------------------------------------------------------
+    | Scopes
+    |--------------------------------------------------------------------------
+    */
 
     public function scopeApplyFilters($query, array $filters)
     {
@@ -65,4 +89,29 @@ class Unit extends Model
 
         return $query->paginate($limit);
     }
+
+    public function scopeWhereCompany($query)
+    {
+        $query->where('company_id', request()->header('company'));
+    }
+
+    public function scopeWhereSearch($query, $search)
+    {
+        return $query->where('name', 'LIKE', '%'.$search.'%');
+    }
+
+    public function scopeWhereUnit($query, $unit_id)
+    {
+        $query->orWhere('id', $unit_id);
+    }
+
+    #endregion
+    #region Factory
+    /*
+    |--------------------------------------------------------------------------
+    | Factory
+    |--------------------------------------------------------------------------
+    */
+
+    #endregion
 }

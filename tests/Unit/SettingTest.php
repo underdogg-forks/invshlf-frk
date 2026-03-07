@@ -1,23 +1,37 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Models\Setting;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Faker\fake;
+class SettingTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
-});
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-test('set setting', function () {
-    $key = fake()->name;
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    }
 
-    $value = fake()->word;
+    #[Test]
+    public function it_sets_and_retrieves_a_global_setting(): void
+    {
+        /* Arrange */
+        $key = fake()->name();
+        $value = fake()->word();
 
-    Setting::setSetting($key, $value);
+        /* Act */
+        Setting::setSetting($key, $value);
+        $result = Setting::getSetting($key);
 
-    $response = Setting::getSetting($key);
-
-    $this->assertEquals($value, $response);
-});
+        /* Assert */
+        $this->assertEquals($value, $result);
+    }
+}

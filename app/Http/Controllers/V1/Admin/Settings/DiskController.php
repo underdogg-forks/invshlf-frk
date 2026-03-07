@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\V1\Admin\Settings;
 
+use App\Enums\FileDiskType;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\DiskEnvironmentRequest;
 use App\Http\Resources\FileDiskResource;
@@ -53,7 +54,7 @@ class DiskController extends Controller
         $credentials = $request->credentials;
         $driver = $request->driver;
 
-        if ($credentials && $driver && $disk->type !== 'SYSTEM') {
+        if ($credentials && $driver && $disk->type !== FileDiskType::System) {
             if (! FileDisk::validateCredentials($credentials, $driver)) {
                 return respondJson('invalid_credentials', 'Invalid Credentials.');
             }
@@ -143,7 +144,7 @@ class DiskController extends Controller
     {
         $this->authorize('manage file disk');
 
-        if ($disk->setAsDefault() && $disk->type === 'SYSTEM') {
+        if ($disk->setAsDefault() && $disk->type === FileDiskType::System) {
             return respondJson('not_allowed', 'Not Allowed');
         }
 

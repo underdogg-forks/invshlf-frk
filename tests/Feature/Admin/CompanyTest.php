@@ -1,72 +1,94 @@
 <?php
 
+namespace Tests\Feature\Admin;
+
 use App\Http\Controllers\V1\Admin\Company\CompaniesController;
 use App\Http\Requests\CompaniesRequest;
 use App\Models\Company;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Laravel\Sanctum\Sanctum;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
 
-use function Pest\Laravel\getJson;
-use function Pest\Laravel\postJson;
+class CompanyTest extends TestCase
+{
+    use RefreshDatabase;
 
-beforeEach(function () {
-    Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
-    Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $user = User::find(1);
-    $this->withHeaders([
-        'company' => $user->companies()->first()->id,
-    ]);
-    Sanctum::actingAs(
-        $user,
-        ['*']
-    );
-});
+        Artisan::call('db:seed', ['--class' => 'DatabaseSeeder', '--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'DemoSeeder', '--force' => true]);
 
-test('store user using a form request', function () {
-    $this->assertActionUsesFormRequest(
-        CompaniesController::class,
-        'store',
-        CompaniesRequest::class
-    );
-});
+        $user = User::find(1);
+        $this->withHeaders(['company' => $user->companies()->first()->id]);
+        Sanctum::actingAs($user, ['*']);
+    }
 
-test('store company', function () {
-    $company = Company::factory()->raw([
-        'currency' => 12,
-        'address' => [
-            'country_id' => 12,
-        ],
-    ]);
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
+    {
+        /* Arrange */
 
-    postJson('/api/v1/companies', $company)
-        ->assertStatus(201);
+        /* Act & Assert */
+        $this->assertActionUsesFormRequest(
+            CompaniesController::class,
+            'store',
+            CompaniesRequest::class
+        );
+    }
 
-    $company = collect($company)
-        ->only([
-            'name',
-        ])
-        ->toArray();
+    #[Test]
+    public function it_creates_a_company(): void
+    {
+        /* Arrange */
+        $company = Company::factory()->raw([
+            'currency' => 12,
+            'address' => ['country_id' => 12],
+        ]);
 
-    $this->assertDatabaseHas('companies', $company);
-});
+        /* Act */
+        $this->postJson('/api/v1/companies', $company)->assertStatus(201);
 
-test('delete company', function () {
-    postJson('/api/v1/companies/delete', ['xyz'])
-        ->assertStatus(422);
-});
+        /* Assert */
+        $this->assertDatabaseHas('companies', collect($company)->only(['name'])->toArray());
+    }
 
-test('transfer ownership', function () {
-    $company = Company::factory()->create();
+    #[Test]
+    public function it_returns_a_validation_error_when_deleting_with_invalid_data(): void
+    {
+        /* Arrange */
 
-    $user = User::factory()->create();
+        /* Act */
+        $response = $this->postJson('/api/v1/companies/delete', ['xyz']);
 
-    postJson('/api/v1/transfer/ownership/'.$user->id)
-        ->assertOk();
-});
+        /* Assert */
+        $response->assertStatus(422);
+    }
 
-test('get companies', function () {
-    getJson('/api/v1/companies')
-        ->assertOk();
-});
+    #[Test]
+    public function it_transfers_ownership_to_another_user(): void
+    {
+        /* Arrange */
+        $user = User::factory()->create();
+
+        /* Act & Assert */
+        $this->postJson('/api/v1/transfer/ownership/'.$user->id)
+            ->assertOk()
+            ->assertJson(['success' => true]);
+    }
+
+    #[Test]
+    public function it_retrieves_all_companies(): void
+    {
+        /* Arrange */
+
+        /* Act */
+        $response = $this->getJson('/api/v1/companies');
+
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonStructure(['data']);
