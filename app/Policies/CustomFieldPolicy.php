@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\CustomField;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class CustomFieldPolicy
 {
@@ -18,11 +18,7 @@ class CustomFieldPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-custom-field', CustomField::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('view-custom-field');
     }
 
     /**
@@ -32,11 +28,7 @@ class CustomFieldPolicy
      */
     public function view(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('view-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('view-custom-field') && $user->hasCompany($customField->company_id);
     }
 
     /**
@@ -46,11 +38,7 @@ class CustomFieldPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-custom-field', CustomField::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('create-custom-field');
     }
 
     /**
@@ -60,11 +48,7 @@ class CustomFieldPolicy
      */
     public function update(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('edit-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('edit-custom-field') && $user->hasCompany($customField->company_id);
     }
 
     /**
@@ -74,11 +58,7 @@ class CustomFieldPolicy
      */
     public function delete(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-custom-field') && $user->hasCompany($customField->company_id);
     }
 
     /**
@@ -88,11 +68,7 @@ class CustomFieldPolicy
      */
     public function restore(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-custom-field') && $user->hasCompany($customField->company_id);
     }
 
     /**
@@ -102,10 +78,6 @@ class CustomFieldPolicy
      */
     public function forceDelete(User $user, CustomField $customField): bool
     {
-        if (BouncerFacade::can('delete-custom-field', $customField) && $user->hasCompany($customField->company_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-custom-field') && $user->hasCompany($customField->company_id);
     }
 }

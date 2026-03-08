@@ -17,8 +17,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\HasApiTokens;
-use Silber\Bouncer\BouncerFacade;
-use Silber\Bouncer\Database\HasRolesAndAbilities;
+use Spatie\Permission\Traits\HasRoles;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -28,7 +27,7 @@ class User extends Authenticatable implements HasMedia
     use HasApiTokens;
     use HasCustomFieldsTrait;
     use HasFactory;
-    use HasRolesAndAbilities;
+    use HasRoles;
     use InteractsWithMedia;
     use Notifiable;
 
@@ -418,12 +417,7 @@ class User extends Authenticatable implements HasMedia
 
         $companies = collect($request->companies);
         $user->companies()->sync($companies->pluck('id'));
-
-        foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
-
-            BouncerFacade::sync($user)->roles([$company['role']]);
-        }
+        $user->syncCompanyRoles($companies);
 
         return $user;
     }
@@ -476,15 +470,41 @@ class User extends Authenticatable implements HasMedia
         $this->update($request->getUserPayload());
 
         $companies = collect($request->companies);
-        $this->companies()->sync($companies->pluck('id'));
+        $incomingIds = $companies->pluck('id')->toArray();
+        $removedIds = $this->companies()->pluck('company_id')->diff($incomingIds)->toArray();
 
-        foreach ($companies as $company) {
-            BouncerFacade::scope()->to($company['id']);
+        $this->companies()->sync($incomingIds);
 
-            BouncerFacade::sync($this)->roles([$company['role']]);
+        if (! empty($removedIds)) {
+            // Direct DB delete is used here because Spatie's removeRole() requires
+            // iterating per team context (setPermissionsTeamId per company), which is
+            // expensive for bulk removal. This precisely targets the pivot rows for
+            // the detached companies without loading any role models.
+            \Illuminate\Support\Facades\DB::table('model_has_roles')
+                ->where('model_type', self::class)
+                ->where('model_id', $this->id)
+                ->whereIn('team_id', $removedIds)
+                ->delete();
         }
 
+        $this->syncCompanyRoles($companies);
+
         return $this;
+    }
+
+    private function syncCompanyRoles(\Illuminate\Support\Collection $companies): void
+    {
+        $originalTeamId = getPermissionsTeamId();
+        try {
+            foreach ($companies as $company) {
+                setPermissionsTeamId($company['id']);
+                $this->syncRoles([$company['role']]);
+            }
+        } finally {
+            setPermissionsTeamId($originalTeamId);
+            $this->unsetRelation('roles');
+            $this->unsetRelation('permissions');
+        }
     }
 
     #endregion

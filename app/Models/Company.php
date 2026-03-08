@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Silber\Bouncer\BouncerFacade;
-use Silber\Bouncer\Database\Role;
+use Spatie\Permission\Models\Role;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -34,16 +33,36 @@ class Company extends BaseModel implements HasMedia
 
     public function setupRoles()
     {
-        BouncerFacade::scope()->to($this->id);
+        $originalTeamId = getPermissionsTeamId();
+        try {
+            setPermissionsTeamId($this->id);
 
-        $super_admin = BouncerFacade::role()->firstOrCreate([
-            'name' => 'super admin',
-            'title' => 'Super Admin',
-            'scope' => $this->id,
-        ]);
+            $super_admin = Role::firstOrCreate([
+                'name' => 'super admin',
+                'guard_name' => 'web',
+                'team_id' => $this->id,
+            ]);
 
-        foreach (config('abilities.abilities') as $ability) {
-            BouncerFacade::allow($super_admin)->to($ability['ability'], $ability['model']);
+            $abilityNames = array_column(config('abilities.abilities'), 'ability');
+            $existing = \Spatie\Permission\Models\Permission::whereIn('name', $abilityNames)
+                ->where('guard_name', 'web')
+                ->pluck('id', 'name');
+
+            $permissionsToCreate = array_values(array_filter($abilityNames, fn ($name) => ! isset($existing[$name])));
+            if (! empty($permissionsToCreate)) {
+                $now = now();
+                \Spatie\Permission\Models\Permission::insert(
+                    array_map(fn ($name) => ['name' => $name, 'guard_name' => 'web', 'created_at' => $now, 'updated_at' => $now], $permissionsToCreate)
+                );
+                app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+                $existing = \Spatie\Permission\Models\Permission::whereIn('name', $abilityNames)
+                    ->where('guard_name', 'web')
+                    ->pluck('id', 'name');
+            }
+
+            $super_admin->syncPermissions($existing->values()->toArray());
+        } finally {
+            setPermissionsTeamId($originalTeamId);
         }
     }
 
@@ -313,7 +332,7 @@ class Company extends BaseModel implements HasMedia
 
     public function getRolesAttribute()
     {
-        return Role::where('scope', $this->id)
+        return Role::where('team_id', $this->id)
             ->get();
     }
 
@@ -422,7 +441,7 @@ class Company extends BaseModel implements HasMedia
         }
 
         $roles = Role::when($this->id, function ($query) {
-            return $query->where('scope', $this->id);
+            return $query->where('team_id', $this->id);
         })->get();
 
         if ($roles) {

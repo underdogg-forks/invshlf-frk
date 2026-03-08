@@ -7,7 +7,6 @@ use App\Models\Setting;
 use App\Models\User;
 use App\Space\InstallUtils;
 use Illuminate\Database\Seeder;
-use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
 
 class UsersTableSeeder extends Seeder
@@ -34,9 +33,9 @@ class UsersTableSeeder extends Seeder
         $company->save();
         $company->setupDefaultData();
         $user->companies()->attach($company->id);
-        BouncerFacade::scope()->to($company->id);
-
-        $user->assign('super admin');
+        setPermissionsTeamId($company->id);
+        $user->assignRole('super admin');
+        setPermissionsTeamId(null);
 
         Setting::setSetting('profile_complete', 0);
         // Set version.

@@ -38,6 +38,10 @@ class UserTest extends TestCase
         /* Assert */
         $response->assertOk()
             ->assertJsonStructure(['data', 'meta']);
+    }
+
+    #[Test]
+    public function it_validates_the_store_action_uses_a_form_request(): void
     {
         /* Arrange */
 
@@ -72,5 +76,61 @@ class UserTest extends TestCase
             'update',
             UserRequest::class
         );
+    }
+
+    #[Test]
+    public function it_removes_stale_role_assignments_when_a_company_is_removed_from_a_user(): void
+    {
+        /* Arrange */
+        $owner = User::find(1);
+        $company = $owner->companies()->first();
+        setPermissionsTeamId($company->id);
+
+        $newUser = User::factory()->create();
+        $newUser->companies()->attach($company->id);
+        $newUser->assignRole('super admin');
+
+        $payload = [
+            'name' => $newUser->name,
+            'email' => $newUser->email,
+            'companies' => [],
+        ];
+
+        /* Act */
+        $this->putJson("/api/v1/users/{$newUser->id}", $payload)->assertOk();
+
+        /* Assert */
+        $this->assertDatabaseMissing('model_has_roles', [
+            'model_id' => $newUser->id,
+            'team_id' => $company->id,
+        ]);
+    }
+
+    #[Test]
+    public function it_retains_role_assignments_for_companies_that_remain_attached(): void
+    {
+        /* Arrange */
+        $owner = User::find(1);
+        $company = $owner->companies()->first();
+        setPermissionsTeamId($company->id);
+
+        $newUser = User::factory()->create();
+        $newUser->companies()->attach($company->id);
+        $newUser->assignRole('super admin');
+
+        $payload = [
+            'name' => $newUser->name,
+            'email' => $newUser->email,
+            'companies' => [['id' => $company->id, 'role' => 'super admin']],
+        ];
+
+        /* Act */
+        $this->putJson("/api/v1/users/{$newUser->id}", $payload)->assertOk();
+
+        /* Assert */
+        $this->assertDatabaseHas('model_has_roles', [
+            'model_id' => $newUser->id,
+            'team_id' => $company->id,
+        ]);
     }
 }

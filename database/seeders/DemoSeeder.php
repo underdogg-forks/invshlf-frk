@@ -10,7 +10,6 @@ use App\Models\User;
 use App\Space\InstallUtils;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
 
 class DemoSeeder extends Seeder
@@ -39,9 +38,9 @@ class DemoSeeder extends Seeder
         $company->save();
         $company->setupDefaultData();
         $user->companies()->attach($company->id);
-        BouncerFacade::scope()->to($company->id);
-
-        $user->assign('super admin');
+        setPermissionsTeamId($company->id);
+        $user->assignRole('super admin');
+        setPermissionsTeamId(null);
 
         // Set default user settings
         $user->setSettings([

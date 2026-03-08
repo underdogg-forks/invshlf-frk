@@ -18,16 +18,19 @@ class RoleResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'title' => $this->title,
-            'level' => $this->level,
+            'scope' => $this->team_id,
             'formatted_created_at' => $this->getFormattedAt(),
-            'abilities' => $this->getAbilities(),
+            'abilities' => ($this->relationLoaded('permissions') ? $this->permissions : $this->permissions()->get())->map(fn ($permission) => ['ability' => $permission->name]),
         ];
     }
 
-    public function getFormattedAt()
+    public function getFormattedAt(): ?string
     {
-        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->scope);
+        if (! $this->created_at) {
+            return null;
+        }
+
+        $dateFormat = CompanySetting::getSetting('carbon_date_format', $this->team_id) ?: 'Y-m-d';
 
         return Carbon::parse($this->created_at)->translatedFormat($dateFormat);
     }

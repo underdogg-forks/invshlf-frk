@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\Expense;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class ExpensePolicy
 {
@@ -18,7 +18,7 @@ class ExpensePolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-expense', Expense::class)) {
+        if ($user->hasPermissionTo('view-expense')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class ExpensePolicy
      */
     public function view(User $user, Expense $expense): bool
     {
-        if (BouncerFacade::can('view-expense', $expense) && $user->hasCompany($expense->company_id)) {
+        if ($user->hasPermissionTo('view-expense') && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class ExpensePolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-expense', Expense::class)) {
+        if ($user->hasPermissionTo('create-expense')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class ExpensePolicy
      */
     public function update(User $user, Expense $expense): bool
     {
-        if (BouncerFacade::can('edit-expense', $expense) && $user->hasCompany($expense->company_id)) {
+        if ($user->hasPermissionTo('edit-expense') && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class ExpensePolicy
      */
     public function delete(User $user, Expense $expense): bool
     {
-        if (BouncerFacade::can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
+        if ($user->hasPermissionTo('delete-expense') && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class ExpensePolicy
      */
     public function restore(User $user, Expense $expense): bool
     {
-        if (BouncerFacade::can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
+        if ($user->hasPermissionTo('delete-expense') && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class ExpensePolicy
      */
     public function forceDelete(User $user, Expense $expense): bool
     {
-        if (BouncerFacade::can('delete-expense', $expense) && $user->hasCompany($expense->company_id)) {
+        if ($user->hasPermissionTo('delete-expense') && $user->hasCompany($expense->company_id)) {
             return true;
         }
 
@@ -114,9 +114,9 @@ class ExpensePolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if (BouncerFacade::can('delete-expense', Expense::class)) {
+        if ($user->hasPermissionTo('delete-expense')) {
             return true;
         }
 

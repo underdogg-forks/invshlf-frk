@@ -46,7 +46,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'auth' => \App\Http\Middleware\Authenticate::class,
             'bindings' => \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            'bouncer' => \App\Http\Middleware\ScopeBouncer::class,
+            'bouncer' => \App\Http\Middleware\SetPermissionTeam::class,
             'company' => \App\Http\Middleware\CompanyMiddleware::class,
             'cron-job' => \App\Http\Middleware\CronJobMiddleware::class,
             'customer' => \App\Http\Middleware\CustomerRedirectIfAuthenticated::class,

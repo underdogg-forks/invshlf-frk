@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Spatie\Permission\PermissionRegistrar;
 use Symfony\Component\HttpFoundation\Response;
 
-class ScopeBouncer
+class SetPermissionTeam
 {
     protected PermissionRegistrar $permissionRegistrar;
 

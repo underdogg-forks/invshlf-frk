@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\Item;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class ItemPolicy
 {
@@ -18,7 +18,7 @@ class ItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-item', Item::class)) {
+        if ($user->hasPermissionTo('view-item')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class ItemPolicy
      */
     public function view(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('view-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->hasPermissionTo('view-item') && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class ItemPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-item', Item::class)) {
+        if ($user->hasPermissionTo('create-item')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class ItemPolicy
      */
     public function update(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('edit-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->hasPermissionTo('edit-item') && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class ItemPolicy
      */
     public function delete(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->hasPermissionTo('delete-item') && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class ItemPolicy
      */
     public function restore(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->hasPermissionTo('delete-item') && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class ItemPolicy
      */
     public function forceDelete(User $user, Item $item): bool
     {
-        if (BouncerFacade::can('delete-item', $item) && $user->hasCompany($item->company_id)) {
+        if ($user->hasPermissionTo('delete-item') && $user->hasCompany($item->company_id)) {
             return true;
         }
 
@@ -114,9 +114,9 @@ class ItemPolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if (BouncerFacade::can('delete-item', Item::class)) {
+        if ($user->hasPermissionTo('delete-item')) {
             return true;
         }
 

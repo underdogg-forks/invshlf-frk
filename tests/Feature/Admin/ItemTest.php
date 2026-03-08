@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Http\Controllers\V1\Admin\Item\ItemsController;
 use App\Http\Requests\ItemsRequest;
+use App\Models\Company;
 use App\Models\Item;
 use App\Models\Tax;
 use App\Models\User;
@@ -40,6 +41,10 @@ class ItemTest extends TestCase
         /* Assert */
         $response->assertOk()
             ->assertJsonStructure(['data', 'meta']);
+    }
+
+    #[Test]
+    public function it_creates_an_item_with_taxes(): void
     {
         /* Arrange */
         $item = Item::factory()->raw([
@@ -169,6 +174,10 @@ class ItemTest extends TestCase
         /* Assert */
         $response->assertOk()
             ->assertJsonStructure(['data', 'meta']);
+    }
+
+    #[Test]
+    public function it_creates_an_item_with_a_fixed_tax(): void
     {
         /* Arrange */
         $item = Item::factory()->raw([
@@ -196,5 +205,50 @@ class ItemTest extends TestCase
             'calculation_type' => 'fixed',
             'fixed_amount' => 5000,
         ]);
+    }
+
+    #[Test]
+    public function it_denies_viewing_an_item_that_belongs_to_another_company(): void
+    {
+        /* Arrange */
+        $otherCompany = Company::factory()->create(['owner_id' => User::find(1)->id]);
+        $item = Item::factory()->create(['company_id' => $otherCompany->id]);
+
+        /* Act */
+        $response = $this->getJson("/api/v1/items/{$item->id}");
+
+        /* Assert */
+        $response->assertForbidden();
+    }
+
+    #[Test]
+    public function it_allows_viewing_an_item_that_belongs_to_the_current_company(): void
+    {
+        /* Arrange */
+        $user = User::find(1);
+        $company = $user->companies()->first();
+        $item = Item::factory()->create(['company_id' => $company->id]);
+
+        /* Act */
+        $response = $this->getJson("/api/v1/items/{$item->id}");
+
+        /* Assert */
+        $response->assertOk()
+            ->assertJsonPath('data.id', $item->id);
+    }
+
+    #[Test]
+    public function it_denies_updating_an_item_that_belongs_to_another_company(): void
+    {
+        /* Arrange */
+        $otherCompany = Company::factory()->create(['owner_id' => User::find(1)->id]);
+        $item = Item::factory()->create(['company_id' => $otherCompany->id]);
+        $updatedData = Item::factory()->raw(['company_id' => $otherCompany->id]);
+
+        /* Act */
+        $response = $this->putJson("/api/v1/items/{$item->id}", $updatedData);
+
+        /* Assert */
+        $response->assertForbidden();
     }
 }

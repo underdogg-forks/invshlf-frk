@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class CustomerPolicy
 {
@@ -18,11 +18,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-customer', Customer::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('view-customer');
     }
 
     /**
@@ -32,11 +28,7 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('view-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('view-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -46,11 +38,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-customer', Customer::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('create-customer');
     }
 
     /**
@@ -60,11 +48,7 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('edit-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('edit-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -74,11 +58,7 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -88,11 +68,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -102,11 +78,7 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        if (BouncerFacade::can('delete-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -116,10 +88,6 @@ class CustomerPolicy
      */
     public function deleteMultiple(User $user)
     {
-        if (BouncerFacade::can('delete-customer', Customer::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer');
     }
 }

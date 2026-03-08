@@ -12,7 +12,6 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Silber\Bouncer\BouncerFacade;
 
 class DashboardController extends Controller
 {
@@ -152,8 +151,8 @@ class DashboardController extends Controller
             'total_invoice_count' => $total_invoice_count,
             'total_estimate_count' => $total_estimate_count,
 
-            'recent_due_invoices' => BouncerFacade::can('view-invoice', Invoice::class) ? $recent_due_invoices : [],
-            'recent_estimates' => BouncerFacade::can('view-estimate', Estimate::class) ? $recent_estimates : [],
+            'recent_due_invoices' => $request->user()->can('view-invoice') ? $recent_due_invoices : [],
+            'recent_estimates' => $request->user()->can('view-estimate') ? $recent_estimates : [],
 
             'chart_data' => $chart_data,
 

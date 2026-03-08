@@ -5,7 +5,7 @@ namespace App\Policies;
 use App\Models\ExchangeRateProvider;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Silber\Bouncer\BouncerFacade;
+
 
 class ExchangeRateProviderPolicy
 {
@@ -18,7 +18,7 @@ class ExchangeRateProviderPolicy
      */
     public function viewAny(User $user): bool
     {
-        if (BouncerFacade::can('view-exchange-rate-provider', ExchangeRateProvider::class)) {
+        if ($user->hasPermissionTo('view-exchange-rate-provider')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class ExchangeRateProviderPolicy
      */
     public function view(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        if (BouncerFacade::can('view-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
+        if ($user->hasPermissionTo('view-exchange-rate-provider') && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class ExchangeRateProviderPolicy
      */
     public function create(User $user): bool
     {
-        if (BouncerFacade::can('create-exchange-rate-provider', ExchangeRateProvider::class)) {
+        if ($user->hasPermissionTo('create-exchange-rate-provider')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class ExchangeRateProviderPolicy
      */
     public function update(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        if (BouncerFacade::can('edit-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
+        if ($user->hasPermissionTo('edit-exchange-rate-provider') && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class ExchangeRateProviderPolicy
      */
     public function delete(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        if (BouncerFacade::can('delete-exchange-rate-provider', $exchangeRateProvider) && $user->hasCompany($exchangeRateProvider->company_id)) {
+        if ($user->hasPermissionTo('delete-exchange-rate-provider') && $user->hasCompany($exchangeRateProvider->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class ExchangeRateProviderPolicy
      */
     public function restore(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        //
+        return $user->hasPermissionTo('delete-exchange-rate-provider') && $user->hasCompany($exchangeRateProvider->company_id);
     }
 
     /**
@@ -98,6 +98,6 @@ class ExchangeRateProviderPolicy
      */
     public function forceDelete(User $user, ExchangeRateProvider $exchangeRateProvider): bool
     {
-        //
+        return $user->hasPermissionTo('delete-exchange-rate-provider') && $user->hasCompany($exchangeRateProvider->company_id);
     }
 }

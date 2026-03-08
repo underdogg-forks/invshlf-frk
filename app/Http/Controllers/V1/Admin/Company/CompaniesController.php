@@ -8,7 +8,6 @@ use App\Http\Resources\CompanyResource;
 use App\Models\Company;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Silber\Bouncer\BouncerFacade;
 use Vinkla\Hashids\Facades\Hashids;
 
 class CompaniesController extends Controller
@@ -24,7 +23,13 @@ class CompaniesController extends Controller
         $company->save();
         $company->setupDefaultData();
         $user->companies()->attach($company->id);
-        $user->assign('super admin');
+        $originalTeamId = getPermissionsTeamId();
+        try {
+            setPermissionsTeamId($company->id);
+            $user->assignRole('super admin');
+        } finally {
+            setPermissionsTeamId($originalTeamId);
+        }
 
         if ($request->address) {
             $company->address()->create($request->address);
@@ -61,15 +66,25 @@ class CompaniesController extends Controller
         $company = Company::find($request->header('company'));
         $this->authorize('transfer company ownership', $company);
 
-        if ($user->hasCompany($company->id)) {
+        if (! $user->hasCompany($company->id)) {
             return response()->json([
                 'success' => false,
                 'message' => 'User does not belongs to this company.',
             ]);
         }
 
+        $previousOwner = User::find($company->owner_id);
         $company->update(['owner_id' => $user->id]);
-        BouncerFacade::sync($user)->roles(['super admin']);
+        $originalTeamId = getPermissionsTeamId();
+        try {
+            setPermissionsTeamId($company->id);
+            $user->assignRole('super admin');
+            if ($previousOwner && $previousOwner->id !== $user->id) {
+                $previousOwner->removeRole('super admin');
+            }
+        } finally {
+            setPermissionsTeamId($originalTeamId);
+        }
 
         return response()->json([
             'success' => true,
