@@ -18,7 +18,7 @@ class ItemPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-item', Item::class)) {
+        if ($user->hasPermissionTo('view-item')) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class ItemPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-item', Item::class)) {
+        if ($user->hasPermissionTo('create-item')) {
             return true;
         }
 
@@ -114,9 +114,9 @@ class ItemPolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if ($user->can('delete-item', Item::class)) {
+        if ($user->hasPermissionTo('delete-item')) {
             return true;
         }
 

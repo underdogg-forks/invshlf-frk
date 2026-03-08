@@ -31,14 +31,18 @@ return new class extends Migration
                 $company->save();
 
                 $company->setupRoles();
-                setPermissionsTeamId($company->id);
-                $user->assignRole('super admin');
 
-                $users = User::where('role', 'admin')->get();
-                $users->map(function ($user) use ($company) {
+                $previousTeamId = getPermissionsTeamId();
+                try {
                     setPermissionsTeamId($company->id);
                     $user->assignRole('super admin');
-                });
+
+                    $company->users()->where('role', 'admin')->get()->map(function ($admin) {
+                        $admin->assignRole('super admin');
+                    });
+                } finally {
+                    setPermissionsTeamId($previousTeamId);
+                }
             }
         }
     }

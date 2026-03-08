@@ -470,7 +470,23 @@ class User extends Authenticatable implements HasMedia
         $this->update($request->getUserPayload());
 
         $companies = collect($request->companies);
-        $this->companies()->sync($companies->pluck('id'));
+        $incomingIds = $companies->pluck('id')->toArray();
+        $removedIds = $this->companies()->pluck('company_id')->diff($incomingIds)->toArray();
+
+        $this->companies()->sync($incomingIds);
+
+        if (! empty($removedIds)) {
+            // Direct DB delete is used here because Spatie's removeRole() requires
+            // iterating per team context (setPermissionsTeamId per company), which is
+            // expensive for bulk removal. This precisely targets the pivot rows for
+            // the detached companies without loading any role models.
+            \Illuminate\Support\Facades\DB::table('model_has_roles')
+                ->where('model_type', self::class)
+                ->where('model_id', $this->id)
+                ->whereIn('team_id', $removedIds)
+                ->delete();
+        }
+
         $this->syncCompanyRoles($companies);
 
         return $this;
