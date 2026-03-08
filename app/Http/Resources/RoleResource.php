@@ -20,7 +20,9 @@ class RoleResource extends JsonResource
             'name' => $this->name,
             'scope' => $this->team_id,
             'formatted_created_at' => $this->getFormattedAt(),
-            'abilities' => $this->permissions->map(fn ($permission) => ['ability' => $permission->name]),
+            'abilities' => $this->whenLoaded('permissions', function () {
+                return $this->permissions->map(fn ($permission) => ['ability' => $permission->name]);
+            }),
         ];
     }
 
