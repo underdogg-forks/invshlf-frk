@@ -28,7 +28,7 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        return $user->hasPermissionTo('view-customer');
+        return $user->hasPermissionTo('view-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -48,7 +48,7 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        return $user->hasPermissionTo('edit-customer');
+        return $user->hasPermissionTo('edit-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -58,7 +58,7 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        return $user->hasPermissionTo('delete-customer');
+        return $user->hasPermissionTo('delete-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -68,7 +68,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        return $user->hasPermissionTo('delete-customer');
+        return $user->hasPermissionTo('delete-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**
@@ -78,7 +78,7 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        return $user->hasPermissionTo('delete-customer');
+        return $user->hasPermissionTo('delete-customer') && $user->hasCompany($customer->company_id);
     }
 
     /**

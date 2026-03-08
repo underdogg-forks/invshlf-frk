@@ -18,7 +18,7 @@ class PaymentPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-payment', Payment::class)) {
+        if ($user->hasPermissionTo('view-payment')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class PaymentPolicy
      */
     public function view(User $user, Payment $payment): bool
     {
-        if ($user->can('view-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->hasPermissionTo('view-payment') && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class PaymentPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-payment', Payment::class)) {
+        if ($user->hasPermissionTo('create-payment')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class PaymentPolicy
      */
     public function update(User $user, Payment $payment): bool
     {
-        if ($user->can('edit-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->hasPermissionTo('edit-payment') && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class PaymentPolicy
      */
     public function delete(User $user, Payment $payment): bool
     {
-        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->hasPermissionTo('delete-payment') && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class PaymentPolicy
      */
     public function restore(User $user, Payment $payment): bool
     {
-        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->hasPermissionTo('delete-payment') && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class PaymentPolicy
      */
     public function forceDelete(User $user, Payment $payment): bool
     {
-        if ($user->can('delete-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->hasPermissionTo('delete-payment') && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -114,9 +114,9 @@ class PaymentPolicy
      *
      * @return mixed
      */
-    public function send(User $user, Payment $payment)
+    public function send(User $user, Payment $payment): bool
     {
-        if ($user->can('send-payment', $payment) && $user->hasCompany($payment->company_id)) {
+        if ($user->hasPermissionTo('send-payment') && $user->hasCompany($payment->company_id)) {
             return true;
         }
 
@@ -128,9 +128,9 @@ class PaymentPolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if ($user->can('delete-payment', Payment::class)) {
+        if ($user->hasPermissionTo('delete-payment')) {
             return true;
         }
 

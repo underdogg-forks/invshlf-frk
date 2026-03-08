@@ -18,7 +18,7 @@ class InvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-invoice', Invoice::class)) {
+        if ($user->hasPermissionTo('view-invoice')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class InvoicePolicy
      */
     public function view(User $user, Invoice $invoice): bool
     {
-        if ($user->can('view-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->hasPermissionTo('view-invoice') && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class InvoicePolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-invoice', Invoice::class)) {
+        if ($user->hasPermissionTo('create-invoice')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class InvoicePolicy
      */
     public function update(User $user, Invoice $invoice): bool
     {
-        if ($user->can('edit-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->hasPermissionTo('edit-invoice') && $user->hasCompany($invoice->company_id)) {
             return $invoice->allow_edit;
         }
 
@@ -74,7 +74,7 @@ class InvoicePolicy
      */
     public function delete(User $user, Invoice $invoice): bool
     {
-        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->hasPermissionTo('delete-invoice') && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class InvoicePolicy
      */
     public function restore(User $user, Invoice $invoice): bool
     {
-        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->hasPermissionTo('delete-invoice') && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class InvoicePolicy
      */
     public function forceDelete(User $user, Invoice $invoice): bool
     {
-        if ($user->can('delete-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->hasPermissionTo('delete-invoice') && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -115,9 +115,9 @@ class InvoicePolicy
      * @param  \App\Models\Payment  $payment
      * @return mixed
      */
-    public function send(User $user, Invoice $invoice)
+    public function send(User $user, Invoice $invoice): bool
     {
-        if ($user->can('send-invoice', $invoice) && $user->hasCompany($invoice->company_id)) {
+        if ($user->hasPermissionTo('send-invoice') && $user->hasCompany($invoice->company_id)) {
             return true;
         }
 
@@ -129,9 +129,9 @@ class InvoicePolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if ($user->can('delete-invoice', Invoice::class)) {
+        if ($user->hasPermissionTo('delete-invoice')) {
             return true;
         }
 

@@ -35,6 +35,7 @@ class UsersTableSeeder extends Seeder
         $user->companies()->attach($company->id);
         setPermissionsTeamId($company->id);
         $user->assignRole('super admin');
+        setPermissionsTeamId(null);
 
         Setting::setSetting('profile_complete', 0);
         // Set version.

@@ -40,7 +40,7 @@ class RoleRequest extends FormRequest
             ],
         ];
 
-        if ($this->getMethod() == 'PUT') {
+        if (in_array($this->getMethod(), ['PUT', 'PATCH'])) {
             $uniquePutRule = $company !== null
                 ? Rule::unique('roles')->ignore($this->route('role')->id, 'id')->where('team_id', $company)
                 : Rule::unique('roles')->ignore($this->route('role')->id, 'id')->whereNull('team_id');
@@ -55,15 +55,14 @@ class RoleRequest extends FormRequest
         return $rules;
     }
 
-    public function getRolePayload()
+    public function getRolePayload(): array
     {
         $company = $this->header('company');
 
-        return collect($this->except('abilities'))
-            ->merge([
-                'team_id' => $company !== null ? (int) $company : null,
-                'guard_name' => 'web',
-            ])
-            ->toArray();
+        return [
+            'name' => $this->validated('name'),
+            'team_id' => $company !== null ? (int) $company : null,
+            'guard_name' => 'web',
+        ];
     }
 }

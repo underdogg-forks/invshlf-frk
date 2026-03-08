@@ -18,7 +18,7 @@ class EstimatePolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-estimate', Estimate::class)) {
+        if ($user->hasPermissionTo('view-estimate')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class EstimatePolicy
      */
     public function view(User $user, Estimate $estimate): bool
     {
-        if ($user->can('view-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->hasPermissionTo('view-estimate') && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class EstimatePolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-estimate', Estimate::class)) {
+        if ($user->hasPermissionTo('create-estimate')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class EstimatePolicy
      */
     public function update(User $user, Estimate $estimate): bool
     {
-        if ($user->can('edit-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->hasPermissionTo('edit-estimate') && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class EstimatePolicy
      */
     public function delete(User $user, Estimate $estimate): bool
     {
-        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->hasPermissionTo('delete-estimate') && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class EstimatePolicy
      */
     public function restore(User $user, Estimate $estimate): bool
     {
-        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->hasPermissionTo('delete-estimate') && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class EstimatePolicy
      */
     public function forceDelete(User $user, Estimate $estimate): bool
     {
-        if ($user->can('delete-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->hasPermissionTo('delete-estimate') && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -115,9 +115,9 @@ class EstimatePolicy
      * @param  \App\Models\Estimate  $payment
      * @return mixed
      */
-    public function send(User $user, Estimate $estimate)
+    public function send(User $user, Estimate $estimate): bool
     {
-        if ($user->can('send-estimate', $estimate) && $user->hasCompany($estimate->company_id)) {
+        if ($user->hasPermissionTo('send-estimate') && $user->hasCompany($estimate->company_id)) {
             return true;
         }
 
@@ -129,9 +129,9 @@ class EstimatePolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if ($user->can('delete-estimate', Estimate::class)) {
+        if ($user->hasPermissionTo('delete-estimate')) {
             return true;
         }
 

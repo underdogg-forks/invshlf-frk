@@ -18,7 +18,7 @@ class RecurringInvoicePolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->hasPermissionTo('view-recurring-invoice')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class RecurringInvoicePolicy
      */
     public function view(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if ($user->can('view-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->hasPermissionTo('view-recurring-invoice') && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class RecurringInvoicePolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->hasPermissionTo('create-recurring-invoice')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class RecurringInvoicePolicy
      */
     public function update(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if ($user->can('edit-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->hasPermissionTo('edit-recurring-invoice') && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class RecurringInvoicePolicy
      */
     public function delete(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->hasPermissionTo('delete-recurring-invoice') && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class RecurringInvoicePolicy
      */
     public function restore(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->hasPermissionTo('delete-recurring-invoice') && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class RecurringInvoicePolicy
      */
     public function forceDelete(User $user, RecurringInvoice $recurringInvoice): bool
     {
-        if ($user->can('delete-recurring-invoice', $recurringInvoice) && $user->hasCompany($recurringInvoice->company_id)) {
+        if ($user->hasPermissionTo('delete-recurring-invoice') && $user->hasCompany($recurringInvoice->company_id)) {
             return true;
         }
 
@@ -114,9 +114,9 @@ class RecurringInvoicePolicy
      *
      * @return mixed
      */
-    public function deleteMultiple(User $user)
+    public function deleteMultiple(User $user): bool
     {
-        if ($user->can('delete-recurring-invoice', RecurringInvoice::class)) {
+        if ($user->hasPermissionTo('delete-recurring-invoice')) {
             return true;
         }
 

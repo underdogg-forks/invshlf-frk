@@ -40,6 +40,7 @@ class DemoSeeder extends Seeder
         $user->companies()->attach($company->id);
         setPermissionsTeamId($company->id);
         $user->assignRole('super admin');
+        setPermissionsTeamId(null);
 
         // Set default user settings
         $user->setSettings([

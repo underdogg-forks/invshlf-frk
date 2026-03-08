@@ -18,7 +18,7 @@ class TaxTypePolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-tax-type', TaxType::class)) {
+        if ($user->hasPermissionTo('view-tax-type')) {
             return true;
         }
 
@@ -32,7 +32,7 @@ class TaxTypePolicy
      */
     public function view(User $user, TaxType $taxType): bool
     {
-        if ($user->can('view-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->hasPermissionTo('view-tax-type') && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -46,7 +46,7 @@ class TaxTypePolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-tax-type', TaxType::class)) {
+        if ($user->hasPermissionTo('create-tax-type')) {
             return true;
         }
 
@@ -60,7 +60,7 @@ class TaxTypePolicy
      */
     public function update(User $user, TaxType $taxType): bool
     {
-        if ($user->can('edit-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->hasPermissionTo('edit-tax-type') && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -74,7 +74,7 @@ class TaxTypePolicy
      */
     public function delete(User $user, TaxType $taxType): bool
     {
-        if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->hasPermissionTo('delete-tax-type') && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -88,7 +88,7 @@ class TaxTypePolicy
      */
     public function restore(User $user, TaxType $taxType): bool
     {
-        if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->hasPermissionTo('delete-tax-type') && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 
@@ -102,7 +102,7 @@ class TaxTypePolicy
      */
     public function forceDelete(User $user, TaxType $taxType): bool
     {
-        if ($user->can('delete-tax-type', $taxType) && $user->hasCompany($taxType->company_id)) {
+        if ($user->hasPermissionTo('delete-tax-type') && $user->hasCompany($taxType->company_id)) {
             return true;
         }
 

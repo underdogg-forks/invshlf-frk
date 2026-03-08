@@ -35,9 +35,11 @@ return new class extends Migration
             $table->unsignedBigInteger('permission_id');
             $table->string('model_type');
             $table->unsignedBigInteger('model_id');
+            $table->unsignedBigInteger('team_id')->nullable();
             $table->index(['model_id', 'model_type'], 'model_has_permissions_model_id_model_type_index');
+            $table->index('team_id', 'model_has_permissions_team_foreign_key_index');
             $table->foreign('permission_id')->references('id')->on('permissions')->onDelete('cascade');
-            $table->primary(['permission_id', 'model_id', 'model_type'], 'model_has_permissions_permission_model_type_primary');
+            $table->primary(['permission_id', 'model_id', 'model_type', 'team_id'], 'model_has_permissions_permission_model_type_primary');
         });
 
         Schema::create('model_has_roles', function (Blueprint $table) {
@@ -62,10 +64,9 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('role_has_permissions');
-        Schema::dropIfExists('model_has_roles');
-        Schema::dropIfExists('model_has_permissions');
-        Schema::dropIfExists('roles');
-        Schema::dropIfExists('permissions');
+        throw new \RuntimeException(
+            'Rolling back this migration would cause irrecoverable data loss. ' .
+            'Manual intervention is required to restore the authorization tables.'
+        );
     }
 };

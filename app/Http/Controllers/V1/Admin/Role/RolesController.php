@@ -5,8 +5,8 @@ namespace App\Http\Controllers\V1\Admin\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RoleRequest;
 use App\Http\Resources\RoleResource;
-use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -21,9 +21,10 @@ class RolesController extends Controller
     {
         $this->authorize('viewAny', Role::class);
 
-        $roles = Role::when($request->has('orderByField'), function ($query) use ($request) {
-            return $query->orderBy($request['orderByField'], $request['orderBy']);
-        })
+        $roles = Role::with('permissions')
+            ->when($request->has('orderByField'), function ($query) use ($request) {
+                return $query->orderBy($request['orderByField'], $request['orderBy']);
+            })
             ->when($request->company_id, function ($query) use ($request) {
                 return $query->where('team_id', $request->company_id);
             })
@@ -46,7 +47,7 @@ class RolesController extends Controller
 
         $this->syncAbilities($request, $role);
 
-        return new RoleResource($role);
+        return new RoleResource($role->load('permissions'));
     }
 
     /**
@@ -59,7 +60,7 @@ class RolesController extends Controller
     {
         $this->authorize('view', $role);
 
-        return new RoleResource($role);
+        return new RoleResource($role->load('permissions'));
     }
 
     /**
@@ -77,7 +78,7 @@ class RolesController extends Controller
 
         $this->syncAbilities($request, $role);
 
-        return new RoleResource($role);
+        return new RoleResource($role->load('permissions'));
     }
 
     /**
@@ -90,9 +91,11 @@ class RolesController extends Controller
     {
         $this->authorize('delete', $role);
 
-        $users = User::role($role->name)->get()->toArray();
+        $hasUsers = DB::table('model_has_roles')
+            ->where('role_id', $role->id)
+            ->exists();
 
-        if (! empty($users)) {
+        if ($hasUsers) {
             return respondJson('role_attached_to_users', 'Roles Attached to user');
         }
 
@@ -105,10 +108,10 @@ class RolesController extends Controller
 
     private function syncAbilities(RoleRequest $request, $role)
     {
+        $requestedAbilities = array_flip(array_column($request->abilities ?? [], 'ability'));
         $permissionsToSync = [];
         foreach (config('abilities.abilities') as $ability) {
-            $check = array_search($ability['ability'], array_column($request->abilities, 'ability'));
-            if ($check !== false) {
+            if (isset($requestedAbilities[$ability['ability']])) {
                 $permission = Permission::firstOrCreate([
                     'name' => $ability['ability'],
                     'guard_name' => 'web',
