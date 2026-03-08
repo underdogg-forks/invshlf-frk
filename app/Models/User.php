@@ -486,6 +486,8 @@ class User extends Authenticatable implements HasMedia
             }
         } finally {
             setPermissionsTeamId($originalTeamId);
+            $this->unsetRelation('roles');
+            $this->unsetRelation('permissions');
         }
     }
 
