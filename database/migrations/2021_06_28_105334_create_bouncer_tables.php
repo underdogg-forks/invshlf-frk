@@ -46,7 +46,7 @@ return new class extends Migration
             $table->unsignedBigInteger('role_id');
             $table->string('model_type');
             $table->unsignedBigInteger('model_id');
-            $table->unsignedBigInteger('team_id')->nullable();
+            $table->unsignedBigInteger('team_id')->default(1);
             $table->index(['model_id', 'model_type'], 'model_has_roles_model_id_model_type_index');
             $table->index('team_id', 'model_has_roles_team_foreign_key_index');
             $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
