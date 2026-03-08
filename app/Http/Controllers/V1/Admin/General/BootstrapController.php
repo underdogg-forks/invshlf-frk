@@ -59,7 +59,7 @@ class BootstrapController extends Controller
         return response()->json([
             'current_user' => new UserResource($current_user),
             'current_user_settings' => $current_user_settings,
-            'current_user_abilities' => $current_user->getAllPermissions()->pluck('name'),
+            'current_user_abilities' => $current_user->getAllPermissions()->map(fn ($p) => ['name' => $p->name]),
             'companies' => CompanyResource::collection($companies),
             'current_company' => new CompanyResource($current_company),
             'current_company_settings' => $current_company_settings,
