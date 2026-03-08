@@ -46,18 +46,19 @@ class Company extends BaseModel implements HasMedia
             ->where('guard_name', 'web')
             ->pluck('id', 'name');
 
-        $permissionsToCreate = array_filter($abilityNames, fn ($name) => ! isset($existing[$name]));
+        $permissionsToCreate = array_values(array_filter($abilityNames, fn ($name) => ! isset($existing[$name])));
         if (! empty($permissionsToCreate)) {
             $now = now();
             \Spatie\Permission\Models\Permission::insert(
                 array_map(fn ($name) => ['name' => $name, 'guard_name' => 'web', 'created_at' => $now, 'updated_at' => $now], $permissionsToCreate)
             );
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
             $existing = \Spatie\Permission\Models\Permission::whereIn('name', $abilityNames)
                 ->where('guard_name', 'web')
                 ->pluck('id', 'name');
         }
 
-        $super_admin->permissions()->sync($existing->values()->toArray());
+        $super_admin->syncPermissions($existing->values()->toArray());
     }
 
     public function setupDefaultPaymentMethods()

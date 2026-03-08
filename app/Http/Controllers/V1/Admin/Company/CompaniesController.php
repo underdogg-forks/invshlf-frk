@@ -68,9 +68,13 @@ class CompaniesController extends Controller
             ]);
         }
 
+        $previousOwner = User::find($company->owner_id);
         $company->update(['owner_id' => $user->id]);
         setPermissionsTeamId($company->id);
-        $user->syncRoles(['super admin']);
+        $user->assignRole('super admin');
+        if ($previousOwner && $previousOwner->id !== $user->id) {
+            $previousOwner->removeRole('super admin');
+        }
 
         return response()->json([
             'success' => true,

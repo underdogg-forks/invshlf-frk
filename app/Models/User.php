@@ -418,10 +418,12 @@ class User extends Authenticatable implements HasMedia
         $companies = collect($request->companies);
         $user->companies()->sync($companies->pluck('id'));
 
+        $originalTeamId = getPermissionsTeamId();
         foreach ($companies as $company) {
             setPermissionsTeamId($company['id']);
             $user->syncRoles([$company['role']]);
         }
+        setPermissionsTeamId($originalTeamId);
 
         return $user;
     }
@@ -476,10 +478,12 @@ class User extends Authenticatable implements HasMedia
         $companies = collect($request->companies);
         $this->companies()->sync($companies->pluck('id'));
 
+        $originalTeamId = getPermissionsTeamId();
         foreach ($companies as $company) {
             setPermissionsTeamId($company['id']);
             $this->syncRoles([$company['role']]);
         }
+        setPermissionsTeamId($originalTeamId);
 
         return $this;
     }

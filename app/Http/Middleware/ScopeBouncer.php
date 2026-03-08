@@ -19,13 +19,12 @@ class ScopeBouncer
     public function handle(Request $request, Closure $next): Response
     {
         $user = $request->user();
-        $teamId = $request->header('company')
-            ? (int) $request->header('company')
+        $companyHeader = $request->header('company');
+        $teamId = (is_string($companyHeader) && preg_match('/^\d+$/', $companyHeader) && (int) $companyHeader > 0)
+            ? (int) $companyHeader
             : ($user ? $user->companies()->first()?->id : null);
 
-        if ($teamId !== null) {
-            $this->permissionRegistrar->setPermissionsTeamId($teamId);
-        }
+        $this->permissionRegistrar->setPermissionsTeamId($teamId);
 
         return $next($request);
     }

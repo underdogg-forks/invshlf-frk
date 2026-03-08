@@ -116,7 +116,7 @@ class RolesController extends Controller
                 $permissionsToSync[] = $permission->id;
             }
         }
-        $role->permissions()->sync($permissionsToSync);
+        $role->syncPermissions($permissionsToSync);
 
         return true;
     }

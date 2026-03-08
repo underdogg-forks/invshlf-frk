@@ -20,11 +20,17 @@ class RoleRequest extends FormRequest
      */
     public function rules(): array
     {
+        $company = $this->header('company');
+
+        $uniqueRule = $company !== null
+            ? Rule::unique('roles')->where('team_id', $company)
+            : Rule::unique('roles')->whereNull('team_id');
+
         $rules = [
             'name' => [
                 'required',
                 'string',
-                Rule::unique('roles')->where('team_id', $this->header('company')),
+                $uniqueRule,
             ],
             'abilities' => [
                 'required',
@@ -35,12 +41,14 @@ class RoleRequest extends FormRequest
         ];
 
         if ($this->getMethod() == 'PUT') {
+            $uniquePutRule = $company !== null
+                ? Rule::unique('roles')->ignore($this->route('role')->id, 'id')->where('team_id', $company)
+                : Rule::unique('roles')->ignore($this->route('role')->id, 'id')->whereNull('team_id');
+
             $rules['name'] = [
                 'required',
                 'string',
-                Rule::unique('roles')
-                    ->ignore($this->route('role')->id, 'id')
-                    ->where('team_id', $this->header('company')),
+                $uniquePutRule,
             ];
         }
 
@@ -49,9 +57,11 @@ class RoleRequest extends FormRequest
 
     public function getRolePayload()
     {
+        $company = $this->header('company');
+
         return collect($this->except('abilities'))
             ->merge([
-                'team_id' => (int) $this->header('company'),
+                'team_id' => $company !== null ? (int) $company : null,
                 'guard_name' => 'web',
             ])
             ->toArray();

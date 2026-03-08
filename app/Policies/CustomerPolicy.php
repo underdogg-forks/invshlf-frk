@@ -18,11 +18,7 @@ class CustomerPolicy
      */
     public function viewAny(User $user): bool
     {
-        if ($user->can('view-customer', Customer::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('view-customer');
     }
 
     /**
@@ -32,11 +28,7 @@ class CustomerPolicy
      */
     public function view(User $user, Customer $customer): bool
     {
-        if ($user->can('view-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('view-customer');
     }
 
     /**
@@ -46,11 +38,7 @@ class CustomerPolicy
      */
     public function create(User $user): bool
     {
-        if ($user->can('create-customer', Customer::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('create-customer');
     }
 
     /**
@@ -60,11 +48,7 @@ class CustomerPolicy
      */
     public function update(User $user, Customer $customer): bool
     {
-        if ($user->can('edit-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('edit-customer');
     }
 
     /**
@@ -74,11 +58,7 @@ class CustomerPolicy
      */
     public function delete(User $user, Customer $customer): bool
     {
-        if ($user->can('delete-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer');
     }
 
     /**
@@ -88,11 +68,7 @@ class CustomerPolicy
      */
     public function restore(User $user, Customer $customer): bool
     {
-        if ($user->can('delete-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer');
     }
 
     /**
@@ -102,11 +78,7 @@ class CustomerPolicy
      */
     public function forceDelete(User $user, Customer $customer): bool
     {
-        if ($user->can('delete-customer', $customer)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer');
     }
 
     /**
@@ -116,10 +88,6 @@ class CustomerPolicy
      */
     public function deleteMultiple(User $user)
     {
-        if ($user->can('delete-customer', Customer::class)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasPermissionTo('delete-customer');
     }
 }

@@ -45,8 +45,6 @@ class BootstrapController extends Controller
             ? Currency::find($current_company_settings->get('currency'))
             : Currency::first();
 
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-
         $global_settings = Setting::getSettings([
             'api_token',
             'admin_portal_theme',
