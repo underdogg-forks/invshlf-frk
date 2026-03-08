@@ -417,16 +417,7 @@ class User extends Authenticatable implements HasMedia
 
         $companies = collect($request->companies);
         $user->companies()->sync($companies->pluck('id'));
-
-        $originalTeamId = getPermissionsTeamId();
-        try {
-            foreach ($companies as $company) {
-                setPermissionsTeamId($company['id']);
-                $user->syncRoles([$company['role']]);
-            }
-        } finally {
-            setPermissionsTeamId($originalTeamId);
-        }
+        $user->syncCompanyRoles($companies);
 
         return $user;
     }
@@ -480,7 +471,13 @@ class User extends Authenticatable implements HasMedia
 
         $companies = collect($request->companies);
         $this->companies()->sync($companies->pluck('id'));
+        $this->syncCompanyRoles($companies);
 
+        return $this;
+    }
+
+    private function syncCompanyRoles(\Illuminate\Support\Collection $companies): void
+    {
         $originalTeamId = getPermissionsTeamId();
         try {
             foreach ($companies as $company) {
@@ -490,8 +487,6 @@ class User extends Authenticatable implements HasMedia
         } finally {
             setPermissionsTeamId($originalTeamId);
         }
-
-        return $this;
     }
 
     #endregion
